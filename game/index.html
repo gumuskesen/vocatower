@@ -909,8 +909,17 @@ var learnedWords = new Set();
 var lastBalloonCount = 0;
 var levels = [[0,'Çırak Mimar'],[50,'Kat Ustası'],[150,'Kule Mühendisi'],[300,'Gökdelen Mimarı'],[600,'Dünya Rekortmeni']];
 
+function saveProgress(){ window.safeSet('vocatower_progress', {xp:xp, floors:floors, learnedWords:Array.from(learnedWords)}); }
+function loadProgress(){
+  var saved = window.safeGet('vocatower_progress', null);
+  if(saved){
+    if(typeof saved.xp==='number') xp = saved.xp;
+    if(typeof saved.floors==='number') floors = saved.floors;
+    if(Array.isArray(saved.learnedWords)) learnedWords = new Set(saved.learnedWords);
+  }
+}
 function addLearned(en){ if(en) learnedWords.add(String(en).toLowerCase()); }
-function addXP(n){ xp+=n; floors+=Math.max(0,Math.round(n/10)); renderTower(); }
+function addXP(n){ xp+=n; floors+=Math.max(0,Math.round(n/10)); saveProgress(); renderTower(); }
 function renderTower(){
   document.getElementById('xpText').textContent = xp;
   document.getElementById('floorCount').textContent = floors;
@@ -1055,6 +1064,7 @@ function openProfileSettings(){
   show('onboarding');
 }
 function bootApp(){
+  loadProgress();
   if(!window.isOnboarded()){
     onbEditingExisting = false;
     setOnboardingCopy(false);
