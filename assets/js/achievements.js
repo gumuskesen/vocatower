@@ -41,7 +41,17 @@
     {id:'gold-saver', title:'Altın Biriktiren', description:'250 altın topla', icon:'🪙', goldReward:25,
       requirement:function(s){ return s.totalGoldEarned>=250; }, progress:function(s){ return [Math.min(s.totalGoldEarned,250),250]; }},
     {id:'treasure-master', title:'Hazine Ustası', description:'1000 altın topla', icon:'💰', goldReward:50,
-      requirement:function(s){ return s.totalGoldEarned>=1000; }, progress:function(s){ return [Math.min(s.totalGoldEarned,1000),1000]; }}
+      requirement:function(s){ return s.totalGoldEarned>=1000; }, progress:function(s){ return [Math.min(s.totalGoldEarned,1000),1000]; }},
+    {id:'building-flatiron', title:'İlk Gökdelen', description:'Flatiron Building\'i tamamla', icon:'🏢', goldReward:15,
+      requirement:function(s){ return s.towerFloors>=21; }, progress:function(s){ return [Math.min(s.towerFloors,21),21]; }},
+    {id:'building-halfway', title:'Yarı Yolda', description:'Empire State Building\'e ulaş', icon:'🏙️', goldReward:40,
+      requirement:function(s){ return s.towerFloors>=201; }, progress:function(s){ return [Math.min(s.towerFloors,201),201]; }},
+    {id:'building-journey-complete', title:'Bina Yolculuğu Tamamlandı', description:'10 gökdeleni de tamamla (1000 kat)', icon:'🌆', goldReward:150,
+      requirement:function(s){ return s.towerFloors>=1000; }, progress:function(s){ return [Math.min(s.towerFloors,1000),1000]; }},
+    {id:'review-first', title:'Tekrar Zamanı', description:'İlk Kelime Tekrarı oturumunu tamamla', icon:'🧠', goldReward:10,
+      requirement:function(s){ return s.reviewGamesCompleted>=1; }, progress:function(s){ return [Math.min(s.reviewGamesCompleted,1),1]; }},
+    {id:'review-master', title:'Tekrar Ustası', description:'10 Kelime Tekrarı oturumu tamamla', icon:'🎓', goldReward:40,
+      requirement:function(s){ return s.reviewGamesCompleted>=10; }, progress:function(s){ return [Math.min(s.reviewGamesCompleted,10),10]; }}
   ];
 
   function getUnlockMap(){

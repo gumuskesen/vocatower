@@ -4,11 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VocaTower — Kelime Kulesi</title>
+<link rel="stylesheet" href="../assets/css/frei-games-design-system.css">
 <style>
+  /* Frei Games kil (clay) tasarım sistemi tokenlarına eşlenir — bkz.
+     assets/css/frei-games-design-system.css. Eski değişken adları (--bg,
+     --card, --ink vb.) korunur çünkü onlarca bileşen zaten bunları
+     kullanıyor; sadece tanımları yeni tokenlara işaret eder. */
   :root{
-    --bg:#EDF2F7; --card:#FFFFFF; --ink:#33415C; --ink-soft:#5C6C82;
-    --blue:#4A6E9B; --green:#72B396; --purple:#9384C9; --amber:#E0A458;
-    --red-soft:#E08E8E; --radius:22px; --shadow:0 4px 14px rgba(51,65,92,0.08);
+    --bg:var(--fg-bg-app); --card:var(--fg-bg-surface); --ink:var(--fg-text-primary); --ink-soft:var(--fg-text-secondary);
+    --blue:var(--fg-accent-secondary); --green:var(--fg-accent-tertiary); --purple:var(--fg-accent-quaternary); --amber:var(--fg-accent-gold);
+    --red-soft:var(--fg-state-error); --radius:var(--fg-radius-lg); --shadow:var(--fg-shadow-md);
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   body{font-family:Inter,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;justify-content:center;}
@@ -62,6 +67,36 @@
   .feedback-link a{color:var(--blue);font-weight:700;font-size:13px;text-decoration:none;}
   .feedback-link a:hover{text-decoration:underline;}
   @media (min-width:700px){ .ach-grid{grid-template-columns:repeat(4,1fr);} }
+
+  /* ---------- BİNA YOLCULUĞU ---------- */
+  .bj-summary{text-align:center;margin-bottom:16px;}
+  .bj-summary .bj-pct{font-size:32px;font-weight:800;color:var(--blue);}
+  .bj-summary .bj-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .bj-list{display:flex;flex-direction:column;gap:10px;}
+  .bj-card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px 16px;display:flex;align-items:center;gap:14px;}
+  .bj-card.current{border:2px solid var(--blue);}
+  .bj-card.done{opacity:.75;}
+  .bj-card.locked{opacity:.45;filter:grayscale(.6);}
+  .bj-icon{font-size:30px;width:42px;text-align:center;flex-shrink:0;}
+  .bj-info{flex:1;min-width:0;}
+  .bj-name{font-weight:700;font-size:14px;}
+  .bj-city{font-size:11px;color:var(--ink-soft);margin-bottom:6px;}
+  .bj-bar{height:8px;border-radius:5px;background:#E2E9F1;overflow:hidden;}
+  .bj-bar-fill{height:100%;background:var(--blue);border-radius:5px;transition:width .4s;}
+  .bj-floors{font-size:10.5px;color:var(--ink-soft);margin-top:4px;font-weight:700;}
+  .bj-status{font-size:20px;flex-shrink:0;}
+
+  /* ---------- KELİME TEKRARI ---------- */
+  .rv-summary{text-align:center;font-size:13px;color:var(--ink-soft);margin-bottom:12px;font-weight:700;}
+  .rv-list{display:flex;flex-direction:column;gap:10px;}
+  .rv-card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px 16px;}
+  .rv-word{font-weight:800;font-size:17px;}
+  .rv-tr{font-size:13px;color:var(--ink-soft);margin-top:2px;}
+  .rv-ex{font-size:12.5px;margin-top:8px;line-height:1.5;}
+  .rv-ex .rv-ex-en{font-style:italic;}
+  .rv-ex .rv-ex-tr{color:var(--ink-soft);}
+  .rv-meta{display:flex;gap:8px;margin-top:8px;font-size:10.5px;color:var(--ink-soft);}
+  .rv-empty{text-align:center;padding:40px 16px;color:var(--ink-soft);}
 
   .badge-unlock-card{padding-top:34px;}
   .badge-unlock-icon{font-size:54px;margin-bottom:6px;animation:badgePop .6s cubic-bezier(.2,.9,.3,1.3);}
@@ -145,6 +180,8 @@
   .slot{background:#E2E9F1;color:var(--ink);}
   .slot.filled{background:#EDE9F8;border:2px solid var(--purple);}
   .slot.small{width:34px;height:40px;font-size:16px;}
+  .slot.locked{background:var(--amber);color:#fff;border:2px solid var(--amber);}
+  .snake-controls{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
 
   .piano{display:flex;justify-content:center;gap:5px;margin:16px 0;}
   .pkey{width:44px;height:120px;border:none;border-radius:0 0 10px 10px;background:linear-gradient(180deg,#FDFDFD,#F0F0F0);box-shadow:0 3px 6px rgba(51,65,92,.15);cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;font-weight:700;font-size:15px;color:var(--ink-soft);font-family:inherit;}
@@ -256,7 +293,7 @@
       <button class="settings-btn" id="btnProfileSettings" onclick="openProfileSettings()" aria-label="Profil ayarları">⚙️</button>
     </div>
 
-    <div class="tower-card">
+    <div class="tower-card" onclick="openBuildingJourney()" role="button" tabindex="0" style="cursor:pointer;" onkeydown="if(event.key==='Enter')openBuildingJourney();">
       <div class="bk-wrap">
         <svg class="bk" viewBox="0 0 120 296" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -281,11 +318,11 @@
           </g>
           <rect x="0" y="292" width="120" height="4" rx="2" fill="#B9C6D6"/>
         </svg>
-        <div class="bk-cap"><b><span id="floorCount">0</span> / 163 kat</b><br>Burj Khalifa %<span id="bkPct">0</span> tamamlandı</div>
+        <div class="bk-cap"><b><span id="floorCount">0</span> / 1000 kat</b><br><span id="bkBuildingName">🏢 Flatiron Building</span> · Genel %<span id="bkPct">0</span></div>
       </div>
       <div class="tower-info">
-        <h2>Kelime Kulen 🏗️</h2>
-        <p>Her doğru cevap <b>1 kat</b> ekler. Kuleni tamamla, <b>Burj Khalifa</b> tüm renkleriyle ortaya çıksın!</p>
+        <h2>Bina Yolculuğun 🏗️</h2>
+        <p>Her doğru cevap <b>1 kat</b> ekler. <b>10 gerçek gökdelen</b> boyunca ilerle — Flatiron'dan Burj Khalifa'ya! <u>Detaylar için dokun →</u></p>
         <div class="goal-line">
           <div class="goal-text">🎯 Kelime Hedefi: <span id="goalNow">0</span> / <span id="goalMax">1000</span></div>
           <div class="goal-bar"><div class="goal-fill" id="homeGoalFill"></div></div>
@@ -333,6 +370,41 @@
     </div>
     <div class="gb-single" id="achList"></div>
     <p class="feedback-link"><a href="mailto:support@vocatower.com?subject=VocaTower%20Feedback">💌 Görüş ve önerilerini gönder</a></p>
+  </div>
+
+  <!-- ============ BİNA YOLCULUĞU ============ -->
+  <div id="buildingJourney" class="hidden">
+    <div class="game-head">
+      <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
+      <div class="game-title">🏙️ Bina Yolculuğu</div>
+    </div>
+    <div class="gb-single">
+      <div class="bj-summary">
+        <div class="bj-pct" id="bjOverallPct">0%</div>
+        <div class="bj-sub" id="bjOverallSub">0 / 1000 kat tamamlandı</div>
+      </div>
+      <div class="bj-list" id="bjList"></div>
+    </div>
+  </div>
+
+  <!-- ============ KELİME TEKRARI (ADAPTİF) ============ -->
+  <div id="reviewWords" class="hidden">
+    <div class="game-head">
+      <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
+      <div class="game-title">🧠 Kelime Tekrarı</div>
+      <div class="score-pill" id="rvScore">✅ 0</div>
+    </div>
+    <div class="game-body" id="rvPlay">
+      <div class="qcard">
+        <div class="hint" id="rvHint">İNGİLİZCESİNİ SEÇ</div>
+        <div class="q-en" id="rvQ"></div>
+        <div class="q-tr" id="rvTr"></div>
+      </div>
+      <div class="opts two-col" id="rvOpts"></div>
+    </div>
+    <div class="gb-single hidden" id="rvEmptyState">
+      <div class="rv-empty">🎉 Şu anda tekrar edilecek zorlanılan kelime yok!<br>Diğer oyunları oynadıkça buraya kelimeler eklenecek.</div>
+    </div>
   </div>
 
   <!-- ============ QUIZ (Gökdelen / Ülke) ============ -->
@@ -520,12 +592,18 @@
     </div>
     <div class="game-body">
       <div class="qcard">
-        <div class="hint">SON HARFLE BAŞLAYAN KELİMEYİ SEÇ</div>
-        <div class="q-en" id="snWord"></div>
+        <div class="hint">HARFLERİ KULLANARAK KELİMEYİ OLUŞTUR</div>
         <div class="q-tr" id="snTr"></div>
-        <div class="q-tr" id="snChain" style="margin-top:6px;"></div>
+        <div class="answer-slots" id="snSlots"></div>
+        <div class="letters" id="snLetters"></div>
+        <div class="snake-controls">
+          <button class="btn ghost small" onclick="snUndo()">⌫ Geri Al</button>
+          <button class="btn ghost small" onclick="snClear()">🔄 Temizle</button>
+          <button class="btn small" id="snSubmitBtn" onclick="snSubmit()">✅ Onayla</button>
+        </div>
+        <div class="feedback" id="snFeedback"></div>
+        <div class="q-tr" id="snChain" style="margin-top:10px;"></div>
       </div>
-      <div class="opts two-col" id="snOpts"></div>
     </div>
   </div>
 
@@ -612,259 +690,15 @@
 </div>
 
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/vocab.js"></script>
+<script src="../assets/js/buildings.js"></script>
+<script src="../assets/js/history.js"></script>
 <script src="../assets/js/avatars.js"></script>
 <script src="../assets/js/profile.js"></script>
 <script src="../assets/js/rewards.js"></script>
 <script src="../assets/js/achievements.js"></script>
 <script>
-/* =====================================================
-   KELİME HAVUZU (günlük hayatta en sık kullanılanlar)
-   ===================================================== */
-const WORDS = [
-["water","su"],["food","yemek"],["bread","ekmek"],["milk","süt"],["apple","elma"],
-["egg","yumurta"],["cheese","peynir"],["sugar","şeker"],["salt","tuz"],["tea","çay"],
-["juice","meyve suyu"],["cake","pasta"],["chocolate","çikolata"],["banana","muz"],["lemon","limon"],
-["fruit","meyve"],["vegetable","sebze"],["meat","et"],["chicken","tavuk"],["fish","balık"],
-["breakfast","kahvaltı"],["lunch","öğle yemeği"],["dinner","akşam yemeği"],
-["house","ev"],["home","ev, yuva"],["school","okul"],["book","kitap"],["pen","kalem"],
-["table","masa"],["chair","sandalye"],["door","kapı"],["window","pencere"],["room","oda"],
-["kitchen","mutfak"],["garden","bahçe"],["wall","duvar"],["roof","çatı"],["floor","kat, zemin"],
-["building","bina"],["tower","kule"],["bridge","köprü"],["street","sokak"],["road","yol"],
-["car","araba"],["bus","otobüs"],["train","tren"],["plane","uçak"],["ship","gemi"],
-["bicycle","bisiklet"],["city","şehir"],["village","köy"],["country","ülke"],["world","dünya"],
-["map","harita"],["flag","bayrak"],
-["sun","güneş"],["moon","ay"],["star","yıldız"],["sky","gökyüzü"],["cloud","bulut"],
-["rain","yağmur"],["snow","kar"],["wind","rüzgar"],["weather","hava durumu"],
-["sea","deniz"],["lake","göl"],["river","nehir"],["mountain","dağ"],["forest","orman"],
-["beach","plaj"],["island","ada"],["tree","ağaç"],["flower","çiçek"],["grass","çimen"],
-["animal","hayvan"],["dog","köpek"],["cat","kedi"],["bird","kuş"],["horse","at"],
-["lion","aslan"],["elephant","fil"],["bear","ayı"],["rabbit","tavşan"],
-["day","gün"],["night","gece"],["morning","sabah"],["evening","akşam"],["week","hafta"],
-["month","ay (takvim)"],["year","yıl"],["time","zaman"],["hour","saat (süre)"],["minute","dakika"],
-["today","bugün"],["tomorrow","yarın"],["yesterday","dün"],["clock","saat"],
-["mother","anne"],["father","baba"],["brother","erkek kardeş"],["sister","kız kardeş"],
-["family","aile"],["friend","arkadaş"],["teacher","öğretmen"],["student","öğrenci"],
-["child","çocuk"],["boy","erkek çocuk"],["girl","kız çocuk"],["man","adam"],["woman","kadın"],
-["people","insanlar"],["name","isim"],["baby","bebek"],
-["hand","el"],["head","baş, kafa"],["eye","göz"],["ear","kulak"],["mouth","ağız"],
-["nose","burun"],["foot","ayak"],["hair","saç"],["heart","kalp"],["arm","kol"],["leg","bacak"],
-["big","büyük"],["small","küçük"],["tall","uzun boylu, yüksek"],["short","kısa"],["long","uzun"],
-["fast","hızlı"],["slow","yavaş"],["hot","sıcak"],["cold","soğuk"],["warm","ılık"],
-["new","yeni"],["old","eski, yaşlı"],["good","iyi"],["bad","kötü"],["happy","mutlu"],
-["sad","üzgün"],["angry","kızgın"],["tired","yorgun"],["hungry","aç"],["thirsty","susamış"],
-["easy","kolay"],["difficult","zor"],["beautiful","güzel"],["strong","güçlü"],["weak","zayıf"],
-["rich","zengin"],["poor","fakir"],["clean","temiz"],["dirty","kirli"],["full","dolu"],
-["empty","boş"],["right","doğru, sağ"],["wrong","yanlış"],["early","erken"],["late","geç"],
-["near","yakın"],["far","uzak"],["high","yüksek"],["low","alçak"],["heavy","ağır"],
-["light","hafif, ışık"],["dark","karanlık"],["quiet","sessiz"],["loud","gürültülü"],
-["young","genç"],["first","ilk, birinci"],["last","son"],["next","sonraki"],
-["always","her zaman"],["never","asla"],["often","sık sık"],["sometimes","bazen"],
-["now","şimdi"],["here","burada"],["there","orada"],["together","birlikte"],
-["go","gitmek"],["come","gelmek"],["run","koşmak"],["walk","yürümek"],["jump","zıplamak"],
-["eat","yemek yemek"],["drink","içmek"],["sleep","uyumak"],["wake","uyanmak"],
-["read","okumak"],["write","yazmak"],["speak","konuşmak"],["listen","dinlemek"],
-["see","görmek"],["look","bakmak"],["watch","izlemek"],["hear","duymak"],
-["play","oynamak, çalmak"],["work","çalışmak"],["study","ders çalışmak"],["learn","öğrenmek"],
-["teach","öğretmek"],["know","bilmek"],["think","düşünmek"],["understand","anlamak"],
-["remember","hatırlamak"],["forget","unutmak"],["love","sevmek"],["like","beğenmek"],
-["want","istemek"],["need","ihtiyaç duymak"],["help","yardım etmek"],["give","vermek"],
-["take","almak"],["buy","satın almak"],["sell","satmak"],["make","yapmak"],
-["say","söylemek"],["tell","anlatmak"],["ask","sormak"],["answer","cevaplamak, cevap"],
-["open","açmak, açık"],["close","kapatmak"],["start","başlamak"],["finish","bitirmek"],
-["stop","durmak"],["wait","beklemek"],["find","bulmak"],["lose","kaybetmek"],["win","kazanmak"],
-["live","yaşamak"],["fly","uçmak"],["swim","yüzmek"],["sing","şarkı söylemek"],
-["dance","dans etmek"],["draw","çizmek"],["paint","boyamak"],["cook","pişirmek"],
-["wash","yıkamak"],["travel","seyahat etmek"],["visit","ziyaret etmek"],["build","inşa etmek"],
-["break","kırmak"],["carry","taşımak"],["hold","tutmak"],["put","koymak"],["bring","getirmek"],
-["send","göndermek"],["smile","gülümsemek"],["laugh","gülmek"],["cry","ağlamak"],
-["money","para"],["number","sayı"],["color","renk"],["red","kırmızı"],["blue","mavi"],
-["green","yeşil"],["yellow","sarı"],["white","beyaz"],["black","siyah"],["orange","turuncu, portakal"],
-["purple","mor"],["pink","pembe"],["brown","kahverengi"],
-["music","müzik"],["song","şarkı"],["game","oyun"],["ball","top"],["toy","oyuncak"],
-["picture","resim"],["photo","fotoğraf"],["movie","film"],["story","hikaye"],
-["question","soru"],["word","kelime"],["letter","harf, mektup"],["sentence","cümle"],
-["language","dil (lisan)"],["piano","piyano"],["guitar","gitar"],["violin","keman"],
-["note","nota, not"],["sound","ses"],["voice","ses (insan sesi)"],
-["doctor","doktor"],["hospital","hastane"],["police","polis"],["driver","şoför"],
-["pilot","pilot"],["engineer","mühendis"],["artist","sanatçı"],["singer","şarkıcı"],
-["team","takım"],["sport","spor"],["football","futbol"],["basketball","basketbol"],
-["fire","ateş"],["ice","buz"],["stone","taş"],["sand","kum"],["gold","altın"],
-["silver","gümüş"],["iron","demir"],["glass","cam, bardak"],["paper","kağıt"],["wood","tahta, odun"],
-["earth","dünya, toprak"],["planet","gezegen"],["space","uzay"],["rocket","roket"],
-["air","hava"],["shop","dükkan"],["market","pazar, market"],["gift","hediye"],["key","anahtar"],
-["bag","çanta"],["bed","yatak"],["face","yüz (surat)"],["age","yaş"],["dad","baba"],
-/* --- genişletilmiş havuz --- */
-["zero","sıfır"],["four","dört"],["five","beş"],["six","altı"],["seven","yedi"],
-["eight","sekiz"],["nine","dokuz"],["ten","on"],["eleven","on bir"],["twelve","on iki"],
-["thirteen","on üç"],["fourteen","on dört"],["fifteen","on beş"],["sixteen","on altı"],["seventeen","on yedi"],
-["eighteen","on sekiz"],["nineteen","on dokuz"],["twenty","yirmi"],["thirty","otuz"],["forty","kırk"],
-["fifty","elli"],["sixty","altmış"],["seventy","yetmiş"],["eighty","seksen"],["ninety","doksan"],
-["hundred","yüz (sayı)"],["thousand","bin"],["second","ikinci; saniye"],["third","üçüncü"],["fourth","dördüncü"],
-["fifth","beşinci"],["season","mevsim"],["spring","ilkbahar"],["summer","yaz"],["autumn","sonbahar"],
-["century","yüzyıl"],["moment","an"],["midnight","gece yarısı"],["noon","öğle vakti"],["weekend","hafta sonu"],
-["holiday","tatil"],["birthday","doğum günü"],["date","tarih"],["future","gelecek"],["past","geçmiş"],
-["present","şimdiki zaman; hediye"],["calendar","takvim"],["monday","pazartesi"],["tuesday","salı"],["wednesday","çarşamba"],
-["thursday","perşembe"],["friday","cuma"],["saturday","cumartesi"],["sunday","pazar"],["january","ocak"],
-["february","şubat"],["march","mart"],["april","nisan"],["may","mayıs; -ebilir"],["june","haziran"],
-["july","temmuz"],["august","ağustos"],["september","eylül"],["october","ekim"],["november","kasım"],
-["december","aralık"],["parents","anne baba"],["grandmother","büyükanne"],["grandfather","büyükbaba"],["uncle","amca, dayı"],
-["aunt","teyze, hala"],["cousin","kuzen"],["son","oğul"],["daughter","kız evlat"],["husband","koca, eş"],
-["wife","karı, eş"],["twin","ikiz"],["guest","misafir"],["king","kral"],["queen","kraliçe"],
-["prince","prens"],["princess","prenses"],["soldier","asker"],["farmer","çiftçi"],["chef","aşçı, şef"],
-["waiter","garson"],["dentist","diş doktoru"],["vet","veteriner"],["lawyer","avukat"],["judge","hakim"],
-["actor","oyuncu (aktör)"],["clown","palyaço"],["captain","kaptan"],["sailor","denizci"],["firefighter","itfaiyeci"],
-["barber","berber"],["tailor","terzi"],["baker","fırıncı"],["butcher","kasap"],["scientist","bilim insanı"],
-["inventor","mucit"],["writer","yazar"],["poet","şair"],["painter","ressam"],["dancer","dansçı"],
-["musician","müzisyen"],["athlete","sporcu"],["coach","antrenör"],["boss","patron"],["worker","işçi"],
-["job","iş, meslek"],["finger","parmak"],["thumb","başparmak"],["knee","diz"],["elbow","dirsek"],
-["shoulder","omuz"],["neck","boyun"],["back","sırt; geri"],["stomach","mide, karın"],["tooth","diş"],
-["tongue","dil (organ)"],["lip","dudak"],["cheek","yanak"],["chin","çene"],["skin","cilt, deri"],
-["bone","kemik"],["blood","kan"],["brain","beyin"],["muscle","kas"],["wrist","bilek"],
-["ankle","ayak bileği"],["nail","tırnak; çivi"],["beard","sakal"],["mustache","bıyık"],["shirt","gömlek"],
-["pants","pantolon"],["dress","elbise"],["skirt","etek"],["sock","çorap"],["shoe","ayakkabı"],
-["hat","şapka"],["coat","palto, mont"],["jacket","ceket"],["scarf","atkı, eşarp"],["glove","eldiven"],
-["belt","kemer"],["button","düğme"],["pocket","cep"],["uniform","üniforma"],["glasses","gözlük"],
-["boots","botlar"],["slippers","terlik"],["pajamas","pijama"],["sweater","kazak"],["tie","kravat; bağlamak"],
-["umbrella","şemsiye"],["bathroom","banyo"],["bedroom","yatak odası"],["garage","garaj"],["stairs","merdiven"],
-["ceiling","tavan"],["mirror","ayna"],["lamp","lamba"],["sofa","koltuk, kanepe"],["carpet","halı"],
-["curtain","perde"],["shelf","raf"],["drawer","çekmece"],["fridge","buzdolabı"],["oven","fırın"],
-["cup","fincan, kupa"],["plate","tabak"],["bowl","kase"],["spoon","kaşık"],["fork","çatal"],
-["knife","bıçak"],["bottle","şişe"],["box","kutu"],["basket","sepet"],["brush","fırça"],
-["soap","sabun"],["towel","havlu"],["pillow","yastık"],["blanket","battaniye"],["phone","telefon"],
-["television","televizyon"],["radio","radyo"],["computer","bilgisayar"],["tablet","tablet"],["camera","kamera, fotoğraf makinesi"],
-["battery","pil"],["machine","makine"],["tool","alet"],["hammer","çekiç"],["rope","ip, halat"],
-["ladder","el merdiveni"],["bucket","kova"],["broom","süpürge"],["scissors","makas"],["needle","iğne"],
-["candle","mum"],["match","kibrit; maç"],["torch","el feneri"],["bell","zil, çan"],["chain","zincir"],
-["wire","tel, kablo"],["switch","düğme, anahtar (elektrik)"],["garbage","çöp"],["vase","vazo"],["frame","çerçeve"],
-["clay","kil, çamur"],["class","sınıf"],["lesson","ders"],["homework","ev ödevi"],["exam","sınav"],
-["test","test, sınav"],["grade","not (karne); sınıf"],["notebook","defter"],["pencil","kurşun kalem"],["eraser","silgi"],
-["ruler","cetvel"],["backpack","sırt çantası"],["board","tahta (yazı)"],["chalk","tebeşir"],["desk","sıra, çalışma masası"],
-["library","kütüphane"],["dictionary","sözlük"],["page","sayfa"],["line","çizgi, satır"],["math","matematik"],
-["science","fen bilimi"],["history","tarih (ders)"],["geography","coğrafya"],["art","sanat, resim dersi"],["subject","ders, konu"],
-["meaning","anlam"],["alphabet","alfabe"],["grammar","dil bilgisi"],["rice","pirinç, pilav"],["pasta","makarna"],
-["soup","çorba"],["salad","salata"],["sandwich","sandviç"],["hamburger","hamburger"],["cookie","kurabiye"],
-["biscuit","bisküvi"],["candy","şeker (bonbon)"],["honey","bal"],["jam","reçel"],["butter","tereyağı"],
-["yogurt","yoğurt"],["olive","zeytin"],["corn","mısır"],["bean","fasulye"],["pea","bezelye"],
-["carrot","havuç"],["cucumber","salatalık"],["pepper","biber"],["garlic","sarımsak"],["onion","soğan"],
-["potato","patates"],["tomato","domates"],["spinach","ıspanak"],["mushroom","mantar"],["strawberry","çilek"],
-["cherry","kiraz"],["peach","şeftali"],["pear","armut"],["plum","erik"],["watermelon","karpuz"],
-["melon","kavun"],["grape","üzüm"],["fig","incir"],["pineapple","ananas"],["coconut","hindistan cevizi"],
-["walnut","ceviz"],["hazelnut","fındık"],["almond","badem"],["peanut","yer fıstığı"],["flour","un"],
-["dough","hamur"],["cream","krema"],["dessert","tatlı"],["snack","atıştırmalık"],["meal","öğün, yemek"],
-["menu","menü"],["taste","tat; tatmak"],["delicious","lezzetli"],["recipe","tarif"],["kebab","kebap"],
-["nut","kuruyemiş, fındık"],["apricot","kayısı"],["pomegranate","nar"],["quince","ayva"],["cow","inek"],
-["sheep","koyun"],["goat","keçi"],["pig","domuz"],["duck","ördek"],["goose","kaz"],
-["rooster","horoz"],["donkey","eşek"],["camel","deve"],["wolf","kurt"],["fox","tilki"],
-["deer","geyik"],["monkey","maymun"],["tiger","kaplan"],["giraffe","zürafa"],["zebra","zebra"],
-["snake","yılan"],["frog","kurbağa"],["turtle","kaplumbağa"],["mouse","fare"],["rat","sıçan"],
-["bat","yarasa"],["bee","arı"],["ant","karınca"],["butterfly","kelebek"],["spider","örümcek"],
-["worm","solucan"],["shark","köpekbalığı"],["whale","balina"],["dolphin","yunus"],["octopus","ahtapot"],
-["crab","yengeç"],["penguin","penguen"],["eagle","kartal"],["owl","baykuş"],["parrot","papağan"],
-["pigeon","güvercin"],["swan","kuğu"],["squirrel","sincap"],["hedgehog","kirpi"],["kangaroo","kanguru"],
-["koala","koala"],["panda","panda"],["seal","fok"],["crocodile","timsah"],["hippo","su aygırı"],
-["rhino","gergedan"],["ostrich","devekuşu"],["peacock","tavus kuşu"],["hamster","hamster"],["goldfish","japon balığı"],
-["puppy","yavru köpek"],["kitten","yavru kedi"],["nest","yuva (kuş)"],["tail","kuyruk"],["wing","kanat"],
-["feather","tüy (kuş)"],["fur","kürk, tüy"],["paw","pati"],["hill","tepe"],["valley","vadi"],
-["desert","çöl"],["cave","mağara"],["wave","dalga"],["storm","fırtına"],["thunder","gök gürültüsü"],
-["lightning","şimşek"],["rainbow","gökkuşağı"],["fog","sis"],["mud","çamur"],["dust","toz"],
-["rock","kaya"],["soil","toprak"],["seed","tohum"],["root","kök"],["branch","dal"],
-["stick","çubuk, sopa"],["bush","çalı"],["jungle","balta girmemiş orman"],["field","tarla, alan"],["farm","çiftlik"],
-["park","park"],["path","patika, yol"],["pond","gölet"],["stream","dere"],["waterfall","şelale"],
-["coast","kıyı, sahil"],["cliff","uçurum, kayalık"],["volcano","yanardağ"],["earthquake","deprem"],["flood","sel"],
-["shadow","gölge"],["sunrise","gün doğumu"],["sunset","gün batımı"],["horizon","ufuk"],["nature","doğa"],
-["environment","çevre"],["leaf","yaprak"],["galaxy","galaksi"],["universe","evren"],["comet","kuyruklu yıldız"],
-["meteor","göktaşı"],["orbit","yörünge"],["gravity","yer çekimi"],["astronaut","astronot"],["alien","uzaylı"],
-["telescope","teleskop"],["satellite","uydu"],["spaceship","uzay gemisi"],["crater","krater"],["airport","havalimanı"],
-["station","istasyon"],["port","liman"],["hotel","otel"],["museum","müze"],["zoo","hayvanat bahçesi"],
-["cinema","sinema"],["theater","tiyatro"],["restaurant","restoran"],["cafe","kafe"],["bakery","fırın (dükkan)"],
-["pharmacy","eczane"],["bank","banka"],["office","ofis"],["factory","fabrika"],["castle","kale, şato"],
-["palace","saray"],["statue","heykel"],["fountain","çeşme, fıskiye"],["square","meydan; kare"],["corner","köşe"],
-["traffic","trafik"],["sign","tabela, işaret"],["ticket","bilet"],["passport","pasaport"],["luggage","bagaj"],
-["suitcase","valiz"],["journey","yolculuk"],["tourist","turist"],["guide","rehber"],["camp","kamp"],
-["tent","çadır"],["address","adres"],["neighborhood","mahalle"],["elevator","asansör"],["escalator","yürüyen merdiven"],
-["subway","metro"],["taxi","taksi"],["helicopter","helikopter"],["motorcycle","motosiklet"],["truck","kamyon"],
-["wheel","tekerlek"],["engine","motor"],["seatbelt","emniyet kemeri"],["crossing","geçit"],["distance","mesafe"],
-["direction","yön"],["east","doğu"],["west","batı"],["begin","başlamak"],["become","olmak, dönüşmek"],
-["believe","inanmak"],["belong","ait olmak"],["borrow","ödünç almak"],["lend","ödünç vermek"],["call","aramak, çağırmak"],
-["catch","yakalamak"],["change","değiştirmek"],["choose","seçmek"],["climb","tırmanmak"],["collect","toplamak, biriktirmek"],
-["count","saymak"],["cover","örtmek, kaplamak"],["cross","karşıya geçmek"],["cut","kesmek"],["decide","karar vermek"],
-["describe","tarif etmek"],["dig","kazmak"],["disappear","kaybolmak"],["discover","keşfetmek"],["dream","hayal kurmak; rüya"],
-["drive","araba sürmek"],["drop","düşürmek"],["dry","kurutmak; kuru"],["enter","girmek"],["escape","kaçmak"],
-["explain","açıklamak"],["fall","düşmek"],["feed","beslemek"],["feel","hissetmek"],["fight","kavga etmek, savaşmak"],
-["fill","doldurmak"],["fix","tamir etmek"],["follow","takip etmek"],["grow","büyümek, yetiştirmek"],["guess","tahmin etmek"],
-["hang","asmak"],["happen","olmak, meydana gelmek"],["hate","nefret etmek"],["hide","saklanmak, saklamak"],["hit","vurmak"],
-["hope","ummak; umut"],["hunt","avlanmak"],["hurry","acele etmek"],["hurt","incitmek, acımak"],["imagine","hayal etmek"],
-["invite","davet etmek"],["join","katılmak"],["keep","tutmak, saklamak"],["kick","tekmelemek"],["knock","kapıyı çalmak"],
-["land","inmek (uçak); kara"],["leave","ayrılmak, terk etmek"],["lift","kaldırmak"],["lock","kilitlemek"],["marry","evlenmek"],
-["meet","tanışmak, buluşmak"],["miss","özlemek; kaçırmak"],["mix","karıştırmak"],["move","hareket etmek, taşınmak"],["notice","fark etmek"],
-["offer","teklif etmek"],["order","sipariş vermek"],["pack","paketlemek, toplamak"],["pass","geçmek"],["pay","ödemek"],
-["plant","dikmek; bitki"],["point","işaret etmek; nokta"],["practice","alıştırma yapmak"],["prepare","hazırlamak"],["promise","söz vermek"],
-["protect","korumak"],["pull","çekmek"],["push","itmek"],["reach","ulaşmak"],["receive","almak (teslim)"],
-["relax","dinlenmek, rahatlamak"],["repair","tamir etmek"],["repeat","tekrar etmek"],["rest","dinlenmek"],["return","geri dönmek"],
-["ride","binmek (at, bisiklet)"],["ring","çalmak (zil); yüzük"],["rise","yükselmek"],["save","kurtarmak, biriktirmek"],["score","gol atmak; skor"],
-["scream","çığlık atmak"],["search","aramak"],["share","paylaşmak"],["shine","parlamak"],["shout","bağırmak"],
-["show","göstermek"],["shut","kapatmak"],["sit","oturmak"],["skate","paten kaymak"],["ski","kayak yapmak"],
-["slide","kaymak; kaydırak"],["smell","koklamak; koku"],["spell","hecelemek"],["spend","harcamak"],["stand","ayakta durmak"],
-["stay","kalmak"],["surprise","şaşırtmak; sürpriz"],["thank","teşekkür etmek"],["throw","fırlatmak, atmak"],["touch","dokunmak"],
-["try","denemek"],["turn","dönmek, çevirmek"],["use","kullanmak"],["wear","giymek"],["welcome","hoş geldin; karşılamak"],
-["whisper","fısıldamak"],["wish","dilemek; dilek"],["wonder","merak etmek"],["worry","endişelenmek"],["agree","aynı fikirde olmak"],
-["arrive","varmak"],["bake","fırında pişirmek"],["boil","kaynatmak"],["celebrate","kutlamak"],["check","kontrol etmek"],
-["clap","alkışlamak"],["complete","tamamlamak"],["continue","devam etmek"],["copy","kopyalamak"],["create","yaratmak, oluşturmak"],
-["cure","iyileştirmek"],["dive","dalmak"],["earn","kazanmak (para)"],["exercise","egzersiz yapmak"],["explore","keşfe çıkmak"],
-["freeze","donmak"],["greet","selamlamak"],["improve","geliştirmek"],["introduce","tanıştırmak"],["invent","icat etmek"],
-["measure","ölçmek"],["melt","erimek"],["obey","itaat etmek"],["organize","düzenlemek"],["pick","seçmek, koparmak"],
-["pour","dökmek"],["print","yazdırmak"],["pretend","-mış gibi yapmak"],["recycle","geri dönüştürmek"],["respect","saygı duymak"],
-["shake","sallamak"],["solve","çözmek"],["translate","çevirmek (dil)"],["yawn","esnemek"],["afraid","korkmuş"],
-["alone","yalnız"],["amazing","şaşırtıcı, harika"],["awake","uyanık"],["asleep","uykuda"],["bored","sıkılmış"],
-["boring","sıkıcı"],["brave","cesur"],["bright","parlak"],["broken","kırık"],["busy","meşgul"],
-["calm","sakin"],["careful","dikkatli"],["cheap","ucuz"],["expensive","pahalı"],["clever","zeki"],
-["comfortable","rahat"],["correct","doğru"],["curious","meraklı"],["cute","sevimli"],["dangerous","tehlikeli"],
-["deep","derin"],["different","farklı"],["wet","ıslak"],["exciting","heyecan verici"],["fresh","taze"],
-["friendly","arkadaş canlısı"],["funny","komik"],["gentle","nazik, yumuşak"],["giant","dev"],["great","harika, büyük"],
-["healthy","sağlıklı"],["honest","dürüst"],["huge","kocaman"],["important","önemli"],["impossible","imkansız"],
-["interesting","ilginç"],["kind","nazik, iyi kalpli"],["lazy","tembel"],["little","küçük, az"],["lost","kayıp"],
-["lovely","hoş, sevimli"],["lucky","şanslı"],["modern","modern"],["narrow","dar"],["wide","geniş"],
-["noisy","gürültülü"],["normal","normal"],["perfect","mükemmel"],["polite","kibar"],["popular","popüler, sevilen"],
-["proud","gururlu"],["quick","hızlı, çabuk"],["ready","hazır"],["real","gerçek"],["round","yuvarlak"],
-["safe","güvenli"],["same","aynı"],["scary","korkutucu"],["sharp","keskin"],["shiny","parlak, ışıltılı"],
-["shy","utangaç"],["sick","hasta"],["silent","sessiz"],["silly","şapşal, saçma"],["simple","basit"],
-["sleepy","uykulu"],["smart","akıllı"],["smooth","pürüzsüz"],["soft","yumuşak"],["hard","sert; zor"],
-["sour","ekşi"],["sweet","tatlı"],["salty","tuzlu"],["bitter","acı (tat)"],["special","özel"],
-["straight","düz"],["strange","garip, tuhaf"],["sunny","güneşli"],["cloudy","bulutlu"],["rainy","yağmurlu"],
-["windy","rüzgarlı"],["snowy","karlı"],["terrible","berbat, korkunç"],["thick","kalın"],["thin","ince, zayıf"],
-["tidy","derli toplu"],["tiny","minicik"],["true","doğru, gerçek"],["false","yanlış, sahte"],["ugly","çirkin"],
-["useful","faydalı"],["wild","vahşi"],["wonderful","harikulade"],["free","özgür; ücretsiz"],["fair","adil"],
-["golden","altın rengi"],["colorful","rengarenk"],["crowded","kalabalık"],["again","tekrar, yine"],["almost","neredeyse"],
-["already","çoktan, zaten"],["away","uzakta, uzağa"],["everywhere","her yerde"],["somewhere","bir yerde"],["nowhere","hiçbir yerde"],
-["inside","içeride"],["outside","dışarıda"],["later","daha sonra"],["maybe","belki"],["once","bir kez"],
-["twice","iki kez"],["quickly","hızlıca"],["slowly","yavaşça"],["quietly","sessizce"],["really","gerçekten"],
-["soon","yakında"],["still","hala"],["suddenly","aniden"],["then","sonra, o zaman"],["carefully","dikkatlice"],
-["finally","sonunda"],["usually","genellikle"],["everyone","herkes"],["someone","birisi"],["something","bir şey"],
-["nothing","hiçbir şey"],["everything","her şey"],["anybody","herhangi biri"],["idea","fikir"],["plan","plan"],
-["problem","sorun, problem"],["reason","sebep"],["secret","sır"],["truth","gerçek, doğruluk"],["lie","yalan; uzanmak"],
-["joke","şaka"],["luck","şans"],["fear","korku"],["danger","tehlike"],["peace","barış, huzur"],
-["news","haber"],["message","mesaj"],["list","liste"],["group","grup"],["part","parça, bölüm"],
-["piece","parça"],["pair","çift"],["half","yarım"],["whole","bütün, tam"],["middle","orta"],
-["top","üst, tepe"],["bottom","alt, dip"],["side","yan, taraf"],["edge","kenar"],["center","merkez"],
-["end","son, bitiş"],["beginning","başlangıç"],["example","örnek"],["mistake","hata"],["prize","ödül"],
-["award","ödül (takdir)"],["medal","madalya"],["goal","hedef; gol"],["race","yarış"],["winner","kazanan"],
-["champion","şampiyon"],["hero","kahraman"],["adventure","macera"],["treasure","hazine"],["magic","sihir, büyü"],
-["monster","canavar"],["dragon","ejderha"],["fairy","peri"],["robot","robot"],["dinosaur","dinozor"],
-["ghost","hayalet"],["superhero","süper kahraman"],["puzzle","bulmaca, yapboz"],["kite","uçurtma"],["doll","oyuncak bebek"],
-["balloon","balon"],["party","parti"],["memory","hafıza, anı"],["mind","zihin, akıl"],["choice","seçim"],
-["chance","şans, fırsat"],["energy","enerji"],["power","güç"],["speed","hız"],["size","boyut"],
-["shape","şekil"],["weight","ağırlık"],["width","genişlik"],["length","uzunluk"],["temperature","sıcaklık"],
-["degree","derece"],["price","fiyat"],["cost","maliyet"],["rule","kural"],["law","kanun"],
-["crown","taç"],["volleyball","voleybol"],["swimming","yüzme"],
-["running","koşu"],["cycling","bisiklet sürme"],["skating","paten"],["skiing","kayak"],["fishing","balık tutma"],
-["camping","kampçılık"],["painting","resim yapma; tablo"],["reading","okuma"],["hobby","hobi"],["drum","davul"],
-["flute","flüt"],["trumpet","trompet"],["orchestra","orkestra"],["concert","konser"],["stage","sahne"],
-["rhythm","ritim"],["melody","melodi"],["instrument","müzik aleti, alet"],["internet","internet"],["website","internet sitesi"],
-["email","e-posta"],["screen","ekran"],["keyboard","klavye"],["video","video"],["code","kod, şifre"],
-["player","oyuncu"],["referee","hakem"],["stadium","stadyum"],["gym","spor salonu"],["swimmer","yüzücü"],
-["runner","koşucu"],["net","ağ, file"],["racket","raket"],["helmet","kask"],["skateboard","kaykay"],
-["chess","satranç"],["dice","zar"],["xylophone","ksilofon"],["card","kart"],["target","hedef (nişan)"]
-];
+/* KELİME HAVUZU: assets/js/vocab.js içindeki VOCAB veri setinden türetilir (window.WORDS). */
 
 const EXTRA_DICT = {
 "the":"(belirtme edatı)","a":"bir","an":"bir","is":"-dır / olmak","are":"-dırlar","am":"-ım",
@@ -902,7 +736,10 @@ WORDS.forEach(function(p){ DICT[p[0]] = p[1]; });
 Object.assign(DICT, EXTRA_DICT);
 
 /* ================= GENEL DURUM & HEDEF ================= */
-var TOWER_MAX_FLOORS = 163;
+/* Eskiden tek kule (Burj Khalifa, 163 kat) vardı; artık floors sayacı 10
+   binaya / 1000 kata bölünerek yorumlanır (bkz. buildings.js). floors
+   değeri asla dönüştürülmez — mevcut oyuncuların ilerlemesi aynen korunur. */
+var TOWER_MAX_FLOORS = window.BUILDING_TOTAL_FLOORS || 1000;
 var xp = 0, floors = 0;
 var WORD_GOAL = 1000;
 var learnedWords = new Set();
@@ -925,17 +762,48 @@ function renderTower(){
   document.getElementById('floorCount').textContent = floors;
   var lvl = levels.filter(function(l){return xp>=l[0];}).length;
   document.getElementById('lvlText').textContent = 'Seviye '+lvl+' · '+levels[Math.min(lvl-1,levels.length-1)][1];
-  var pct = Math.min(1, floors/TOWER_MAX_FLOORS);
+  var bprog = window.getBuildingProgress ? window.getBuildingProgress(floors) : null;
+  var pct = bprog ? bprog.overallPct : Math.min(1, floors/TOWER_MAX_FLOORS);
   var rect = document.getElementById('bkClipRect');
   if(rect){
     rect.setAttribute('y', (292-292*pct).toFixed(1));
     rect.setAttribute('height', (292*pct).toFixed(1));
   }
   var bp=document.getElementById('bkPct'); if(bp) bp.textContent=Math.round(pct*100);
+  var bn=document.getElementById('bkBuildingName');
+  if(bn && bprog) bn.textContent = bprog.current.icon+' '+bprog.current.name;
   document.getElementById('goalNow').textContent = learnedWords.size;
   document.getElementById('goalMax').textContent = WORD_GOAL;
   document.getElementById('homeGoalFill').style.width = Math.min(100, learnedWords.size/WORD_GOAL*100)+'%';
   renderProfileBar();
+}
+function openBuildingJourney(){
+  renderBuildingJourney();
+  show('buildingJourney');
+}
+function renderBuildingJourney(){
+  if(!window.getBuildingProgress || !window.BUILDINGS) return;
+  var bprog = window.getBuildingProgress(floors);
+  document.getElementById('bjOverallPct').textContent = Math.round(bprog.overallPct*100)+'%';
+  document.getElementById('bjOverallSub').textContent = floors+' / '+window.BUILDING_TOTAL_FLOORS+' kat tamamlandı';
+  var list = document.getElementById('bjList'); list.innerHTML='';
+  window.BUILDINGS.forEach(function(b, i){
+    var state = i < bprog.currentIndex ? 'done' : (i === bprog.currentIndex ? 'current' : 'locked');
+    var floorsInto = state==='done' ? b.floors : (state==='current' ? bprog.floorsIntoCurrent : 0);
+    var cardPct = b.floors>0 ? Math.round(floorsInto/b.floors*100) : 100;
+    var card = document.createElement('div');
+    card.className = 'bj-card '+state;
+    card.innerHTML =
+      '<div class="bj-icon">'+b.icon+'</div>'+
+      '<div class="bj-info">'+
+        '<div class="bj-name">'+(i+1)+'. '+b.name+'</div>'+
+        '<div class="bj-city">'+b.city+'</div>'+
+        '<div class="bj-bar"><div class="bj-bar-fill" style="width:'+cardPct+'%"></div></div>'+
+        '<div class="bj-floors">'+floorsInto+' / '+b.floors+' kat</div>'+
+      '</div>'+
+      '<div class="bj-status">'+(state==='done'?'✅':(state==='current'?'🚧':'🔒'))+'</div>';
+    list.appendChild(card);
+  });
 }
 function renderProfileBar(){
   var profile = window.getProfile ? window.getProfile() : null;
@@ -972,7 +840,7 @@ function renderAchievementsScreen(){
   box.innerHTML = html;
 }
 function show(id){
-  ['home','onboarding','achievements','quiz','scramble','piano','picmatch','memory','listen','spelling','fillgap','mapdet','snake','rocket','crossword','story','resultScreen']
+  ['home','onboarding','achievements','buildingJourney','reviewWords','quiz','scramble','piano','picmatch','memory','listen','spelling','fillgap','mapdet','snake','rocket','crossword','story','resultScreen']
     .forEach(function(s){document.getElementById(s).classList.add('hidden');});
   document.getElementById(id).classList.remove('hidden');
   hideBubble();
@@ -1064,6 +932,7 @@ function openProfileSettings(){
   show('onboarding');
 }
 function bootApp(){
+  if(window.migrateSaveData) window.migrateSaveData();
   loadProgress();
   if(!window.isOnboarded()){
     onbEditingExisting = false;
@@ -1226,12 +1095,13 @@ var MODES = [
  {cls:'b', e:'✍️', tag:'YAZIM', n:'Yazım Arısı', d:'Duy ve harf harf yaz', fn:startSpelling},
  {cls:'a', e:'📝', tag:'CÜMLE', n:'Boşluk Doldurma', d:'Cümledeki eksik kelimeyi bul', fn:startFillgap},
  {cls:'p', e:'🗺️', tag:'DEDEKTİF', n:'Harita Dedektifi', d:'İpuçlarıyla ülkeyi bul', fn:startMapdet},
- {cls:'g', e:'🐍', tag:'ZİNCİR', n:'Kelime Yılanı', d:'Son harfle yeni kelime', fn:startSnake},
+ {cls:'g', e:'🐍', tag:'ZİNCİR', n:'Kelime Yılanı', d:'Harflerden kelime kur', fn:startSnake},
  {cls:'a', e:'🚀', tag:'YARIŞ', n:'Roket Yarışı', d:'Rakip roketten önce uzaya çık!', fn:startRocket},
  {cls:'b', e:'🧩', tag:'BULMACA', n:'Çapraz Bulmaca', d:'Kelimeleri karelere yerleştir', fn:startCrossword},
  {cls:'p', e:'📖', tag:'HİKAYE', n:'Mini Hikayeler', d:'Oku, dokun-çevir, cevapla', fn:startStory},
  {cls:'p', e:'🪐', tag:'BULMACA', n:'Kelime Bulmacası', d:'Karışık harflerden kelime kur', fn:startScramble},
  {cls:'a', e:'🎹', tag:'NOTA OYUNU', n:'Nota Kelimeleri', d:'Piyanoyla kelime çal!', fn:startPiano},
+ {cls:'b', e:'🧠', tag:'TEKRAR', n:'Kelime Tekrarı', d:'Zorlandığın kelimeleri tekrar et', fn:startReview},
 ];
 function renderModes(){
   var g=document.getElementById('modeGrid'); g.innerHTML='';
@@ -1249,9 +1119,24 @@ var FACTS = {
 buildings: [
  {en:'Which is the tallest building in the world?', tr:'Dünyanın en yüksek binası hangisidir?', opts:['Burj Khalifa — 828 m','Shanghai Tower — 632 m','Merdeka 118 — 679 m','Taipei 101 — 508 m'], a:0},
  {en:'How many floors does Burj Khalifa have?', tr:'Burj Khalifa kaç katlıdır?', opts:['163','101','128','96'], a:0},
- {en:'Merdeka 118 is in which country?', tr:'Merdeka 118 hangi ülkededir?', opts:['Malaysia (Malezya)','Japan (Japonya)','China (Çin)','Qatar (Katar)'], a:0},
- {en:'How tall is Shanghai Tower?', tr:'Shanghai Tower kaç metredir?', opts:['632 meters','828 meters','554 meters','508 meters'], a:0},
- {en:'Which building is in New York?', tr:'Hangi bina New York şehrindedir?', opts:['One World Trade Center','Taipei 101','Lotte World Tower','Merdeka 118'], a:0},
+ {en:'In which city is Burj Khalifa?', tr:'Burj Khalifa hangi şehirdedir?', opts:['Dubai','Doha','Riyadh','Abu Dhabi'], a:0},
+ {en:'Which building has a famous triangular shape?', tr:'Hangi bina ünlü üçgen şekliyle bilinir?', opts:['Flatiron Building','Empire State Building','Petronas Towers','Lotte World Tower'], a:0},
+ {en:'In which city is the Flatiron Building?', tr:'Flatiron Building hangi şehirdedir?', opts:['New York','Chicago','Boston','Seattle'], a:0},
+ {en:'Which building was the tallest in the world for less than a year, in 1930?', tr:'1930 yılında bir yıldan kısa süre dünyanın en yüksek binası olan yapı hangisidir?', opts:['Chrysler Building','Empire State Building','Eiffel Tower','Willis Tower'], a:0},
+ {en:'What style is the Chrysler Building famous for?', tr:'Chrysler Building hangi mimari tarzıyla ünlüdür?', opts:['Art Deco','Gothic','Modernist','Baroque'], a:0},
+ {en:'Which building was the tallest in the world when it opened in 1931?', tr:'1931 yılında açıldığında dünyanın en yüksek binası hangisiydi?', opts:['Empire State Building','Taipei 101','Burj Khalifa','Shanghai Tower'], a:0},
+ {en:'In which city is the Empire State Building?', tr:'Empire State Building hangi şehirdedir?', opts:['New York','Los Angeles','Miami','Washington D.C.'], a:0},
+ {en:'Who designed the Bank of China Tower in Hong Kong?', tr:'Hong Kong\'daki Bank of China Tower\'ı kim tasarladı?', opts:['I. M. Pei','Frank Lloyd Wright','Zaha Hadid','Norman Foster'], a:0},
+ {en:'In which city is the Bank of China Tower?', tr:'Bank of China Tower hangi şehirdedir?', opts:['Hong Kong','Beijing','Shanghai','Singapore'], a:0},
+ {en:'Taipei 101 has a giant ball inside it. What is its purpose?', tr:'Taipei 101\'in içinde dev bir top vardır. Amacı nedir?', opts:['To reduce swaying in wind and earthquakes','To store water','To generate electricity','To be a tourist decoration only'], a:0},
+ {en:'Which two towers are connected by a famous sky bridge in Kuala Lumpur?', tr:'Kuala Lumpur\'da hangi iki kule ünlü bir gökyüzü köprüsüyle birbirine bağlıdır?', opts:['Petronas Towers','Lotte World Tower and Burj Khalifa','Taipei 101 and Shanghai Tower','Chrysler and Empire State'], a:0},
+ {en:'In which country are the Petronas Towers?', tr:'Petronas Towers hangi ülkededir?', opts:['Malaysia','Indonesia','Thailand','Singapore'], a:0},
+ {en:'What is special about the shape of the Shanghai Tower?', tr:'Shanghai Tower\'ın şeklinde özel olan nedir?', opts:['It twists as it rises','It is perfectly square','It leans to one side','It has no windows'], a:0},
+ {en:'Shanghai Tower is the second tallest building in the world. In which country is it?', tr:'Shanghai Tower dünyanın ikinci en yüksek binasıdır. Hangi ülkededir?', opts:['China','Japan','South Korea','Taiwan'], a:0},
+ {en:'In which city is the Lotte World Tower?', tr:'Lotte World Tower hangi şehirdedir?', opts:['Seoul','Tokyo','Beijing','Hong Kong'], a:0},
+ {en:'The Makkah Royal Clock Tower has one of the world\'s largest what?', tr:'Makkah Royal Clock Tower dünyanın en büyük neyine sahiptir?', opts:['Clock faces','Swimming pools','Libraries','Gardens'], a:0},
+ {en:'In which city is the Makkah Royal Clock Tower?', tr:'Makkah Royal Clock Tower hangi şehirdedir?', opts:['Mecca','Medina','Jeddah','Riyadh'], a:0},
+ {en:'Put these in order of height, tallest first: Empire State Building, Petronas Towers, Burj Khalifa.', tr:'Bunları en yüksekten en kısaya sırala: Empire State Building, Petronas Towers, Burj Khalifa.', opts:['Burj Khalifa, Petronas Towers, Empire State Building','Empire State Building, Petronas Towers, Burj Khalifa','Petronas Towers, Burj Khalifa, Empire State Building','Empire State Building, Burj Khalifa, Petronas Towers'], a:0},
 ],
 countries: [
  {en:'Which continent is Brazil in?', tr:'Brezilya hangi kıtadadır?', opts:['South America (Güney Amerika)','Africa (Afrika)','Asia (Asya)','Europe (Avrupa)'], a:0},
@@ -1260,10 +1145,26 @@ countries: [
  {en:'Which country has the biggest population?', tr:'Hangi ülkenin nüfusu en fazladır?', opts:['India (Hindistan)','China (Çin)','USA (ABD)','Indonesia (Endonezya)'], a:0},
  {en:'Which city is the most crowded in Turkey?', tr:"Türkiye'nin en kalabalık şehri hangisidir?", opts:['İstanbul','Ankara','İzmir','Bursa'], a:0},
  {en:'Which continent is Egypt in?', tr:'Mısır hangi kıtadadır?', opts:['Africa (Afrika)','Asia (Asya)','Europe (Avrupa)','Oceania (Okyanusya)'], a:0},
+ {en:'What is the capital of France?', tr:"Fransa'nın başkenti neresidir?", opts:['Paris','Lyon','Marseille','Nice'], a:0},
+ {en:'What is the capital of Turkey?', tr:"Türkiye'nin başkenti neresidir?", opts:['Ankara','İstanbul','İzmir','Bursa'], a:0},
+ {en:'Which is the smallest continent?', tr:'En küçük kıta hangisidir?', opts:['Oceania (Okyanusya)','Europe (Avrupa)','Antarctica (Antarktika)','South America (Güney Amerika)'], a:0},
+ {en:'Which river is the longest in the world?', tr:'Dünyanın en uzun nehri hangisidir?', opts:['The Nile','The Amazon','The Danube','The Yangtze'], a:0},
+ {en:'Which country is famous for the pyramids of Giza?', tr:'Giza piramitleriyle hangi ülke ünlüdür?', opts:['Egypt','Mexico','Peru','Sudan'], a:0},
+ {en:'Which country has kangaroos as a national symbol?', tr:'Hangi ülkenin ulusal sembollerinden biri kangurudur?', opts:['Australia','New Zealand','South Africa','India'], a:0},
+ {en:'What is the capital of Italy?', tr:"İtalya'nın başkenti neresidir?", opts:['Rome','Milan','Venice','Naples'], a:0},
+ {en:'Which country is shaped like a boot on the map?', tr:'Haritada çizmeye benzeyen ülke hangisidir?', opts:['Italy','Spain','Greece','Portugal'], a:0},
+ {en:'Which mountain is the tallest in the world?', tr:'Dünyanın en yüksek dağı hangisidir?', opts:['Mount Everest','K2','Kilimanjaro','Mont Blanc'], a:0},
+ {en:'Which desert is the largest hot desert in the world?', tr:'Dünyanın en büyük sıcak çölü hangisidir?', opts:['The Sahara','The Gobi','The Kalahari','The Atacama'], a:0},
+ {en:'Which country gave the Statue of Liberty to the USA?', tr:'Özgürlük Heykeli\'ni ABD\'ye hangi ülke hediye etti?', opts:['France','England','Spain','Italy'], a:0},
+ {en:'What is the capital of Germany?', tr:"Almanya'nın başkenti neresidir?", opts:['Berlin','Munich','Hamburg','Frankfurt'], a:0},
+ {en:'Which ocean is the largest in the world?', tr:'Dünyanın en büyük okyanusu hangisidir?', opts:['The Pacific Ocean','The Atlantic Ocean','The Indian Ocean','The Arctic Ocean'], a:0},
+ {en:'Which country is home to the Great Wall?', tr:'Büyük Sed hangi ülkededir?', opts:['China','Mongolia','Japan','Vietnam'], a:0},
 ]};
 
 function makeVocabQ(){
-  var four = pick(WORDS, 4);
+  var primary = window.pickUnseen ? window.pickUnseen('vocabq', WORDS, 1, function(w){return w[0];})[0] : rand(WORDS);
+  var distractors = pick(WORDS.filter(function(w){return w[0]!==primary[0];}), 3);
+  var four = [primary].concat(distractors);
   var en=four[0][0], tr=four[0][1];
   if(Math.random()<0.5){
     return { hint:'KELİME · WORD', en:'What does "'+en+'" mean?', tr:'"'+en+'" ne demek?',
@@ -1279,7 +1180,8 @@ function stopAllTimers(){
   if(rkInt){clearInterval(rkInt);rkInt=null;}
 }
 function buildQuizList(cat,count){
-  var facts = pick(FACTS[cat], 3).map(function(f){
+  var factPool = window.pickUnseen ? window.pickUnseen('quizfacts_'+cat, FACTS[cat], 3, function(f){return f.en;}) : pick(FACTS[cat], 3);
+  var facts = factPool.map(function(f){
     return {hint:'BİLGİ · FACT', en:f.en, tr:f.tr, opts:f.opts.map(function(o){return {label:o};}), a:f.a};
   });
   var list=facts.slice();
@@ -1334,6 +1236,7 @@ function qAnswer(btn, ok, item){
   qState.results[qState.i]=ok; qState.answered++;
   btn.classList.add(ok?'correct':'wrong');
   sfx(ok?'correct':'wrong');
+  if(item.w && window.recordWordResult) window.recordWordResult(item.w, ok);
   if(ok){ qState.correct++; addXP(10); if(item.w) addLearned(item.w);
     if(qState.timed) document.getElementById('quizScore').textContent='✅ '+qState.correct; }
   setTimeout(function(){
@@ -1371,7 +1274,8 @@ var EMOJI_WORDS = [
 var pmState=null;
 function startPicmatch(){
   window._activeSession = {mode:'picmatch', done:false};
-  pmState={rounds:pick(EMOJI_WORDS,8), i:0, correct:0, locked:false};
+  var rounds = window.pickUnseen ? window.pickUnseen('picmatch', EMOJI_WORDS, 8, function(w){return w[0];}) : pick(EMOJI_WORDS,8);
+  pmState={rounds:rounds, i:0, correct:0, locked:false};
   show('picmatch'); renderPm();
 }
 function renderPm(){
@@ -1390,6 +1294,7 @@ function renderPm(){
       var ok=o[0]===item[0];
       b.classList.add(ok?'correct':'wrong');
       sfx(ok?'correct':'wrong');
+      if(window.recordWordResult) window.recordWordResult(item[0], ok);
       if(ok){ s.correct++; addXP(10); addLearned(item[0]); }
       setTimeout(function(){
         s.i++;
@@ -1408,7 +1313,9 @@ function renderPm(){
 var lsState=null;
 function startListen(){
   window._activeSession = {mode:'listen', done:false};
-  lsState={rounds:pick(WORDS.filter(function(w){return w[0].length>=3&&w[0].length<=8;}),8), i:0, correct:0, locked:false};
+  var pool = WORDS.filter(function(w){return w[0].length>=3&&w[0].length<=8&&/^[a-z]+$/.test(w[0]);});
+  var rounds = window.pickUnseen ? window.pickUnseen('listen', pool, 8, function(w){return w[0];}) : pick(pool,8);
+  lsState={rounds:rounds, i:0, correct:0, locked:false};
   show('listen'); renderLs();
 }
 function renderLs(){
@@ -1427,6 +1334,7 @@ function renderLs(){
       var ok=o[0]===item[0];
       b.classList.add(ok?'correct':'wrong');
       sfx(ok?'correct':'wrong');
+      if(window.recordWordResult) window.recordWordResult(item[0], ok);
       if(ok){ s.correct++; addXP(10); addLearned(item[0]); }
       setTimeout(function(){
         s.i++;
@@ -1451,7 +1359,8 @@ function lsHint(){
 var memState=null;
 function startMemory(){
   window._activeSession = {mode:'memory', done:false};
-  var pairs=pick(EMOJI_WORDS.filter(function(w){return (DICT[w[0]]||'').length<=14;}),6);
+  var memPool = EMOJI_WORDS.filter(function(w){return (DICT[w[0]]||'').length<=14;});
+  var pairs = window.pickUnseen ? window.pickUnseen('memory', memPool, 6, function(w){return w[0];}) : pick(memPool,6);
   var cards=[];
   pairs.forEach(function(p,i){
     cards.push({pid:i, en:p[0], face:'en', emoji:p[1], text:p[0]});
@@ -1513,7 +1422,8 @@ var spState=null;
 function startSpelling(){
   window._activeSession = {mode:'spelling', done:false};
   var cand=WORDS.filter(function(w){return w[0].length>=3&&w[0].length<=7&&/^[a-z]+$/.test(w[0]);});
-  spState={rounds:pick(cand,5), i:0, correct:0, typed:[]};
+  var rounds = window.pickUnseen ? window.pickUnseen('spelling', cand, 5, function(w){return w[0];}) : pick(cand,5);
+  spState={rounds:rounds, i:0, correct:0, typed:[]};
   show('spelling'); renderSp(true);
 }
 function renderSp(newRound){
@@ -1560,6 +1470,7 @@ function spType(L,bi){
     if(guess===item[0]){
       fb.textContent='🎉 Doğru! '+item[0].toUpperCase()+' · +15 XP';
       fb.className='feedback ok';
+      if(window.recordWordResult) window.recordWordResult(item[0], true);
       sfx('correct'); addXP(15); addLearned(item[0]); s.correct++;
       setTimeout(function(){
         s.i++; s.usedIdx=[];
@@ -1572,6 +1483,7 @@ function spType(L,bi){
     } else {
       fb.textContent='Olmadı! Tekrar dinle ve dene 🔄';
       fb.className='feedback no';
+      if(window.recordWordResult) window.recordWordResult(item[0], false);
       sfx('wrong');
       setTimeout(function(){ s.typed=[]; s.usedIdx=[]; renderSp(false);
         document.getElementById('spFeedback').textContent=''; },900);
@@ -1603,11 +1515,30 @@ var FILL = [
  {s:'Mars is a red ___ .', tr:'Mars kırmızı bir gezegendir.', a:'planet', o:['planet','animal','kitchen','lemon']},
  {s:'My friend and I play ___ .', tr:'Arkadaşım ve ben futbol oynarız.', a:'football', o:['football','breakfast','mountain','window']},
  {s:'Turkey has many ___ cities.', tr:"Türkiye'nin birçok güzel şehri vardır.", a:'beautiful', o:['beautiful','angry','thirsty','heavy']},
+ {s:'I ___ my teeth every morning.', tr:'Her sabah dişlerimi fırçalarım.', a:'brush', o:['brush','paint','wash','cut']},
+ {s:'The dog is chasing its ___ .', tr:'Köpek kuyruğunu kovalıyor.', a:'tail', o:['tail','ear','hat','shoe']},
+ {s:'We watched the ___ set over the sea.', tr:'Denizin üzerinde batan güneşi izledik.', a:'sun', o:['sun','moon','cloud','boat']},
+ {s:'She wrote a letter with a ___ .', tr:'Bir kalemle mektup yazdı.', a:'pen', o:['pen','spoon','key','ball']},
+ {s:'The train arrived at the ___ on time.', tr:'Tren istasyona zamanında geldi.', a:'station', o:['station','forest','kitchen','beach']},
+ {s:'He felt very ___ after the long run.', tr:'Uzun koşudan sonra çok yorgun hissetti.', a:'tired', o:['tired','happy','angry','young']},
+ {s:'Please ___ the door when you leave.', tr:'Çıkarken kapıyı kapat lütfen.', a:'close', o:['close','open','break','paint']},
+ {s:'The chef added ___ to the soup.', tr:'Şef çorbaya tuz ekledi.', a:'salt', o:['salt','glue','sand','ink']},
+ {s:'My grandmother tells wonderful ___ every night.', tr:'Büyükannem her gece harika hikayeler anlatır.', a:'stories', o:['stories','shoes','clouds','stones']},
+ {s:'The astronaut wore a special ___ in space.', tr:'Astronot uzayda özel bir kıyafet giydi.', a:'suit', o:['suit','hat','scarf','sock']},
+ {s:'We need an ___ because it might rain.', tr:'Yağmur yağabileceği için bir şemsiyeye ihtiyacımız var.', a:'umbrella', o:['umbrella','ladder','pillow','mirror']},
+ {s:'The farmer grows ___ in his big field.', tr:'Çiftçi büyük tarlasında mısır yetiştirir.', a:'corn', o:['corn','glass','paper','wool']},
+ {s:'I ___ my homework before dinner.', tr:'Akşam yemeğinden önce ödevimi bitiririm.', a:'finish', o:['finish','forget','break','lose']},
+ {s:'The little boy was ___ of the dark.', tr:'Küçük çocuk karanlıktan korkuyordu.', a:'afraid', o:['afraid','proud','tall','hungry']},
+ {s:'She keeps her jewelry in a small ___ .', tr:'Mücevherlerini küçük bir kutuda saklar.', a:'box', o:['box','river','cloud','shoe']},
+ {s:'The mountain climbers reached the ___ at noon.', tr:'Dağcılar öğlen zirveye ulaştı.', a:'summit', o:['summit','valley','kitchen','harbor']},
+ {s:'A ___ has eight legs.', tr:'Bir örümceğin sekiz bacağı vardır.', a:'spider', o:['spider','bird','fish','horse']},
+ {s:'The library was completely ___ during the exam.', tr:'Sınav sırasında kütüphane tamamen sessizdi.', a:'silent', o:['silent','loud','wet','crowded']},
 ];
 var fgState=null;
 function startFillgap(){
   window._activeSession = {mode:'fillgap', done:false};
-  fgState={rounds:pick(FILL,8), i:0, correct:0, locked:false};
+  var rounds = window.pickUnseen ? window.pickUnseen('fillgap', FILL, 8, function(f){return f.s;}) : pick(FILL,8);
+  fgState={rounds:rounds, i:0, correct:0, locked:false};
   show('fillgap'); renderFg();
 }
 function renderFg(){
@@ -1625,6 +1556,7 @@ function renderFg(){
       var ok=o===item.a;
       b.classList.add(ok?'correct':'wrong');
       sfx(ok?'correct':'wrong');
+      if(window.recordWordResult) window.recordWordResult(item.a, ok);
       if(ok){ s.correct++; addXP(10); addLearned(item.a); }
       setTimeout(function(){
         s.i++;
@@ -1662,11 +1594,36 @@ var MAPQ = [
  {c:'Canada', f:'🇨🇦', trn:'Kanada',
   clues:['It is a very big country in North America.','Its flag has a red leaf.','It is very cold in winter.'],
   cluesTr:["Kuzey Amerika'da çok büyük bir ülkedir.",'Bayrağında kırmızı bir yaprak vardır.','Kışın çok soğuktur.']},
+ {c:'Germany', f:'🇩🇪', trn:'Almanya',
+  clues:['It is in the middle of Europe.','Its capital is Berlin.','It is famous for cars and football.'],
+  cluesTr:["Avrupa'nın ortasındadır.","Başkenti Berlin'dir.",'Arabaları ve futboluyla ünlüdür.']},
+ {c:'India', f:'🇮🇳', trn:'Hindistan',
+  clues:['It is in South Asia.','It has the second biggest population in the world.','The Taj Mahal is there.'],
+  cluesTr:["Güney Asya'dadır.",'Dünyada nüfusu en fazla ikinci ülkedir.','Tac Mahal oradadır.']},
+ {c:'Mexico', f:'🇲🇽', trn:'Meksika',
+  clues:['It is in North America.','People there speak Spanish.','Tacos come from this country.'],
+  cluesTr:["Kuzey Amerika'dadır.",'İnsanlar orada İspanyolca konuşur.','Taco bu ülkeden gelir.']},
+ {c:'South Korea', f:'🇰🇷', trn:'Güney Kore',
+  clues:['It is in East Asia.','Its capital is Seoul.','The Lotte World Tower is there.'],
+  cluesTr:["Doğu Asya'dadır.","Başkenti Seul'dür.",'Lotte World Tower oradadır.']},
+ {c:'China', f:'🇨🇳', trn:'Çin',
+  clues:['It has the biggest population in the world.','The Great Wall is there.','Its capital is Beijing.'],
+  cluesTr:['Dünyada nüfusu en fazla ülkedir.','Büyük Sed oradadır.',"Başkenti Pekin'dir."]},
+ {c:'Spain', f:'🇪🇸', trn:'İspanya',
+  clues:['It is in Europe, next to Portugal.','People there speak Spanish.','Flamenco dance comes from there.'],
+  cluesTr:["Avrupa'da, Portekiz'in yanındadır.",'İnsanlar orada İspanyolca konuşur.','Flamenko dansı oradan gelir.']},
+ {c:'United Arab Emirates', f:'🇦🇪', trn:'Birleşik Arap Emirlikleri',
+  clues:['It is in the Middle East.','Burj Khalifa is there.','Dubai is its most famous city.'],
+  cluesTr:["Orta Doğu'dadır.",'Burj Khalifa oradadır.','En ünlü şehri Dubai\'dir.']},
+ {c:'Malaysia', f:'🇲🇾', trn:'Malezya',
+  clues:['It is in Southeast Asia.','The Petronas Towers are there.','Its capital is Kuala Lumpur.'],
+  cluesTr:["Güneydoğu Asya'dadır.",'Petronas Kuleleri oradadır.',"Başkenti Kuala Lumpur'dur."]},
 ];
 var mdState=null;
 function startMapdet(){
   window._activeSession = {mode:'mapdet', done:false};
-  mdState={rounds:pick(MAPQ,5), i:0, clue:0, correct:0, xpTotal:0, locked:false};
+  var rounds = window.pickUnseen ? window.pickUnseen('mapdet', MAPQ, 5, function(m){return m.c;}) : pick(MAPQ,5);
+  mdState={rounds:rounds, i:0, clue:0, correct:0, xpTotal:0, locked:false};
   show('mapdet'); renderMd(true);
 }
 function renderMd(newRound){
@@ -1690,6 +1647,7 @@ function renderMd(newRound){
       var ok=o.c===item.c;
       b.classList.add(ok?'correct':'wrong');
       sfx(ok?'correct':'wrong');
+      if(window.recordWordResult) window.recordWordResult(item.c, ok);
       if(ok){ var earn=30-s.clue*10; s.correct++; s.xpTotal+=earn; addXP(earn); addLearned(item.c); }
       setTimeout(function(){
         s.i++;
@@ -1708,63 +1666,142 @@ function mdMoreClue(){
   if(s.clue<2){ s.clue++; sfx('tick'); renderMd(false); }
 }
 
-/* ================= 9) KELİME YILANI ================= */
+/* ================= 9) KELİME YILANI (harflerden kelime kur) ================= */
 var byFirst={};
 WORDS.forEach(function(w){
   var f=w[0][0];
   (byFirst[f]=byFirst[f]||[]).push(w);
 });
 function snakeCandidates(letter, used){
-  return (byFirst[letter]||[]).filter(function(w){return used.indexOf(w[0])<0;});
+  return (byFirst[letter]||[]).filter(function(w){return used.indexOf(w[0])<0 && /^[a-z]+$/.test(w[0]);});
 }
 var snState=null;
 function startSnake(){
   window._activeSession = {mode:'snake', done:false};
   var start;
-  do{ start=rand(WORDS); } while(snakeCandidates(start[0].slice(-1),[start[0]]).length<1);
-  snState={cur:start, used:[start[0]], i:0, correct:0, locked:false};
-  show('snake'); renderSn();
+  do{ start=rand(WORDS); } while(!/^[a-z]+$/.test(start[0]) || snakeCandidates(start[0].slice(-1),[start[0]]).length<1);
+  snState={cur:start, used:[start[0]], i:0, correct:0, typed:[], locked:false, checking:false};
+  show('snake'); snPickTarget(); renderSn(true);
 }
-function renderSn(){
+function snPickTarget(){
+  var s=snState;
+  var last=s.cur[0].slice(-1);
+  var pool=snakeCandidates(last, s.used);
+  /* Kademeli zorluk: ilk turlarda kısa kelimeler, sonraki turlarda daha uzun kelimeler tercih edilir */
+  var minLen = 3, maxLen = Math.min(9, 4 + s.i);
+  var byLen=pool.filter(function(w){return w[0].length>=minLen && w[0].length<=maxLen;});
+  if(byLen.length>0) pool=byLen;
+  if(pool.length===0){ s.target=null; return; }
+  var picked = window.pickUnseen ? window.pickUnseen('snake', pool, 1, function(w){return w[0];}) : [rand(pool)];
+  s.target = picked[0] || rand(pool);
+}
+function renderSn(newRound){
   var s=snState;
   document.getElementById('snRound').textContent=(s.i+1)+'/8';
-  document.getElementById('snWord').innerHTML=s.cur[0].toUpperCase().slice(0,-1)+'<span style="color:var(--amber)">'+s.cur[0].toUpperCase().slice(-1)+'</span>';
-  document.getElementById('snTr').textContent='🇹🇷 '+s.cur[1]+' · Son harf: "'+s.cur[0].slice(-1).toUpperCase()+'"';
+  if(!s.target){ finishSnake(); return; }
+  if(newRound){
+    s.typed=[s.target[0][0].toUpperCase()];
+    s.usedIdx=[];
+    var rest=s.target[0].toUpperCase().slice(1).split('');
+    var decoyCount=Math.min(5, 1+Math.floor(s.i/2));
+    var decoys=[];
+    while(decoys.length<decoyCount){
+      var L=String.fromCharCode(65+Math.floor(Math.random()*26));
+      if(rest.indexOf(L)<0 && decoys.indexOf(L)<0) decoys.push(L);
+    }
+    s.bank=shuffle(rest.concat(decoys));
+    document.getElementById('snFeedback').textContent='';
+    document.getElementById('snFeedback').className='feedback';
+  }
+  document.getElementById('snTr').textContent='🇹🇷 '+s.target[1]+' · Son harf: "'+s.cur[0].slice(-1).toUpperCase()+'" ile başlar';
   document.getElementById('snChain').textContent='🐍 Zincir: '+s.used.join(' → ');
-  var last=s.cur[0].slice(-1);
-  var goodPool=snakeCandidates(last, s.used).filter(function(w){
-    return snakeCandidates(w[0].slice(-1), s.used.concat([w[0]])).length>0 || s.i>=7;
+  snRenderSlots();
+  var bank=document.getElementById('snLetters'); bank.innerHTML='';
+  s.bank.forEach(function(L,bi){
+    var b=document.createElement('button'); b.className='letter'; b.textContent=L;
+    b.disabled = s.usedIdx.indexOf(bi)>=0;
+    b.onclick=function(e){ e.stopPropagation(); snType(L,bi); };
+    bank.appendChild(b);
   });
-  if(goodPool.length===0) goodPool=snakeCandidates(last, s.used);
-  if(goodPool.length===0){ finishSnake(); return; }
-  var good=rand(goodPool);
-  var badPool=WORDS.filter(function(w){return w[0][0]!==last && s.used.indexOf(w[0])<0;});
-  var opts=shuffle([good].concat(pick(badPool,3)));
-  var box=document.getElementById('snOpts'); box.innerHTML='';
   s.locked=false;
-  opts.forEach(function(o){
-    var b=document.createElement('button'); b.className='opt';
-    b.innerHTML=o[0]+'<small>'+o[1]+'</small>';
-    b.onclick=function(e){ e.stopPropagation();
-      if(s.locked) return; s.locked=true;
-      var ok=o[0][0]===last;
-      b.classList.add(ok?'correct':'wrong');
-      sfx(ok?'correct':'wrong');
-      if(ok){ s.correct++; addXP(10); addLearned(o[0]); s.cur=o; s.used.push(o[0]); }
-      setTimeout(function(){
-        s.i++;
-        if(s.i>=8) finishSnake();
-        else renderSn();
-      },700);
-    };
-    box.appendChild(b);
-  });
+}
+function snRenderSlots(){
+  var s=snState, targetLen=s.target[0].length;
+  var slots=document.getElementById('snSlots'); slots.innerHTML='';
+  for(var i=0;i<targetLen;i++){
+    var d=document.createElement('div');
+    var filled = i<s.typed.length;
+    d.className='slot'+(i===0?' locked':'')+(filled&&i>0?' filled':'');
+    d.textContent=filled?s.typed[i]:'';
+    slots.appendChild(d);
+  }
+  var submitBtn=document.getElementById('snSubmitBtn');
+  if(submitBtn) submitBtn.disabled = s.typed.length<targetLen;
+}
+function snType(L,bi){
+  var s=snState;
+  if(s.locked || s.typed.length>=s.target[0].length) return;
+  s.typed.push(L);
+  s.usedIdx.push(bi);
+  sfx('tick');
+  snRenderSlots();
+  document.getElementById('snLetters').children[bi].disabled=true;
+}
+function snUndo(){
+  var s=snState;
+  if(s.locked || s.typed.length<=1) return;
+  s.typed.pop();
+  var lastIdx=s.usedIdx.pop();
+  document.getElementById('snLetters').children[lastIdx].disabled=false;
+  snRenderSlots();
+}
+function snClear(){
+  var s=snState;
+  if(s.locked) return;
+  s.typed=[s.target[0][0].toUpperCase()];
+  s.usedIdx.forEach(function(bi){ document.getElementById('snLetters').children[bi].disabled=false; });
+  s.usedIdx=[];
+  snRenderSlots();
+}
+function snSubmit(){
+  var s=snState;
+  if(s.locked || s.typed.length<s.target[0].length) return;
+  s.locked=true;
+  var guess=s.typed.join('').toLowerCase();
+  var fb=document.getElementById('snFeedback');
+  var ok=guess===s.target[0];
+  if(window.recordWordResult) window.recordWordResult(s.target[0], ok);
+  if(ok){
+    fb.textContent='🎉 Doğru! '+s.target[0].toUpperCase()+' · +10 XP';
+    fb.className='feedback ok';
+    sfx('correct'); s.correct++; addXP(10); addLearned(s.target[0]);
+    s.used.push(s.target[0]);
+    s.cur=s.target;
+    setTimeout(function(){
+      s.i++;
+      if(s.i>=8){ finishSnake(); return; }
+      snPickTarget();
+      if(!s.target){ finishSnake(); return; }
+      renderSn(true);
+    },1000);
+  } else {
+    fb.textContent='Olmadı! Doğrusu: '+s.target[0].toUpperCase()+' 🔄';
+    fb.className='feedback no';
+    sfx('wrong');
+    setTimeout(function(){
+      s.i++;
+      if(s.i>=8){ finishSnake(); return; }
+      snPickTarget();
+      if(!s.target){ finishSnake(); return; }
+      renderSn(true);
+    },1400);
+  }
 }
 function finishSnake(){
   var s=snState;
   if(s.correct>=6) sfx('win');
   var reward = completeGameSession('snake', {correct:s.correct, total:8, perfect:s.correct===8});
-  showResult(s.correct>=6?'🐍':'💪','Yılan Tamamlandı!', s.correct+' halka · Zincir: '+s.used.join(' → '), '+'+(s.correct*10)+' XP', reward);
+  showResult(s.correct>=6?'🐍':'💪','Yılan Tamamlandı!', s.correct+' / 8 doğru · Zincir: '+s.used.join(' → '), '+'+(s.correct*10)+' XP', reward);
 }
 
 /* ================= 10) ROKET YARIŞI ================= */
@@ -1803,6 +1840,7 @@ function renderRk(){
       var ok=p.i===q.a;
       b.classList.add(ok?'correct':'wrong');
       sfx(ok?'correct':'wrong');
+      if(window.recordWordResult && q.w) window.recordWordResult(q.w, ok);
       if(ok){ rkState.correct++; rkState.me+=13; addXP(10); addLearned(q.w);
         document.getElementById('rkScore').textContent='✅ '+rkState.correct;
         updateRockets();
@@ -1836,6 +1874,26 @@ var CW_PUZZLES = [
    {word:'FRIEND', tr:'Arkadaş 🤝', dir:'A', r:0, c:0},
    {word:'FISH',   tr:'Balık 🐟', dir:'D', r:0, c:0},
    {word:'NIGHT',  tr:'Gece 🌙', dir:'D', r:0, c:4},
+ ]},
+ {rows:4, cols:5, slots:[
+   {word:'HOUSE', tr:'Ev 🏠', dir:'A', r:0, c:0},
+   {word:'HAND',  tr:'El ✋', dir:'D', r:0, c:0},
+   {word:'SUN',   tr:'Güneş ☀️', dir:'D', r:0, c:3},
+ ]},
+ {rows:3, cols:5, slots:[
+   {word:'CLOUD', tr:'Bulut ☁️', dir:'A', r:0, c:0},
+   {word:'CAT',   tr:'Kedi 🐱', dir:'D', r:0, c:0},
+   {word:'DOG',   tr:'Köpek 🐶', dir:'D', r:0, c:4},
+ ]},
+ {rows:4, cols:5, slots:[
+   {word:'LIGHT', tr:'Işık 💡', dir:'A', r:0, c:0},
+   {word:'LAMP',  tr:'Lamba 🏮', dir:'D', r:0, c:0},
+   {word:'TOY',   tr:'Oyuncak 🧸', dir:'D', r:0, c:4},
+ ]},
+ {rows:4, cols:6, slots:[
+   {word:'GARDEN', tr:'Bahçe 🌷', dir:'A', r:0, c:0},
+   {word:'GOAT',   tr:'Keçi 🐐', dir:'D', r:0, c:0},
+   {word:'EGG',    tr:'Yumurta 🥚', dir:'D', r:0, c:4},
  ]},
 ];
 var CW_TOTAL_SLOTS = CW_PUZZLES.reduce(function(sum,p){return sum+p.slots.length;},0);
@@ -1949,6 +2007,7 @@ function cwType(L){
       cells.forEach(function(rc){ delete s.fill[cwKey(rc[0],rc[1])]; });
       s.active=-1;
       sfx('correct'); addXP(15); addLearned(sl.word);
+      if(window.recordWordResult) window.recordWordResult(sl.word, true);
       s.correctWords++;
       fb.textContent='🎉 '+sl.word+' doğru! +15 XP';
       fb.className='feedback ok';
@@ -2004,11 +2063,50 @@ var STORIES = [
    {en:'Who listens to me?', tr:'Beni kim dinler?', opts:['My mother','My teacher','My dog','My friend'], a:0},
    {en:'What makes me happy?', tr:'Beni ne mutlu eder?', opts:['Music','Money','Snow','Homework'], a:0},
   ]},
+ {"title":"📖 The Clever Fox","text":"A clever fox lived near a small farm. Every night, he searched for food in the forest. One day, he found a hole full of ripe grapes. The fox tried to reach the grapes, but they were too high. He jumped many times, but he could not get them. Finally, the fox walked away and said the grapes were probably sour.","tr":"Zeki bir tilki küçük bir çiftliğin yakınında yaşardı. Her gece ormanda yiyecek arardı. Bir gün, olgun üzümlerle dolu bir çukur buldu. Tilki üzümlere ulaşmaya çalıştı, ama çok yüksekteydiler. Birçok kez zıpladı, ama onlara ulaşamadı. Sonunda tilki uzaklaştı ve üzümlerin muhtemelen ekşi olduğunu söyledi.","qs":[{"en":"Where did the fox search for food?","tr":"Tilki yiyeceği nerede aradı?","opts":["In the forest","In the city","In the river","In the school"],"a":0},{"en":"What did the fox find in the hole?","tr":"Tilki çukurda ne buldu?","opts":["Apples","Grapes","Bread","Fish"],"a":1},{"en":"Why could the fox not reach the grapes?","tr":"Tilki üzümlere neden ulaşamadı?","opts":["They were too far","They were too small","They were too high","They were too heavy"],"a":2}]},
+ {"title":"📖 Grandma's Garden","text":"My grandma has a beautiful garden behind her house. She grows tomatoes, carrots, and sweet strawberries there. Every morning, she waters the plants with a green watering can. I help her pick vegetables in the summer. We often make a fresh salad together after picking.","tr":"Büyükannemin evinin arkasında güzel bir bahçesi var. Orada domates, havuç ve tatlı çilekler yetiştiriyor. Her sabah, bitkileri yeşil bir sulama kabıyla suluyor. Yazın sebzeleri toplamasına yardım ediyorum. Toplama işinden sonra genellikle birlikte taze bir salata yapıyoruz.","qs":[{"en":"What does grandma grow in her garden?","tr":"Büyükannem bahçesinde ne yetiştiriyor?","opts":["Flowers only","Trees","Rice","Tomatoes, carrots, and strawberries"],"a":3},{"en":"What color is the watering can?","tr":"Sulama kabının rengi nedir?","opts":["Green","Blue","Red","Yellow"],"a":0},{"en":"When do they make a salad?","tr":"Ne zaman salata yapıyorlar?","opts":["Before picking","After picking vegetables","At night","In winter"],"a":1}]},
+ {"title":"📖 The New Student","text":"Ayşe is a new student at Green Valley School. On her first day, she felt a little nervous. A friendly girl named Emma sat next to her and smiled. Emma showed her the classroom, the library, and the cafeteria. By lunchtime, Ayşe already had a new friend.","tr":"Ayşe, Green Valley Okulu'nda yeni bir öğrencidir. İlk gününde biraz gergin hissetti. Emma adında arkadaş canlısı bir kız yanına oturdu ve gülümsedi. Emma ona sınıfı, kütüphaneyi ve kafeteryayı gösterdi. Öğle yemeğine kadar, Ayşe'nin zaten yeni bir arkadaşı vardı.","qs":[{"en":"How did Ayşe feel on her first day?","tr":"Ayşe ilk gününde nasıl hissetti?","opts":["Happy","Angry","A little nervous","Bored"],"a":2},{"en":"What is the name of the friendly girl?","tr":"Arkadaş canlısı kızın adı nedir?","opts":["Ayşe","Sara","Lily","Emma"],"a":3},{"en":"What did Emma show Ayşe?","tr":"Emma Ayşe'ye neyi gösterdi?","opts":["The classroom, library, and cafeteria","Only the library","Her house","The park"],"a":0}]},
+ {"title":"📖 The Soccer Match","text":"Last Saturday, our school team played a big soccer match. The weather was sunny and perfect for the game. Our team wore red shirts, and the other team wore blue. In the last minute, Kerem scored the winning goal. Everyone cheered loudly and celebrated together.","tr":"Geçen cumartesi, okul takımımız büyük bir futbol maçı oynadı. Hava güneşliydi ve oyun için mükemmeldi. Takımımız kırmızı forma giydi, diğer takım ise mavi giydi. Son dakikada, Kerem galibiyet golünü attı. Herkes yüksek sesle tezahürat etti ve birlikte kutladı.","qs":[{"en":"What day was the match?","tr":"Maç hangi gündü?","opts":["Friday","Saturday","Sunday","Monday"],"a":1},{"en":"What color shirts did our team wear?","tr":"Takımımız hangi renk forma giydi?","opts":["Blue","Green","Red","Yellow"],"a":2},{"en":"Who scored the winning goal?","tr":"Galibiyet golünü kim attı?","opts":["The coach","A player from the other team","Nobody","Kerem"],"a":3}]},
+ {"title":"📖 Homemade Bread","text":"On Sunday mornings, my father bakes homemade bread. He mixes flour, water, salt, and yeast in a big bowl. Then he kneads the dough for ten minutes. The bread bakes in the oven for about an hour. The whole house smells wonderful when it is ready.","tr":"Pazar sabahları, babam evde ekmek pişirir. Büyük bir kasede un, su, tuz ve maya karıştırır. Sonra hamuru on dakika yoğurur. Ekmek fırında yaklaşık bir saat pişer. Hazır olduğunda tüm ev harika kokar.","qs":[{"en":"When does father bake bread?","tr":"Babam ekmeği ne zaman pişirir?","opts":["Sunday mornings","Friday nights","Every day","Monday evenings"],"a":0},{"en":"How long does he knead the dough?","tr":"Hamuru ne kadar süre yoğurur?","opts":["Twenty minutes","Ten minutes","Five minutes","One hour"],"a":1},{"en":"How long does the bread bake?","tr":"Ekmek ne kadar süre pişer?","opts":["Ten minutes","Two days","About an hour","Thirty seconds"],"a":2}]},
+ {"title":"📖 A Trip to Paris","text":"Last summer, my family visited Paris, the capital of France. We climbed the Eiffel Tower and saw the whole city below. We also visited a famous museum full of paintings. In the evenings, we ate delicious French bread and cheese. It was an unforgettable trip.","tr":"Geçen yaz, ailem Fransa'nın başkenti Paris'i ziyaret etti. Eyfel Kulesi'ne tırmandık ve altımızda tüm şehri gördük. Ayrıca tablolarla dolu ünlü bir müzeyi de ziyaret ettik. Akşamları, lezzetli Fransız ekmeği ve peyniri yedik. Unutulmaz bir yolculuktu.","qs":[{"en":"What is the capital of France?","tr":"Fransa'nın başkenti nedir?","opts":["London","Rome","Berlin","Paris"],"a":3},{"en":"What did they climb?","tr":"Neye tırmandılar?","opts":["The Eiffel Tower","A mountain","A church tower","A hill"],"a":0},{"en":"What did they eat in the evenings?","tr":"Akşamları ne yediler?","opts":["Pizza and pasta","French bread and cheese","Rice and fish","Only fruit"],"a":1}]},
+ {"title":"📖 The Water Cycle","text":"Water on Earth moves in a cycle. The sun heats the ocean, and water turns into vapor. The vapor rises and forms clouds in the sky. When the clouds get heavy, rain falls back to the ground. This water flows into rivers and returns to the ocean again.","tr":"Dünya'daki su bir döngü içinde hareket eder. Güneş okyanusu ısıtır ve su buhara dönüşür. Buhar yükselir ve gökyüzünde bulutlar oluşturur. Bulutlar ağırlaştığında, yağmur tekrar yere düşer. Bu su nehirlere akar ve tekrar okyanusa döner.","qs":[{"en":"What heats the ocean?","tr":"Okyanusu ne ısıtır?","opts":["The moon","The wind","The sun","The rain"],"a":2},{"en":"What do clouds do when they get heavy?","tr":"Bulutlar ağırlaştığında ne yapar?","opts":["Disappear","Turn into snow only","Fly away","Turn into rain"],"a":3},{"en":"Where does the water go after it rains?","tr":"Yağmurdan sonra su nereye gider?","opts":["Into rivers and back to the ocean","It stays in the sky","Into the ground forever","Nowhere"],"a":0}]},
+ {"title":"📖 The Big Storm","text":"Dark clouds covered the sky yesterday afternoon. The wind grew stronger, and thunder rumbled loudly. Suddenly, heavy rain poured down on the town. People closed their windows and stayed inside. By evening, the storm passed, and a bright rainbow appeared.","tr":"Dün öğleden sonra gökyüzünü kara bulutlar kapladı. Rüzgar güçlendi ve gök gürültüsü yüksek sesle gürledi. Aniden, kasabaya şiddetli bir yağmur boşaldı. İnsanlar pencerelerini kapattı ve içeride kaldı. Akşama doğru fırtına geçti ve parlak bir gökkuşağı belirdi.","qs":[{"en":"What covered the sky yesterday afternoon?","tr":"Dün öğleden sonra gökyüzünü ne kapladı?","opts":["Snow","Dark clouds","Birds","Smoke"],"a":1},{"en":"What did people do during the storm?","tr":"İnsanlar fırtına sırasında ne yaptı?","opts":["Went outside","Played in the rain","Closed windows and stayed inside","Left the town"],"a":2},{"en":"What appeared after the storm passed?","tr":"Fırtına geçtikten sonra ne belirdi?","opts":["The sun only","Another storm","Snow","A rainbow"],"a":3}]},
+ {"title":"📖 Best Friends Forever","text":"Deniz and Mia have been best friends since kindergarten. They sit together at school and share their lunch every day. On weekends, they ride bicycles in the park. When Deniz was sick last month, Mia visited her every afternoon. True friends always take care of each other.","tr":"Deniz ve Mia anaokulundan beri en iyi arkadaştır. Okulda birlikte otururlar ve her gün öğle yemeklerini paylaşırlar. Hafta sonları parkta bisiklet sürerler. Geçen ay Deniz hasta olduğunda, Mia her öğleden sonra onu ziyaret etti. Gerçek arkadaşlar her zaman birbirine bakar.","qs":[{"en":"Since when have Deniz and Mia been friends?","tr":"Deniz ve Mia ne zamandan beri arkadaş?","opts":["Since kindergarten","Since high school","Since last year","Since summer"],"a":0},{"en":"What do they do on weekends?","tr":"Hafta sonları ne yaparlar?","opts":["Watch TV","Ride bicycles in the park","Study math","Cook dinner"],"a":1},{"en":"Who visited Deniz when she was sick?","tr":"Deniz hasta olduğunda onu kim ziyaret etti?","opts":["Her teacher","Her mother","Mia","Her brother"],"a":2}]},
+ {"title":"📖 Painting Pictures","text":"Zeynep loves painting pictures in her free time. She paints flowers, animals, and beautiful sunsets. Her favorite colors are orange and purple. Last month, her painting won first prize at the school art show. Now she dreams of becoming a famous artist.","tr":"Zeynep boş zamanlarında resim yapmayı sever. Çiçekler, hayvanlar ve güzel gün batımları resmeder. En sevdiği renkler turuncu ve mordur. Geçen ay, tablosu okul sanat sergisinde birincilik ödülü kazandı. Şimdi ünlü bir ressam olmayı hayal ediyor.","qs":[{"en":"What are Zeynep's favorite colors?","tr":"Zeynep'in en sevdiği renkler nelerdir?","opts":["Red and blue","Black and white","Green and yellow","Orange and purple"],"a":3},{"en":"What did her painting win?","tr":"Tablosu ne kazandı?","opts":["First prize","Nothing","Second prize","A trip"],"a":0},{"en":"What does Zeynep dream of becoming?","tr":"Zeynep ne olmayı hayal ediyor?","opts":["A doctor","A famous artist","A teacher","A singer"],"a":1}]},
+ {"title":"📖 The Brave Firefighter","text":"Mr. Aydın works as a firefighter in the city. He wears a heavy uniform and a strong helmet. Yesterday, he helped save a cat from a tall tree. He also teaches children about fire safety at schools. Mr. Aydın says helping people is the best part of his job.","tr":"Bay Aydın şehirde itfaiyeci olarak çalışıyor. Ağır bir üniforma ve sağlam bir kask giyiyor. Dün, yüksek bir ağaçtan bir kediyi kurtarmaya yardım etti. Ayrıca okullarda çocuklara yangın güvenliğini öğretiyor. Bay Aydın, insanlara yardım etmenin işinin en güzel yanı olduğunu söylüyor.","qs":[{"en":"What is Mr. Aydın's job?","tr":"Bay Aydın'ın mesleği nedir?","opts":["Teacher","Doctor","Firefighter","Driver"],"a":2},{"en":"What did he save yesterday?","tr":"Dün neyi kurtardı?","opts":["A dog","A bird","A child","A cat"],"a":3},{"en":"What does he teach children?","tr":"Çocuklara ne öğretiyor?","opts":["Fire safety","Swimming","Cooking","Math"],"a":0}]},
+ {"title":"📖 The Rainforest","text":"The Amazon rainforest is home to millions of plants and animals. It is located mostly in Brazil, in South America. Tall trees form a thick green roof called the canopy. Colorful parrots and monkeys live among the branches. Scientists say the rainforest produces a lot of the world's oxygen.","tr":"Amazon yağmur ormanı, milyonlarca bitki ve hayvana ev sahipliği yapar. Çoğunlukla Güney Amerika'da, Brezilya'da bulunur. Uzun ağaçlar tepe örtüsü denilen kalın yeşil bir çatı oluşturur. Renkli papağanlar ve maymunlar dallar arasında yaşar. Bilim insanları, yağmur ormanının dünyanın oksijeninin büyük bir bölümünü ürettiğini söylüyor.","qs":[{"en":"Where is the Amazon rainforest mostly located?","tr":"Amazon yağmur ormanı çoğunlukla nerede bulunur?","opts":["Africa","Brazil","Asia","Australia"],"a":1},{"en":"What is the thick green roof called?","tr":"Kalın yeşil çatıya ne denir?","opts":["The floor","The root","The canopy","The trunk"],"a":2},{"en":"What does the rainforest produce a lot of?","tr":"Yağmur ormanı neyi bol miktarda üretir?","opts":["Water","Sand","Salt","Oxygen"],"a":3}]},
+ {"title":"📖 The Moon Landing","text":"In 1969, astronauts traveled to the moon for the first time. Neil Armstrong was the first person to walk on its surface. He said famous words as he stepped onto the ground. Millions of people watched the event on television. This mission changed how humans see space forever.","tr":"1969'da, astronotlar ilk kez Ay'a seyahat etti. Neil Armstrong, yüzeyinde yürüyen ilk kişiydi. Yere adım atarken ünlü sözler söyledi. Milyonlarca insan olayı televizyondan izledi. Bu görev, insanların uzayı görme biçimini sonsuza dek değiştirdi.","qs":[{"en":"In what year did the moon landing happen?","tr":"Ay'a iniş hangi yıl gerçekleşti?","opts":["1969","1959","1979","1989"],"a":0},{"en":"Who was the first person to walk on the moon?","tr":"Ay'da yürüyen ilk kişi kimdi?","opts":["Buzz Aldrin","Neil Armstrong","Yuri Gagarin","John Glenn"],"a":1},{"en":"How did people watch the event?","tr":"İnsanlar olayı nasıl izledi?","opts":["On the radio","In newspapers","On television","In person"],"a":2}]},
+ {"title":"📖 The Great Wall","text":"The Great Wall of China stretches thousands of kilometers. Ancient rulers built it to protect their land from invaders. Workers used stone, brick, and wood to build the wall. Today, tourists from all over the world climb its old steps. It remains one of the most famous structures on Earth.","tr":"Çin Seddi binlerce kilometre boyunca uzanır. Antik hükümdarlar, topraklarını istilacılardan korumak için onu inşa etti. İşçiler duvarı inşa etmek için taş, tuğla ve tahta kullandı. Bugün, dünyanın her yerinden turistler onun eski basamaklarına tırmanıyor. Dünyadaki en ünlü yapılardan biri olmaya devam ediyor.","qs":[{"en":"Why did ancient rulers build the wall?","tr":"Antik hükümdarlar duvarı neden inşa etti?","opts":["For decoration","To trade goods","For fun","To protect their land"],"a":3},{"en":"What materials did workers use?","tr":"İşçiler hangi malzemeleri kullandı?","opts":["Stone, brick, and wood","Glass and metal","Plastic","Ice"],"a":0},{"en":"Who climbs the wall's steps today?","tr":"Bugün duvarın basamaklarına kim tırmanıyor?","opts":["Only soldiers","Tourists from all over the world","Only children","No one"],"a":1}]},
+ {"title":"📖 Robots at Home","text":"In the future, robots may help us with many daily tasks. Some robots already clean floors and wash windows. Other robots can cook simple meals in the kitchen. Engineers are working to make robots smarter and safer. Many people wonder how robots will change our lives.","tr":"Gelecekte, robotlar birçok günlük görevde bize yardımcı olabilir. Bazı robotlar zaten zemin temizliyor ve pencere yıkıyor. Diğer robotlar mutfakta basit yemekler pişirebilir. Mühendisler robotları daha akıllı ve daha güvenli yapmak için çalışıyor. Birçok insan robotların hayatımızı nasıl değiştireceğini merak ediyor.","qs":[{"en":"What do some robots already do?","tr":"Bazı robotlar şimdiden ne yapıyor?","opts":["Fly airplanes","Teach math","Clean floors and wash windows","Drive trains"],"a":2},{"en":"What are engineers working on?","tr":"Mühendisler ne üzerinde çalışıyor?","opts":["Making robots cheaper only","Making robots bigger","Stopping robot research","Making robots smarter and safer"],"a":3},{"en":"What do many people wonder about?","tr":"Birçok insan ne merak ediyor?","opts":["How robots will change our lives","How to build a house","How to cook rice","How to swim"],"a":0}]},
+ {"title":"📖 New Year's Eve","text":"Every December 31st, my family celebrates New Year's Eve together. We cook a big dinner and decorate the living room with lights. At midnight, we watch fireworks light up the dark sky. Everyone hugs and wishes each other a happy new year. It is my favorite night of the whole year.","tr":"Her yıl 31 Aralık'ta ailem birlikte yılbaşını kutlar. Büyük bir akşam yemeği pişiririz ve oturma odasını ışıklarla süsleriz. Gece yarısı, havai fişeklerin karanlık gökyüzünü aydınlatmasını izleriz. Herkes sarılır ve birbirine mutlu yıllar diler. Bu, tüm yılın en sevdiğim gecesidir.","qs":[{"en":"When does the family celebrate New Year's Eve?","tr":"Aile yılbaşını ne zaman kutlar?","opts":["January 1st","December 31st","December 25th","November 30th"],"a":1},{"en":"What do they watch at midnight?","tr":"Gece yarısı ne izlerler?","opts":["A movie","The news","Fireworks","A concert"],"a":2},{"en":"What do they decorate with?","tr":"Neyle süslerler?","opts":["Flowers","Balloons","Candles only","Lights"],"a":3}]},
+ {"title":"📖 Venice, the Water City","text":"Venice is a unique city built on many small islands in Italy. Instead of cars, people travel by boats called gondolas. Beautiful old buildings stand right next to the water. Tourists love to walk across the many bridges in the city. Every year, rising water sometimes floods the streets.","tr":"Venedik, İtalya'da birçok küçük ada üzerine kurulmuş eşsiz bir şehirdir. Arabalar yerine, insanlar gondol adı verilen teknelerle seyahat eder. Güzel eski binalar suyun hemen yanında durur. Turistler şehirdeki birçok köprüden yürümeyi sever. Her yıl, yükselen su bazen sokakları su altında bırakır.","qs":[{"en":"How do people travel in Venice?","tr":"İnsanlar Venedik'te nasıl seyahat eder?","opts":["By boats called gondolas","By car","By train","By bicycle"],"a":0},{"en":"What do tourists love to walk across?","tr":"Turistler neyin üzerinden yürümeyi sever?","opts":["Fields","Bridges","Mountains","Deserts"],"a":1},{"en":"What sometimes happens to the streets?","tr":"Sokaklara bazen ne olur?","opts":["They get painted","They disappear","They flood","They get wider"],"a":2}]},
+ {"title":"📖 The Deep Blue Sea","text":"Oceans cover more than seventy percent of the Earth's surface. Deep under the water, sunlight cannot reach the ocean floor. Strange creatures like anglerfish live in this dark, cold world. Some fish even make their own light to see. Scientists still explore the ocean to discover new species.","tr":"Okyanuslar, Dünya'nın yüzeyinin yüzde yetmişten fazlasını kaplar. Suyun derinliklerinde, güneş ışığı okyanus tabanına ulaşamaz. Fener balığı gibi garip yaratıklar bu karanlık, soğuk dünyada yaşar. Bazı balıklar görebilmek için kendi ışıklarını bile üretir. Bilim insanları yeni türler keşfetmek için okyanusu hala keşfediyor.","qs":[{"en":"How much of Earth's surface do oceans cover?","tr":"Okyanuslar Dünya yüzeyinin ne kadarını kaplar?","opts":["Ten percent","Exactly fifty percent","Twenty percent","More than seventy percent"],"a":3},{"en":"Why can't sunlight reach the ocean floor?","tr":"Güneş ışığı neden okyanus tabanına ulaşamaz?","opts":["It is too far and deep","There is no sun","Fish block it","It is too warm"],"a":0},{"en":"What do some fish do to see in the dark?","tr":"Bazı balıklar karanlıkta görmek için ne yapar?","opts":["They close their eyes","They make their own light","They swim faster","They sleep"],"a":1}]},
+ {"title":"📖 The First Telephone","text":"Alexander Graham Bell invented the telephone in 1876. Before this invention, people sent messages by letter or telegraph. Bell's telephone let people talk to each other from far away. His famous first words were spoken to his assistant, Watson. Today, phones are much smaller and far more powerful.","tr":"Alexander Graham Bell, telefonu 1876'da icat etti. Bu icattan önce, insanlar mesajları mektup veya telgrafla gönderirdi. Bell'in telefonu, insanların birbirleriyle uzaktan konuşmasını sağladı. Ünlü ilk sözleri asistanı Watson'a söylendi. Bugün, telefonlar çok daha küçük ve çok daha güçlü.","qs":[{"en":"Who invented the telephone?","tr":"Telefonu kim icat etti?","opts":["Thomas Edison","Isaac Newton","Alexander Graham Bell","Albert Einstein"],"a":2},{"en":"How did people send messages before the telephone?","tr":"İnsanlar telefondan önce mesajları nasıl gönderirdi?","opts":["By email","By radio","By phone call","By letter or telegraph"],"a":3},{"en":"Who did Bell speak his first words to?","tr":"Bell ilk sözlerini kime söyledi?","opts":["His assistant, Watson","His mother","A stranger","A reporter"],"a":0}]},
+ {"title":"📖 The Young Violinist","text":"Elif started learning the violin when she was six years old. She practices every day after school for thirty minutes. Her music teacher says she has a natural talent. Last week, she performed a solo at the school concert. The audience clapped loudly when the song ended.","tr":"Elif altı yaşındayken keman çalmayı öğrenmeye başladı. Okuldan sonra her gün otuz dakika pratik yapar. Müzik öğretmeni, onun doğal bir yeteneği olduğunu söylüyor. Geçen hafta, okul konserinde solo bir performans sergiledi. Şarkı bittiğinde, seyirciler yüksek sesle alkışladı.","qs":[{"en":"How old was Elif when she started the violin?","tr":"Elif kemana başladığında kaç yaşındaydı?","opts":["Ten","Six","Four","Eight"],"a":1},{"en":"How long does she practice each day?","tr":"Her gün ne kadar süre pratik yapar?","opts":["Ten minutes","Two hours","Thirty minutes","One hour"],"a":2},{"en":"What happened when the song ended?","tr":"Şarkı bittiğinde ne oldu?","opts":["Everyone left","It started raining","Nothing happened","The audience clapped loudly"],"a":3}]},
+ {"title":"📖 The Museum Visit","text":"Our class visited an art museum on Friday. We saw paintings from famous artists around the world. Our guide explained the story behind each picture. My favorite painting showed a peaceful garden full of flowers. After the tour, we drew our own pictures in the museum's art room.","tr":"Sınıfımız cuma günü bir sanat müzesini ziyaret etti. Dünyanın dört bir yanından ünlü sanatçıların tablolarını gördük. Rehberimiz her resmin arkasındaki hikayeyi anlattı. En sevdiğim tablo, çiçeklerle dolu huzurlu bir bahçeyi gösteriyordu. Turdan sonra, müzenin sanat odasında kendi resimlerimizi çizdik.","qs":[{"en":"When did the class visit the museum?","tr":"Sınıf müzeyi ne zaman ziyaret etti?","opts":["Friday","Monday","Sunday","Wednesday"],"a":0},{"en":"What did the favorite painting show?","tr":"En sevdiği tablo neyi gösteriyordu?","opts":["A city street","A peaceful garden","A stormy sea","A mountain"],"a":1},{"en":"What did the class do after the tour?","tr":"Sınıf turdan sonra ne yaptı?","opts":["Went home","Ate lunch","Drew their own pictures","Watched a movie"],"a":2}]},
+ {"title":"📖 The Olympic Games","text":"The Olympic Games happen every four years in a different country. Athletes from all around the world compete in many sports. Winners receive gold, silver, or bronze medals. The games began in ancient Greece thousands of years ago. Millions of fans watch the events on television and online.","tr":"Olimpiyat Oyunları her dört yılda bir farklı bir ülkede gerçekleşir. Dünyanın her yerinden sporcular birçok spor dalında yarışır. Kazananlar altın, gümüş veya bronz madalya alır. Oyunlar binlerce yıl önce antik Yunanistan'da başladı. Milyonlarca hayran etkinlikleri televizyondan ve internetten izler.","qs":[{"en":"How often do the Olympic Games happen?","tr":"Olimpiyat Oyunları ne sıklıkla gerçekleşir?","opts":["Every two years","Every year","Every ten years","Every four years"],"a":3},{"en":"Where did the games begin?","tr":"Oyunlar nerede başladı?","opts":["Ancient Greece","Ancient Rome","Ancient Egypt","Ancient China"],"a":0},{"en":"What do winners receive?","tr":"Kazananlar ne alır?","opts":["Money only","Medals","Trophies only","Certificates"],"a":1}]},
+ {"title":"📖 The Lantern Festival","text":"Every year, a beautiful lantern festival takes place in Taiwan. People write their wishes on paper lanterns. At night, they release the lanterns into the dark sky. Hundreds of glowing lights float upward like stars. It is a magical sight that visitors never forget.","tr":"Her yıl, Tayvan'da güzel bir fener festivali düzenlenir. İnsanlar dileklerini kağıt fenerlere yazar. Gece, fenerleri karanlık gökyüzüne bırakırlar. Yüzlerce parlayan ışık yıldızlar gibi yukarı doğru süzülür. Ziyaretçilerin asla unutmadığı büyülü bir manzaradır.","qs":[{"en":"Where does the lantern festival take place?","tr":"Fener festivali nerede düzenlenir?","opts":["Japan","Korea","Taiwan","Thailand"],"a":2},{"en":"What do people write on the lanterns?","tr":"İnsanlar fenerlere ne yazar?","opts":["Their names","Poems","Nothing","Their wishes"],"a":3},{"en":"When do people release the lanterns?","tr":"Fenerleri ne zaman bırakırlar?","opts":["At night","At noon","In the morning","At sunrise"],"a":0}]},
+ {"title":"📖 Grandpa's Soup","text":"Every winter, my grandpa cooks his famous vegetable soup. He uses carrots, potatoes, onions, and fresh herbs from his garden. The soup cooks slowly on the stove for two hours. Its warm smell fills the whole kitchen. We always ask for a second bowl.","tr":"Her kış, büyükbabam ünlü sebze çorbasını pişirir. Bahçesinden havuç, patates, soğan ve taze otlar kullanır. Çorba ocakta yavaşça iki saat pişer. Sıcak kokusu tüm mutfağı doldurur. Her zaman ikinci bir kase isteriz.","qs":[{"en":"What season does grandpa cook the soup?","tr":"Büyükbabam çorbayı hangi mevsimde pişirir?","opts":["Summer","Winter","Spring","Autumn"],"a":1},{"en":"How long does the soup cook?","tr":"Çorba ne kadar süre pişer?","opts":["Thirty minutes","One hour","Two hours","All day"],"a":2},{"en":"Where do the herbs come from?","tr":"Otlar nereden gelir?","opts":["The market","A friend","A store","His garden"],"a":3}]},
+ {"title":"📖 Growing Tomatoes","text":"This spring, I planted tomato seeds in my backyard. I water them every morning before school. The little green plants grew taller each week. Small yellow flowers appeared before the tomatoes formed. Now, bright red tomatoes hang from every branch.","tr":"Bu ilkbahar, arka bahçeme domates tohumları ektim. Okuldan önce her sabah onları suluyorum. Küçük yeşil bitkiler her hafta biraz daha uzadı. Domatesler oluşmadan önce küçük sarı çiçekler açtı. Şimdi, her dalda parlak kırmızı domatesler asılı.","qs":[{"en":"When did the speaker plant the seeds?","tr":"Konuşmacı tohumları ne zaman ekti?","opts":["This spring","Last winter","This summer","Last autumn"],"a":0},{"en":"What color were the flowers?","tr":"Çiçekler ne renkti?","opts":["Red","Yellow","White","Blue"],"a":1},{"en":"What color are the tomatoes now?","tr":"Domatesler şimdi ne renk?","opts":["Green","Orange","Bright red","Purple"],"a":2}]},
+ {"title":"📖 Autumn Leaves","text":"In autumn, the leaves on the trees change color. Green leaves slowly turn yellow, orange, and red. Cool wind blows the colorful leaves onto the ground. Children love to jump into big piles of leaves. Soon after, the trees stand bare until spring returns.","tr":"Sonbaharda, ağaçlardaki yapraklar renk değiştirir. Yeşil yapraklar yavaşça sarı, turuncu ve kırmızıya döner. Serin rüzgar renkli yaprakları yere savurur. Çocuklar büyük yaprak yığınlarına atlamayı sever. Kısa süre sonra, ilkbahar gelene kadar ağaçlar çıplak kalır.","qs":[{"en":"What happens to green leaves in autumn?","tr":"Sonbaharda yeşil yapraklara ne olur?","opts":["They stay green","They disappear","They turn blue","They turn yellow, orange, and red"],"a":3},{"en":"What do children love to jump into?","tr":"Çocuklar neye atlamayı sever?","opts":["Piles of leaves","Piles of snow","Puddles","Sand"],"a":0},{"en":"When do the trees stand bare?","tr":"Ağaçlar ne zaman çıplak kalır?","opts":["Until summer","Until spring returns","Forever","Until winter ends only"],"a":1}]},
+ {"title":"📖 A Visit to the Doctor","text":"Yusuf felt sick and had a high fever last night. His mother took him to see the doctor this morning. The doctor listened to his heart and checked his throat. She said Yusuf had a small cold and needed rest. Yusuf stayed home from school and drank warm tea all day.","tr":"Yusuf dün gece kendini hasta hissetti ve yüksek ateşi vardı. Annesi bu sabah onu doktora götürdü. Doktor kalbini dinledi ve boğazını kontrol etti. Yusuf'un küçük bir soğuk algınlığı olduğunu ve dinlenmesi gerektiğini söyledi. Yusuf okula gitmedi ve tüm gün ılık çay içti.","qs":[{"en":"What did Yusuf have last night?","tr":"Yusuf'un dün gece nesi vardı?","opts":["A headache","A broken arm","A high fever","A toothache"],"a":2},{"en":"What did the doctor check?","tr":"Doktor neyi kontrol etti?","opts":["His eyes","His teeth","His legs","His heart and throat"],"a":3},{"en":"What did Yusuf drink all day?","tr":"Yusuf tüm gün ne içti?","opts":["Warm tea","Cold water","Milk","Juice"],"a":0}]},
+ {"title":"📖 Lost in the Forest","text":"Two hikers, Sam and Leo, walked deep into the forest on a sunny morning. By afternoon, thick clouds hid the sun, and they lost their path. Sam remembered a survival tip and looked for moss on the trees to find north. They followed a small stream, hoping it would lead to a village. After two tiring hours, they finally reached a road and found help.","tr":"İki gezgin, Sam ve Leo, güneşli bir sabahta ormanın derinliklerine yürüdü. Öğleden sonraya doğru, kalın bulutlar güneşi gizledi ve yollarını kaybettiler. Sam bir hayatta kalma ipucunu hatırladı ve kuzeyi bulmak için ağaçlardaki yosunlara baktı. Bir köye çıkacağını umarak küçük bir dereyi takip ettiler. Yorucu iki saatin ardından, sonunda bir yola ulaştılar ve yardım buldular.","qs":[{"en":"When did Sam and Leo lose their path?","tr":"Sam ve Leo yollarını ne zaman kaybetti?","opts":["In the morning","By afternoon","At night","Before sunrise"],"a":1},{"en":"What did Sam look for to find north?","tr":"Sam kuzeyi bulmak için neye baktı?","opts":["Stars","A map","Moss on the trees","A compass"],"a":2},{"en":"What did they follow to find help?","tr":"Yardım bulmak için neyi takip ettiler?","opts":["A road sign","Bird sounds","Footprints","A small stream"],"a":3}]},
+ {"title":"📖 The Missing Cat","text":"One morning, Mrs. Kaya noticed her cat Pamuk was missing. She searched the garden and called his name many times. Her neighbor said he saw a white cat near the old bakery. Mrs. Kaya walked there and heard a soft meow behind some boxes. She found Pamuk safe and carried him happily home.","tr":"Bir sabah, Bayan Kaya kedisi Pamuk'un kayıp olduğunu fark etti. Bahçeyi aradı ve adını defalarca seslendi. Komşusu, eski fırının yakınında beyaz bir kedi gördüğünü söyledi. Bayan Kaya oraya yürüdü ve bazı kutuların arkasında hafif bir miyavlama duydu. Pamuk'u güvende buldu ve onu mutlu bir şekilde eve taşıdı.","qs":[{"en":"What is the cat's name?","tr":"Kedinin adı nedir?","opts":["Pamuk","Tekir","Boncuk","Minnoş"],"a":0},{"en":"Where did the neighbor see a white cat?","tr":"Komşu beyaz kediyi nerede gördü?","opts":["Near the school","Near the old bakery","In the park","At the market"],"a":1},{"en":"Where was Pamuk found?","tr":"Pamuk nerede bulundu?","opts":["Under a car","On the roof","Behind some boxes","In a tree"],"a":2}]},
+ {"title":"📖 The Little Dragon","text":"In a faraway kingdom, a small dragon named Ember lived in a quiet cave. Unlike other dragons, Ember was afraid of fire and could not breathe flames. The other dragons laughed at him every day. One winter night, Ember's warm body saved a lost village from freezing. After that, everyone respected him as a true hero.","tr":"Uzak bir krallıkta, Ember adında küçük bir ejderha sessiz bir mağarada yaşardı. Diğer ejderhaların aksine, Ember ateşten korkardı ve alev püskürtemezdi. Diğer ejderhalar her gün ona gülerdi. Bir kış gecesi, Ember'ın sıcak vücudu kaybolmuş bir köyü donmaktan kurtardı. Bundan sonra, herkes ona gerçek bir kahraman olarak saygı duydu.","qs":[{"en":"What was Ember afraid of?","tr":"Ember neden korkardı?","opts":["Water","Dark","Heights","Fire"],"a":3},{"en":"What did the other dragons do to Ember?","tr":"Diğer ejderhalar Ember'a ne yaptı?","opts":["Laughed at him","Helped him","Ignored him completely","Taught him"],"a":0},{"en":"How did Ember save the village?","tr":"Ember köyü nasıl kurtardı?","opts":["With his fire breath","With his warm body","With his strength","With his speed"],"a":1}]},
+ {"title":"📖 Morning Routine","text":"Every morning, Can wakes up at seven o'clock. He brushes his teeth and eats a healthy breakfast. After breakfast, he packs his school bag carefully. He walks to school with his best friend, Ali. Can says a good morning routine makes his whole day better.","tr":"Her sabah, Can saat yedide uyanır. Dişlerini fırçalar ve sağlıklı bir kahvaltı yer. Kahvaltıdan sonra, okul çantasını dikkatlice hazırlar. En iyi arkadaşı Ali ile okula yürür. Can, iyi bir sabah rutininin tüm gününü daha iyi yaptığını söylüyor.","qs":[{"en":"What time does Can wake up?","tr":"Can saat kaçta uyanır?","opts":["Six o'clock","Eight o'clock","Seven o'clock","Nine o'clock"],"a":2},{"en":"What does Can do after breakfast?","tr":"Can kahvaltıdan sonra ne yapar?","opts":["Watches TV","Plays games","Goes back to sleep","Packs his school bag"],"a":3},{"en":"Who does Can walk to school with?","tr":"Can okula kiminle yürür?","opts":["Ali","His mother","His sister","Alone"],"a":0}]},
+ {"title":"📖 Penguins of Antarctica","text":"Penguins are birds that cannot fly, but they swim very well. Emperor penguins live in Antarctica, one of the coldest places on Earth. They huddle together in large groups to stay warm. Father penguins often keep the eggs warm on their feet. These amazing birds can survive extremely harsh winters.","tr":"Penguenler uçamayan ama çok iyi yüzen kuşlardır. İmparator penguenleri, Dünya'nın en soğuk yerlerinden biri olan Antarktika'da yaşar. Sıcak kalmak için büyük gruplar halinde bir araya toplanırlar. Baba penguenler genellikle yumurtaları ayaklarının üzerinde sıcak tutar. Bu şaşırtıcı kuşlar aşırı sert kışlarda hayatta kalabilir.","qs":[{"en":"Can penguins fly?","tr":"Penguenler uçabilir mi?","opts":["Yes, very high","No, but they swim well","Yes, a little","No, and they cannot swim"],"a":1},{"en":"Where do emperor penguins live?","tr":"İmparator penguenleri nerede yaşar?","opts":["The Arctic","Africa","Antarctica","South America"],"a":2},{"en":"Who keeps the eggs warm?","tr":"Yumurtaları kim sıcak tutar?","opts":["Mother penguins","No one","Other birds","Father penguins"],"a":3}]},
+ {"title":"📖 How Volcanoes Erupt","text":"Deep inside the Earth, extremely hot melted rock is called magma. Pressure slowly builds up beneath the Earth's crust over time. When the pressure becomes too strong, the magma pushes upward through a volcano. During an eruption, hot lava, ash, and gas shoot into the air. Scientists study volcanoes carefully to predict future eruptions.","tr":"Dünya'nın derinliklerinde, son derece sıcak erimiş kayaya magma denir. Zamanla Dünya'nın kabuğunun altında basınç yavaşça birikir. Basınç çok güçlü hale geldiğinde, magma bir volkandan yukarı doğru iter. Bir patlama sırasında, sıcak lav, kül ve gaz havaya fırlar. Bilim insanları gelecekteki patlamaları tahmin etmek için volkanları dikkatle inceler.","qs":[{"en":"What is hot melted rock inside the Earth called?","tr":"Dünya'nın içindeki sıcak erimiş kayaya ne denir?","opts":["Magma","Lava","Ash","Crust"],"a":0},{"en":"What happens when pressure becomes too strong?","tr":"Basınç çok güçlü hale geldiğinde ne olur?","opts":["Nothing changes","The magma pushes upward","The Earth cools down","The volcano disappears"],"a":1},{"en":"Why do scientists study volcanoes?","tr":"Bilim insanları volkanları neden inceler?","opts":["For fun","To build cities near them","To predict future eruptions","To stop earthquakes"],"a":2}]},
+ {"title":"📖 A Desert Camel Ride","text":"Last winter, Mert traveled to the Sahara Desert with his family. They rode camels across the golden sand dunes at sunset. The desert air was surprisingly cool once the sun went down. At night, they slept in a tent and watched thousands of bright stars. Mert said it was the most peaceful trip of his life.","tr":"Geçen kış, Mert ailesiyle birlikte Sahra Çölü'ne seyahat etti. Gün batımında altın renkli kum tepelerinde develerle gezdiler. Güneş battıktan sonra çöl havası şaşırtıcı derecede serindi. Gece, bir çadırda uyudular ve binlerce parlak yıldızı izlediler. Mert, bunun hayatının en huzurlu yolculuğu olduğunu söyledi.","qs":[{"en":"Where did Mert travel last winter?","tr":"Mert geçen kış nereye seyahat etti?","opts":["The Amazon rainforest","The Alps","Antarctica","The Sahara Desert"],"a":3},{"en":"What did they ride across the dunes?","tr":"Kum tepelerinde neyle gezdiler?","opts":["Camels","Horses","Bicycles","Cars"],"a":0},{"en":"Where did they sleep at night?","tr":"Gece nerede uyudular?","opts":["In a hotel","In a tent","In a car","Under a tree"],"a":1}]},
+ {"title":"📖 Video Calls with Family","text":"My grandparents live in another country, far away from us. Every Sunday, we make a video call to talk with them. We can see their faces and share our weekly news. My grandmother always asks about my school and my hobbies. Technology helps our family stay close, even from a distance.","tr":"Büyükannem ve büyükbabam başka bir ülkede, bizden çok uzakta yaşıyor. Her pazar, onlarla konuşmak için görüntülü bir arama yapıyoruz. Yüzlerini görebiliyoruz ve haftalık haberlerimizi paylaşıyoruz. Büyükannem her zaman okulumu ve hobilerimi soruyor. Teknoloji, ailemizin uzaktan bile yakın kalmasına yardımcı oluyor.","qs":[{"en":"When does the family make a video call?","tr":"Aile ne zaman görüntülü arama yapar?","opts":["Every Monday","Every Friday","Every Sunday","Every day"],"a":2},{"en":"What does grandmother always ask about?","tr":"Büyükanne her zaman ne hakkında sorar?","opts":["The weather","Politics","Cooking","School and hobbies"],"a":3},{"en":"What helps the family stay close?","tr":"Ailenin yakın kalmasına ne yardımcı olur?","opts":["Technology","Letters","Money","Travel"],"a":0}]},
+ {"title":"📖 Saturn's Rings","text":"Saturn is the sixth planet from the sun and famous for its beautiful rings. The rings are made mostly of ice and rock particles. Some pieces are as small as dust, while others are as big as houses. Saturn also has more than eighty known moons. Scientists continue to study this giant, mysterious planet.","tr":"Satürn, güneşten altıncı gezegendir ve güzel halkalarıyla ünlüdür. Halkalar çoğunlukla buz ve kaya parçacıklarından oluşur. Bazı parçalar toz kadar küçükken, bazıları ev kadar büyüktür. Satürn'ün ayrıca seksenden fazla bilinen uydusu vardır. Bilim insanları bu dev, gizemli gezegeni incelemeye devam ediyor.","qs":[{"en":"Which planet from the sun is Saturn?","tr":"Satürn güneşten kaçıncı gezegendir?","opts":["Fifth","Sixth","Seventh","Fourth"],"a":1},{"en":"What are Saturn's rings mostly made of?","tr":"Satürn'ün halkaları çoğunlukla neden oluşur?","opts":["Gas and dust only","Metal","Ice and rock particles","Water"],"a":2},{"en":"How many known moons does Saturn have?","tr":"Satürn'ün kaç bilinen uydusu var?","opts":["About ten","About thirty","Exactly one hundred","More than eighty"],"a":3}]},
 ];
 var stState=null, stIndex=0;
 function startStory(){
   window._activeSession = {mode:'story', done:false};
-  stState={story:STORIES[stIndex%STORIES.length], qi:0, correct:0, locked:false, results:[]};
+  var nextStory = window.pickUnseen
+    ? window.pickUnseen('story', STORIES, 1, function(st){return st.title;})[0]
+    : STORIES[stIndex%STORIES.length];
+  stState={story:nextStory||STORIES[0], qi:0, correct:0, locked:false, results:[]};
   stIndex++;
   document.getElementById('stTitle').textContent=stState.story.title;
   makeTappable(stState.story.text, document.getElementById('stText'));
@@ -2068,11 +2166,11 @@ var SCRAMBLE_EXTRA = [
 var scState=null;
 function pickScrambleWord(){
   if(Math.random()<0.3){
-    var p=rand(SCRAMBLE_EXTRA);
-    return {w:p[0], hint:p[1], en:p[0].toLowerCase()};
+    var extra = window.pickUnseen ? window.pickUnseen('scramble_extra', SCRAMBLE_EXTRA, 1, function(p){return p[0];})[0] : rand(SCRAMBLE_EXTRA);
+    return {w:extra[0], hint:extra[1], en:extra[0].toLowerCase()};
   }
   var cand=WORDS.filter(function(w){return w[0].length>=4&&w[0].length<=7&&/^[a-z]+$/.test(w[0]);});
-  var c=rand(cand);
+  var c = window.pickUnseen ? window.pickUnseen('scramble', cand, 1, function(w){return w[0];})[0] : rand(cand);
   return {w:c[0].toUpperCase(), hint:'Türkçesi: '+c[1], en:c[0]};
 }
 function startScramble(){
@@ -2114,6 +2212,7 @@ function checkScramble(){
     if(guess===scState.word){
       fb.textContent='🎉 Doğru! '+scState.word+' · +15 XP';
       fb.className='feedback ok';
+      if(window.recordWordResult) window.recordWordResult(scState.en, true);
       sfx('correct'); addXP(15); addLearned(scState.en); scState.correct++;
       setTimeout(function(){
         scState.round++;
@@ -2126,6 +2225,7 @@ function checkScramble(){
     } else {
       fb.textContent='Olmadı, tekrar dene! 🔄';
       fb.className='feedback no';
+      if(window.recordWordResult) window.recordWordResult(scState.en, false);
       sfx('wrong');
       setTimeout(scReset,900);
     }
@@ -2154,7 +2254,7 @@ function startPiano(){
   show('piano');
 }
 function pnNext(){
-  var p=rand(NOTE_WORDS);
+  var p = window.pickUnseen ? window.pickUnseen('piano', NOTE_WORDS, 1, function(x){return x.w;})[0] : rand(NOTE_WORDS);
   pnState.word=p.w; pnState.pos=0;
   document.getElementById('pnRound').textContent=pnState.round+'/3';
   document.getElementById('pnMeaning').textContent=p.m+'  →  '+p.w.length+' nota';
@@ -2182,6 +2282,7 @@ function playKey(note){
     if(pnState.pos===pnState.word.length){
       fb.textContent='🎵 Süper! "'+pnState.word+'" kelimesini çaldın! +20 XP';
       fb.className='feedback ok';
+      if(window.recordWordResult) window.recordWordResult(pnState.word, true);
       addXP(20); addLearned(pnState.word); pnState.correct++;
       var wordNotes=pnState.word.split('');
       wordNotes.forEach(function(n,i){ setTimeout(function(){playTone(n);},500+i*350); });
@@ -2206,6 +2307,82 @@ function pnReset(){
   var fb=document.getElementById('pnFeedback');
   fb.textContent=''; fb.className='feedback';
   renderPnSlots();
+}
+
+/* ================= 15) KELİME TEKRARI (ADAPTİF/SRS) ================= */
+var rvState = null;
+var RV_FORMATS = ['en2tr','tr2en','fillgap'];
+function startReview(){
+  window._activeSession = {mode:'review', done:false};
+  var vocabByEn = window.VOCAB_BY_EN || {};
+  var words = window.getReviewWords ? window.getReviewWords(vocabByEn, 10) : [];
+  show('reviewWords');
+  if(words.length === 0){
+    document.getElementById('rvPlay').classList.add('hidden');
+    document.getElementById('rvEmptyState').classList.remove('hidden');
+    document.getElementById('rvScore').textContent = '✅ 0';
+    return;
+  }
+  document.getElementById('rvPlay').classList.remove('hidden');
+  document.getElementById('rvEmptyState').classList.add('hidden');
+  rvState = {rounds: words, i:0, correct:0, locked:false};
+  renderRv();
+}
+function rvBuildOptions(correctAnswer, field, item){
+  var pool = window.VOCAB || [];
+  var distractors = pick(pool.filter(function(w){return w.en!==item.en;}), 3).map(function(w){return w[field];});
+  return shuffle([correctAnswer].concat(distractors));
+}
+function renderRv(){
+  var s = rvState, item = s.rounds[s.i];
+  document.getElementById('rvScore').textContent = '✅ ' + s.correct;
+  var format = RV_FORMATS[s.i % RV_FORMATS.length];
+  var box = document.getElementById('rvOpts');
+  box.innerHTML = '';
+  s.locked = false;
+  var correctAnswer, opts;
+  if(format === 'en2tr'){
+    document.getElementById('rvHint').textContent = 'TÜRKÇESİNİ SEÇ';
+    document.getElementById('rvQ').textContent = item.en;
+    document.getElementById('rvTr').textContent = '';
+    correctAnswer = item.tr;
+    opts = rvBuildOptions(correctAnswer, 'tr', item);
+  } else if(format === 'tr2en'){
+    document.getElementById('rvHint').textContent = 'İNGİLİZCESİNİ SEÇ';
+    document.getElementById('rvQ').textContent = item.tr;
+    document.getElementById('rvTr').textContent = '';
+    correctAnswer = item.en;
+    opts = rvBuildOptions(correctAnswer, 'en', item);
+  } else {
+    document.getElementById('rvHint').textContent = 'CÜMLEYİ TAMAMLA';
+    var blanked = (item.exEn||item.en).replace(new RegExp('\\b'+item.en+'\\b','i'), '___');
+    document.getElementById('rvQ').textContent = blanked;
+    document.getElementById('rvTr').textContent = item.exTr ? '🇹🇷 ' + item.exTr : '';
+    correctAnswer = item.en;
+    opts = rvBuildOptions(correctAnswer, 'en', item);
+  }
+  opts.forEach(function(o){
+    var b = document.createElement('button'); b.className='opt'; b.textContent = o;
+    b.onclick = function(e){ e.stopPropagation(); rvAnswer(b, o===correctAnswer, item); };
+    box.appendChild(b);
+  });
+}
+function rvAnswer(btn, ok, item){
+  var s = rvState;
+  if(s.locked) return; s.locked = true;
+  btn.classList.add(ok?'correct':'wrong');
+  sfx(ok?'correct':'wrong');
+  if(window.recordWordResult) window.recordWordResult(item.en, ok);
+  if(ok){ s.correct++; addXP(10); addLearned(item.en); }
+  setTimeout(function(){
+    s.i++;
+    if(s.i >= s.rounds.length){
+      var passMark = Math.ceil(s.rounds.length*0.7);
+      if(s.correct >= passMark) sfx('win');
+      var reward = completeGameSession('review', {correct:s.correct, total:s.rounds.length, perfect:s.correct===s.rounds.length});
+      showResult(s.correct>=passMark?'🧠':'💪','Tekrar Tamamlandı!', s.correct+' / '+s.rounds.length+' doğru','+'+(s.correct*10)+' XP', reward);
+    } else renderRv();
+  }, 900);
 }
 
 bootApp();

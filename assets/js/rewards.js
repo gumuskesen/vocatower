@@ -16,6 +16,7 @@
       spellingGamesCompleted: 0,
       puzzlesCompleted: 0,
       rocketWins: 0,
+      reviewGamesCompleted: 0,
       playDates: []
     };
   }
@@ -49,7 +50,8 @@
     spelling: 'spellingGamesCompleted',
     story: 'storiesCompleted',
     crossword: 'puzzlesCompleted',
-    scramble: 'puzzlesCompleted'
+    scramble: 'puzzlesCompleted',
+    review: 'reviewGamesCompleted'
   };
 
   function recordSession(stats, mode, data){

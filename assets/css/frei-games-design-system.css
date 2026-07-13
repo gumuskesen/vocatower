@@ -1,0 +1,617 @@
+/* =====================================================================
+   FREI GAMES — DESIGN SYSTEM
+   Premium stylized clay illustration aesthetic for VocaTower and all
+   future Frei Games products.
+
+   STATUS: Phase 1 — tokens + reusable component classes only.
+   This file is NOT linked from any page yet and does not affect any
+   existing screen. Nothing here changes gameplay, JS state, rewards,
+   XP, gold, badges, tower logic or localStorage.
+
+   NAMING
+   Every token and class is prefixed `fg-` (Frei Games) so this system
+   can be loaded alongside the existing legacy stylesheets (inline
+   <style> in game/index.html and assets/css/landing.css) without any
+   name collision. Those legacy files define their own unprefixed
+   tokens (--bg, --ink, --blue, --card, --radius, --shadow, ...) — this
+   file intentionally never reuses those names. See the Phase 1 report
+   for the migration approach planned for Phase 2+.
+
+   HOW TO READ THIS FILE
+   1. :root tokens, grouped exactly like the brief: color, typography,
+      spacing, radius, shadow, surface, motion.
+   2. Reusable component classes, one section per component family:
+      buttons, cards, dialogs, inputs, progress, badges, coins, xp,
+      icon containers, animations.
+   ===================================================================== */
+
+:root{
+
+  /* ---------------------------------------------------------------
+     COLOR — soft, muted, warm. No pure white, no saturated primaries.
+     --------------------------------------------------------------- */
+
+  /* Base palette (raw hues — prefer the semantic tokens below in components) */
+  --fg-cream:            #FBF3E7;   /* warm app background */
+  --fg-cream-dark:       #F3E6D3;   /* secondary background / section alt */
+  --fg-beige:            #EDE0CB;   /* tertiary background, wells, tracks */
+  --fg-warm-white:       #FFFDF8;   /* card surface (never pure #fff) */
+
+  --fg-terracotta:       #E08A5B;   /* primary accent */
+  --fg-terracotta-dark:  #C96F42;   /* primary accent, pressed/deep */
+  --fg-soft-orange:      #F0A868;   /* warm highlight accent */
+
+  --fg-dusty-blue:       #7FA3B0;   /* secondary accent */
+  --fg-dusty-blue-dark:  #5C8794;   /* secondary accent, pressed/deep */
+
+  --fg-sage:             #8FAE87;   /* tertiary accent / success */
+  --fg-sage-dark:        #6F9268;
+
+  --fg-lavender:         #B3A1C7;   /* quaternary accent */
+  --fg-lavender-dark:    #9483AE;
+
+  --fg-gold:             #E0AE4D;   /* coins, XP, celebratory accents */
+  --fg-gold-dark:        #C08F35;
+
+  --fg-warm-brown:       #6E5540;   /* primary ink / text */
+  --fg-brown-soft:       #9C8069;   /* secondary / muted text */
+  --fg-brown-faint:      #C7B49B;   /* placeholder / disabled text */
+
+  --fg-white:            #FFFFFF;   /* used sparingly: text-on-accent only */
+
+  /* Semantic roles (compose components from these, not raw hues) */
+  --fg-bg-app:           var(--fg-cream);
+  --fg-bg-app-alt:       var(--fg-cream-dark);
+  --fg-bg-surface:       var(--fg-warm-white);
+  --fg-bg-surface-sunken: var(--fg-beige);   /* inset wells: progress track, input */
+
+  --fg-text-primary:     var(--fg-warm-brown);
+  --fg-text-secondary:   var(--fg-brown-soft);
+  --fg-text-faint:       var(--fg-brown-faint);
+  --fg-text-inverse:     var(--fg-white);
+
+  --fg-border-soft:      #E4D6C0;    /* hairline borders on warm surfaces */
+
+  --fg-accent-primary:       var(--fg-terracotta);
+  --fg-accent-primary-deep:  var(--fg-terracotta-dark);
+  --fg-accent-secondary:     var(--fg-dusty-blue);
+  --fg-accent-secondary-deep: var(--fg-dusty-blue-dark);
+  --fg-accent-tertiary:      var(--fg-sage);
+  --fg-accent-tertiary-deep: var(--fg-sage-dark);
+  --fg-accent-quaternary:    var(--fg-lavender);
+  --fg-accent-quaternary-deep: var(--fg-lavender-dark);
+  --fg-accent-gold:          var(--fg-gold);
+  --fg-accent-gold-deep:     var(--fg-gold-dark);
+
+  --fg-state-success:    var(--fg-sage);
+  --fg-state-info:       var(--fg-dusty-blue);
+  --fg-state-warning:    var(--fg-soft-orange);
+  --fg-state-error:      #D9836A;   /* muted terracotta-red, never harsh red */
+
+
+  /* ---------------------------------------------------------------
+     TYPOGRAPHY
+     No external font requests (see project decision to remove Google
+     Fonts). Stack starts with rounded/friendly system-available faces
+     and falls back gracefully. If a bespoke rounded display face
+     (e.g. Fredoka, Baloo 2) is approved later, it must be self-hosted
+     under assets/fonts/ — never linked from a third-party CDN.
+     --------------------------------------------------------------- */
+
+  --fg-font-family:      'Segoe UI Rounded', 'Nunito', 'Quicksand',
+                          Inter, 'Segoe UI', Roboto, Arial, sans-serif;
+  --fg-font-family-display: var(--fg-font-family);
+
+  --fg-font-size-xs:     11px;
+  --fg-font-size-sm:     13px;
+  --fg-font-size-base:   15px;
+  --fg-font-size-md:     17px;
+  --fg-font-size-lg:     20px;
+  --fg-font-size-xl:     26px;
+  --fg-font-size-2xl:    32px;
+  --fg-font-size-display: 40px;
+
+  --fg-font-weight-regular: 500;
+  --fg-font-weight-bold:    700;
+  --fg-font-weight-black:   800;
+
+  --fg-line-height-tight:   1.2;
+  --fg-line-height-normal:  1.5;
+  --fg-line-height-relaxed: 1.7;
+
+
+  /* ---------------------------------------------------------------
+     SPACING — 4px grid, generous by default ("comfortable spacing")
+     --------------------------------------------------------------- */
+
+  --fg-space-1:  4px;
+  --fg-space-2:  8px;
+  --fg-space-3:  12px;
+  --fg-space-4:  16px;
+  --fg-space-5:  20px;
+  --fg-space-6:  24px;
+  --fg-space-8:  32px;
+  --fg-space-10: 40px;
+  --fg-space-12: 48px;
+  --fg-space-16: 64px;
+
+
+  /* ---------------------------------------------------------------
+     BORDER RADIUS — large, soft, rounded. No sharp corners anywhere.
+     --------------------------------------------------------------- */
+
+  --fg-radius-sm:   14px;
+  --fg-radius-md:   20px;
+  --fg-radius-lg:   28px;
+  --fg-radius-xl:   36px;
+  --fg-radius-2xl:  48px;
+  --fg-radius-pill: 999px;
+
+
+  /* ---------------------------------------------------------------
+     SHADOW — soft, warm-toned, layered depth. Never pure black,
+     never hard/glassy. Shadow color is derived from the warm-brown
+     ink so every shadow reads as "clay resting on clay."
+     --------------------------------------------------------------- */
+
+  --fg-shadow-color:      110, 85, 64;  /* rgb channels of --fg-warm-brown, reused via rgba() */
+
+  --fg-shadow-sm:  0 2px 6px  rgba(var(--fg-shadow-color), 0.10);
+  --fg-shadow-md:  0 6px 16px rgba(var(--fg-shadow-color), 0.14);
+  --fg-shadow-lg:  0 14px 32px rgba(var(--fg-shadow-color), 0.16);
+
+  /* Tactile button shadow: a stacked "clay thickness" edge below the
+     button face, giving a pressable, physical feel without gloss. */
+  --fg-shadow-button:        0 6px 0 rgba(var(--fg-shadow-color), 0.22), var(--fg-shadow-sm);
+  --fg-shadow-button-pressed: 0 2px 0 rgba(var(--fg-shadow-color), 0.22);
+
+  /* Inset shadow for sunken wells (progress track, input field) */
+  --fg-shadow-inset: inset 0 2px 5px rgba(var(--fg-shadow-color), 0.14);
+
+
+  /* ---------------------------------------------------------------
+     SURFACE — soft matte gradients standing in for a subtle clay
+     texture. Always low-contrast, always warm, never glossy/chrome.
+     --------------------------------------------------------------- */
+
+  --fg-surface-card:     linear-gradient(180deg, var(--fg-warm-white) 0%, var(--fg-cream) 100%);
+  --fg-surface-sunken:   linear-gradient(180deg, var(--fg-beige) 0%, var(--fg-cream-dark) 100%);
+  --fg-surface-accent-primary:   linear-gradient(160deg, var(--fg-soft-orange) 0%, var(--fg-terracotta) 100%);
+  --fg-surface-accent-secondary: linear-gradient(160deg, #9CC0CC 0%, var(--fg-dusty-blue) 100%);
+  --fg-surface-accent-tertiary:  linear-gradient(160deg, #ADCBA5 0%, var(--fg-sage) 100%);
+  --fg-surface-accent-gold:      linear-gradient(160deg, #F2C875 0%, var(--fg-gold) 100%);
+
+
+  /* ---------------------------------------------------------------
+     MOTION — gentle only. No fast/aggressive/distracting animation.
+     --------------------------------------------------------------- */
+
+  --fg-motion-fast:  120ms;
+  --fg-motion-base:  220ms;
+  --fg-motion-slow:  420ms;
+  --fg-motion-tower: 1200ms;
+
+  --fg-ease-soft:    cubic-bezier(.22, .8, .32, 1);
+  --fg-ease-bounce:  cubic-bezier(.34, 1.56, .64, 1);
+}
+
+
+/* =====================================================================
+   COMPONENT CLASSES
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   Base surface / typography helpers
+   --------------------------------------------------------------------- */
+
+.fg-app{
+  font-family: var(--fg-font-family);
+  background: var(--fg-bg-app);
+  color: var(--fg-text-primary);
+}
+
+.fg-text-secondary{ color: var(--fg-text-secondary); }
+.fg-text-faint{ color: var(--fg-text-faint); }
+.fg-text-inverse{ color: var(--fg-text-inverse); }
+
+.fg-heading{
+  font-family: var(--fg-font-family-display);
+  font-weight: var(--fg-font-weight-black);
+  line-height: var(--fg-line-height-tight);
+  color: var(--fg-text-primary);
+}
+.fg-heading--xl{ font-size: var(--fg-font-size-2xl); }
+.fg-heading--lg{ font-size: var(--fg-font-size-xl); }
+.fg-heading--md{ font-size: var(--fg-font-size-lg); }
+
+
+/* ---------------------------------------------------------------------
+   Buttons — rounded, thick, tactile, elevated with a soft "clay edge"
+   shadow. Press feedback flattens the edge instead of a hard color
+   change, to feel physical rather than flat/generic mobile UI.
+   --------------------------------------------------------------------- */
+
+.fg-btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fg-space-2);
+  font-family: var(--fg-font-family);
+  font-weight: var(--fg-font-weight-bold);
+  font-size: var(--fg-font-size-base);
+  color: var(--fg-text-inverse);
+  background: var(--fg-surface-accent-primary);
+  border: none;
+  border-radius: var(--fg-radius-lg);
+  padding: var(--fg-space-4) var(--fg-space-6);
+  box-shadow: var(--fg-shadow-button);
+  cursor: pointer;
+  transition: transform var(--fg-motion-fast) var(--fg-ease-soft),
+              box-shadow var(--fg-motion-fast) var(--fg-ease-soft);
+}
+.fg-btn:hover{ transform: translateY(-1px); }
+.fg-btn:active{
+  transform: translateY(3px);
+  box-shadow: var(--fg-shadow-button-pressed);
+}
+.fg-btn:focus-visible{
+  outline: 3px solid var(--fg-accent-secondary);
+  outline-offset: 3px;
+}
+
+.fg-btn--secondary{ background: var(--fg-surface-accent-secondary); }
+.fg-btn--tertiary{  background: var(--fg-surface-accent-tertiary); }
+.fg-btn--gold{      background: var(--fg-surface-accent-gold); color: var(--fg-warm-brown); }
+
+.fg-btn--ghost{
+  background: var(--fg-bg-surface);
+  color: var(--fg-text-primary);
+  box-shadow: var(--fg-shadow-sm);
+}
+.fg-btn--ghost:active{ box-shadow: var(--fg-shadow-inset); }
+
+.fg-btn--sm{ padding: var(--fg-space-2) var(--fg-space-4); font-size: var(--fg-font-size-sm); border-radius: var(--fg-radius-md); }
+.fg-btn--lg{ padding: var(--fg-space-5) var(--fg-space-8); font-size: var(--fg-font-size-md); }
+.fg-btn--full{ width: 100%; }
+
+.fg-btn--icon{
+  padding: var(--fg-space-3);
+  border-radius: var(--fg-radius-pill);
+  aspect-ratio: 1;
+}
+
+
+/* ---------------------------------------------------------------------
+   Cards & panels
+   --------------------------------------------------------------------- */
+
+.fg-card{
+  background: var(--fg-surface-card);
+  border: 1px solid var(--fg-border-soft);
+  border-radius: var(--fg-radius-xl);
+  box-shadow: var(--fg-shadow-md);
+  padding: var(--fg-space-6);
+}
+
+.fg-card--flat{
+  box-shadow: none;
+  border: 1px solid var(--fg-border-soft);
+}
+
+.fg-card--sunken{
+  background: var(--fg-surface-sunken);
+  box-shadow: var(--fg-shadow-inset);
+  border: none;
+}
+
+.fg-card--interactive{
+  cursor: pointer;
+  transition: transform var(--fg-motion-base) var(--fg-ease-soft),
+              box-shadow var(--fg-motion-base) var(--fg-ease-soft);
+}
+.fg-card--interactive:hover{
+  transform: translateY(-3px);
+  box-shadow: var(--fg-shadow-lg);
+}
+.fg-card--interactive:active{
+  transform: translateY(0);
+  box-shadow: var(--fg-shadow-sm);
+}
+
+.fg-card-header{
+  display: flex;
+  align-items: center;
+  gap: var(--fg-space-3);
+  margin-bottom: var(--fg-space-4);
+}
+.fg-card-body{ color: var(--fg-text-secondary); font-size: var(--fg-font-size-base); line-height: var(--fg-line-height-normal); }
+.fg-card-footer{ margin-top: var(--fg-space-4); }
+
+
+/* ---------------------------------------------------------------------
+   Dialogs — floating clay-like cards, generous spacing
+   --------------------------------------------------------------------- */
+
+.fg-dialog-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(110, 85, 64, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--fg-space-6);
+  z-index: 200;
+}
+
+.fg-dialog{
+  width: 100%;
+  max-width: 380px;
+  background: var(--fg-surface-card);
+  border-radius: var(--fg-radius-2xl);
+  box-shadow: var(--fg-shadow-lg);
+  padding: var(--fg-space-8) var(--fg-space-6);
+  text-align: center;
+}
+
+.fg-dialog-title{
+  font-family: var(--fg-font-family-display);
+  font-weight: var(--fg-font-weight-black);
+  font-size: var(--fg-font-size-xl);
+  color: var(--fg-text-primary);
+  margin-bottom: var(--fg-space-2);
+}
+
+.fg-dialog-body{
+  color: var(--fg-text-secondary);
+  font-size: var(--fg-font-size-base);
+  line-height: var(--fg-line-height-relaxed);
+  margin-bottom: var(--fg-space-6);
+}
+
+.fg-dialog-actions{
+  display: flex;
+  flex-direction: column;
+  gap: var(--fg-space-3);
+}
+
+
+/* ---------------------------------------------------------------------
+   Inputs — sunken clay wells, soft focus glow
+   --------------------------------------------------------------------- */
+
+.fg-input{
+  width: 100%;
+  font-family: var(--fg-font-family);
+  font-size: var(--fg-font-size-md);
+  color: var(--fg-text-primary);
+  background: var(--fg-bg-surface-sunken);
+  border: 2px solid transparent;
+  border-radius: var(--fg-radius-md);
+  padding: var(--fg-space-4);
+  box-shadow: var(--fg-shadow-inset);
+  transition: border-color var(--fg-motion-fast) var(--fg-ease-soft),
+              box-shadow var(--fg-motion-fast) var(--fg-ease-soft);
+}
+.fg-input::placeholder{ color: var(--fg-text-faint); }
+.fg-input:focus{
+  outline: none;
+  border-color: var(--fg-accent-secondary);
+  box-shadow: var(--fg-shadow-inset), 0 0 0 4px rgba(127, 163, 176, 0.25);
+}
+.fg-input--error{ border-color: var(--fg-state-error); }
+
+.fg-input-label{
+  display: block;
+  font-weight: var(--fg-font-weight-bold);
+  font-size: var(--fg-font-size-sm);
+  color: var(--fg-text-secondary);
+  margin-bottom: var(--fg-space-2);
+}
+
+.fg-input-error-text{
+  color: var(--fg-state-error);
+  font-size: var(--fg-font-size-sm);
+  font-weight: var(--fg-font-weight-bold);
+  margin-top: var(--fg-space-2);
+}
+
+
+/* ---------------------------------------------------------------------
+   Progress bars — rounded capsules, soft inset track, smooth fill
+   --------------------------------------------------------------------- */
+
+.fg-progress{
+  width: 100%;
+}
+.fg-progress-track{
+  height: 18px;
+  background: var(--fg-bg-surface-sunken);
+  border-radius: var(--fg-radius-pill);
+  box-shadow: var(--fg-shadow-inset);
+  overflow: hidden;
+}
+.fg-progress-fill{
+  height: 100%;
+  border-radius: var(--fg-radius-pill);
+  background: var(--fg-surface-accent-tertiary);
+  transition: width var(--fg-motion-tower) var(--fg-ease-soft);
+}
+.fg-progress-fill--gold{ background: var(--fg-surface-accent-gold); }
+.fg-progress-fill--primary{ background: var(--fg-surface-accent-primary); }
+
+.fg-progress-label{
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fg-font-size-sm);
+  font-weight: var(--fg-font-weight-bold);
+  color: var(--fg-text-secondary);
+  margin-bottom: var(--fg-space-2);
+}
+
+
+/* ---------------------------------------------------------------------
+   Badges — sculpted, collectible, toy-like
+   --------------------------------------------------------------------- */
+
+.fg-badge{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fg-space-2);
+  text-align: center;
+  padding: var(--fg-space-4);
+  background: var(--fg-surface-card);
+  border-radius: var(--fg-radius-lg);
+  box-shadow: var(--fg-shadow-md);
+}
+
+.fg-badge-icon-frame{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--fg-radius-pill);
+  background: var(--fg-surface-accent-gold);
+  box-shadow: var(--fg-shadow-sm), inset 0 -4px 0 rgba(var(--fg-shadow-color), 0.18);
+  font-size: 30px;
+}
+
+.fg-badge--locked{
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+.fg-badge--locked .fg-badge-icon-frame{
+  background: var(--fg-bg-surface-sunken);
+  box-shadow: var(--fg-shadow-inset);
+}
+
+.fg-badge-title{ font-weight: var(--fg-font-weight-bold); font-size: var(--fg-font-size-sm); color: var(--fg-text-primary); }
+.fg-badge-desc{ font-size: var(--fg-font-size-xs); color: var(--fg-text-secondary); }
+
+
+/* ---------------------------------------------------------------------
+   Coins — chunky clay tokens
+   --------------------------------------------------------------------- */
+
+.fg-coin{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--fg-radius-pill);
+  background: var(--fg-surface-accent-gold);
+  box-shadow: var(--fg-shadow-sm), inset 0 -3px 0 rgba(var(--fg-shadow-color), 0.2);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.fg-coin--lg{ width: 44px; height: 44px; font-size: 22px; }
+.fg-coin--sm{ width: 20px; height: 20px; font-size: 10px; }
+
+.fg-coin-value{
+  font-weight: var(--fg-font-weight-black);
+  color: var(--fg-accent-gold-deep);
+}
+
+
+/* ---------------------------------------------------------------------
+   XP indicators — soft glowing stars, warm not neon
+   --------------------------------------------------------------------- */
+
+.fg-xp-star{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--fg-radius-pill);
+  background: var(--fg-surface-accent-gold);
+  box-shadow: 0 0 0 6px rgba(224, 174, 77, 0.18);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.fg-xp-pill{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fg-space-2);
+  background: var(--fg-cream-dark);
+  color: var(--fg-accent-gold-deep);
+  font-weight: var(--fg-font-weight-bold);
+  font-size: var(--fg-font-size-sm);
+  padding: var(--fg-space-2) var(--fg-space-4);
+  border-radius: var(--fg-radius-pill);
+  box-shadow: var(--fg-shadow-sm);
+}
+
+
+/* ---------------------------------------------------------------------
+   Icon containers — miniature clay-object feeling, never flat/outline
+   --------------------------------------------------------------------- */
+
+.fg-icon-frame{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--fg-radius-md);
+  background: var(--fg-surface-sunken);
+  box-shadow: var(--fg-shadow-sm);
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.fg-icon-frame--sm{ width: 36px; height: 36px; font-size: 18px; border-radius: var(--fg-radius-sm); }
+.fg-icon-frame--lg{ width: 64px; height: 64px; font-size: 32px; border-radius: var(--fg-radius-lg); }
+
+.fg-icon-frame--primary{   background: var(--fg-surface-accent-primary); }
+.fg-icon-frame--secondary{ background: var(--fg-surface-accent-secondary); }
+.fg-icon-frame--tertiary{  background: var(--fg-surface-accent-tertiary); }
+.fg-icon-frame--gold{      background: var(--fg-surface-accent-gold); }
+
+
+/* ---------------------------------------------------------------------
+   Animations — gentle only. Bind these classes to trigger a keyframe;
+   nothing here runs automatically or aggressively.
+   --------------------------------------------------------------------- */
+
+@keyframes fg-bounce{
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.94); }
+  70%  { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+@keyframes fg-lift{
+  from{ transform: translateY(0); box-shadow: var(--fg-shadow-sm); }
+  to  { transform: translateY(-4px); box-shadow: var(--fg-shadow-lg); }
+}
+@keyframes fg-pop{
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes fg-celebrate{
+  0%   { transform: scale(0) rotate(-12deg); opacity: 0; }
+  55%  { transform: scale(1.12) rotate(6deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes fg-wave{
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-8deg); }
+  75%      { transform: rotate(8deg); }
+}
+
+.fg-anim-bounce{    animation: fg-bounce var(--fg-motion-base) var(--fg-ease-bounce); }
+.fg-anim-lift{      animation: fg-lift var(--fg-motion-base) var(--fg-ease-soft) forwards; }
+.fg-anim-pop{       animation: fg-pop var(--fg-motion-slow) var(--fg-ease-bounce); }
+.fg-anim-celebrate{ animation: fg-celebrate var(--fg-motion-slow) var(--fg-ease-bounce); }
+.fg-anim-wave{      animation: fg-wave var(--fg-motion-slow) var(--fg-ease-soft); }
+
+@media (prefers-reduced-motion: reduce){
+  .fg-anim-bounce, .fg-anim-lift, .fg-anim-pop, .fg-anim-celebrate, .fg-anim-wave,
+  .fg-btn, .fg-card--interactive, .fg-progress-fill{
+    animation: none !important;
+    transition: none !important;
+  }
+}

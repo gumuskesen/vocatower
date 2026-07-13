@@ -3,7 +3,10 @@
   var STORAGE_KEYS = {
     profile: 'vocatower_profile',
     stats: 'vocatower_stats',
-    badges: 'vocatower_badges'
+    badges: 'vocatower_badges',
+    progress: 'vocatower_progress',
+    history: 'vocatower_history',
+    mastery: 'vocatower_mastery'
   };
 
   function safeGet(key, fallback){
@@ -27,7 +30,47 @@
     }
   }
 
+  var SCHEMA_VERSION_KEY = 'vocatower_schema_version';
+  var CURRENT_SCHEMA_VERSION = 2;
+
+  /* Oyuncu ilerlemesini asla silmeyen, yalnızca eksik alanları tamamlayan
+     tek seferlik açılış geçişi. Var olan geçerli veriye asla dokunmaz —
+     yalnızca eksik/bozuk alanları güvenli varsayılanlarla tamamlar. */
+  function migrateSaveData(){
+    try{
+      var version = safeGet(SCHEMA_VERSION_KEY, 0);
+
+      var progress = safeGet(STORAGE_KEYS.progress, null);
+      if(progress && typeof progress === 'object'){
+        var fixed = false;
+        if(typeof progress.xp !== 'number'){ progress.xp = 0; fixed = true; }
+        if(typeof progress.floors !== 'number'){ progress.floors = 0; fixed = true; }
+        if(!Array.isArray(progress.learnedWords)){ progress.learnedWords = []; fixed = true; }
+        if(fixed) safeSet(STORAGE_KEYS.progress, progress);
+      }
+
+      var badges = safeGet(STORAGE_KEYS.badges, null);
+      if(badges !== null && (typeof badges !== 'object' || Array.isArray(badges))){
+        safeSet(STORAGE_KEYS.badges, {});
+      }
+
+      var stats = safeGet(STORAGE_KEYS.stats, null);
+      if(stats && typeof stats === 'object' && !Array.isArray(stats.playDates)){
+        stats.playDates = [];
+        safeSet(STORAGE_KEYS.stats, stats);
+      }
+
+      if(version < CURRENT_SCHEMA_VERSION){
+        safeSet(SCHEMA_VERSION_KEY, CURRENT_SCHEMA_VERSION);
+      }
+    }catch(e){
+      /* Geçiş sırasında bir hata olsa bile mevcut veriye asla dokunulmadı —
+         sessizce vazgeç, oyun normal varsayılanlarla açılmaya devam eder. */
+    }
+  }
+
   window.STORAGE_KEYS = STORAGE_KEYS;
   window.safeGet = safeGet;
   window.safeSet = safeSet;
+  window.migrateSaveData = migrateSaveData;
 })(window);
