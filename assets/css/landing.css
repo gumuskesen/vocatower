@@ -1,0 +1,85 @@
+/* VocaTower — Frei Games tanıtım sitesi (index.html, privacy.html, support.html ortak stili) */
+:root{
+  --navy:#1C2740; --bg:#EDF2F7; --card:#FFFFFF; --ink:#33415C; --ink-soft:#5C6C82;
+  --blue:#4A6E9B; --green:#72B396; --turquoise:#5FBFB5; --purple:#9384C9; --amber:#E0A458;
+  --red-soft:#E08E8E; --radius:22px; --shadow:0 4px 14px rgba(51,65,92,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{font-family:Inter,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;}
+img{max-width:100%;display:block;}
+a{color:inherit;}
+.lp-wrap{width:100%;max-width:1080px;margin:0 auto;padding:0 20px;}
+
+/* ---------- Header ---------- */
+.lp-header{background:var(--card);box-shadow:var(--shadow);position:sticky;top:0;z-index:10;}
+.lp-header .lp-wrap{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;gap:14px;}
+.lp-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;}
+.lp-brand img{height:38px;width:auto;border-radius:10px;}
+.lp-nav{display:flex;gap:18px;font-size:13.5px;font-weight:700;flex-wrap:wrap;}
+.lp-nav a{text-decoration:none;color:var(--ink-soft);}
+.lp-nav a:hover{color:var(--blue);}
+
+/* ---------- Hero ---------- */
+.lp-hero{background:linear-gradient(180deg,var(--navy) 0%,#2E3A5C 100%);color:#fff;padding:56px 0 70px;text-align:center;}
+.lp-hero .lp-logos{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px;}
+.lp-hero .lp-logos img{height:64px;width:auto;border-radius:16px;background:#fff;padding:6px;}
+.lp-tagline{font-size:13px;letter-spacing:.5px;color:#B9C6D6;font-weight:700;margin-bottom:18px;}
+.lp-hero h1{font-size:38px;line-height:1.2;margin-bottom:10px;}
+.lp-hero .lp-sub-tr{font-size:16px;color:#C9D8EA;margin-bottom:22px;max-width:520px;margin-left:auto;margin-right:auto;}
+.lp-hero p.lp-explain{max-width:560px;margin:0 auto 30px;color:#DCE6F2;font-size:14.5px;}
+.lp-cta-row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;align-items:center;}
+.lp-btn-primary{display:inline-block;background:var(--amber);color:#2A1E0A;font-weight:700;font-size:16px;padding:16px 34px;border-radius:18px;text-decoration:none;box-shadow:0 10px 24px rgba(224,164,88,.35);transition:transform .12s;}
+.lp-btn-primary:hover{transform:translateY(-2px);}
+.lp-store-badges{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
+.lp-store-badge{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.25);color:#fff;padding:10px 16px;border-radius:14px;font-size:12.5px;font-weight:700;}
+.lp-store-badge .lp-store-icon{font-size:18px;}
+.lp-store-badge .lp-soon{display:block;font-size:10px;font-weight:600;color:#B9C6D6;letter-spacing:.4px;}
+
+/* ---------- Sections ---------- */
+.lp-section{padding:56px 0;}
+.lp-section h2{font-size:26px;text-align:center;margin-bottom:10px;}
+.lp-section .lp-section-sub{text-align:center;color:var(--ink-soft);font-size:14px;max-width:520px;margin:0 auto 34px;}
+
+.lp-features{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.lp-feature-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;text-align:left;}
+.lp-feature-card .lp-fe-icon{font-size:30px;margin-bottom:10px;}
+.lp-feature-card h3{font-size:15.5px;margin-bottom:6px;}
+.lp-feature-card p{font-size:13px;color:var(--ink-soft);}
+
+.lp-preview-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.lp-preview-card{aspect-ratio:9/16;background:linear-gradient(160deg,var(--blue),var(--purple));border-radius:var(--radius);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;font-weight:700;text-align:center;padding:16px;gap:8px;}
+.lp-preview-card .lp-pv-emoji{font-size:40px;}
+.lp-preview-card span{font-size:12.5px;font-weight:600;opacity:.9;}
+
+.lp-cta-band{background:linear-gradient(90deg,var(--turquoise),var(--blue));border-radius:var(--radius);padding:38px 24px;text-align:center;color:#fff;}
+.lp-cta-band h2{color:#fff;}
+.lp-cta-band .lp-btn-primary{background:#fff;color:var(--navy);box-shadow:0 10px 24px rgba(0,0,0,.15);}
+
+/* ---------- Footer ---------- */
+.lp-footer{background:var(--navy);color:#B9C6D6;padding:36px 0 24px;font-size:13px;}
+.lp-footer .lp-wrap{display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center;}
+.lp-footer-brand{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;}
+.lp-footer-brand img{height:28px;width:auto;border-radius:8px;background:#fff;padding:3px;}
+.lp-footer-links{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;}
+.lp-footer-links a{text-decoration:none;color:#B9C6D6;font-weight:700;}
+.lp-footer-links a:hover{color:#fff;}
+.lp-footer-copy{color:#8FA0B8;font-size:12px;}
+
+/* ---------- Content pages (privacy / support) ---------- */
+.lp-content{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:34px 28px;margin:36px auto;max-width:760px;}
+.lp-content h1{font-size:26px;margin-bottom:6px;}
+.lp-content .lp-updated{color:var(--ink-soft);font-size:12.5px;margin-bottom:24px;}
+.lp-content h2{font-size:17px;margin:26px 0 8px;color:var(--blue);}
+.lp-content p, .lp-content li{font-size:14px;color:var(--ink);margin-bottom:8px;}
+.lp-content ul{padding-left:20px;margin-bottom:10px;}
+.lp-content .lp-faq-q{font-weight:700;margin-top:18px;}
+.lp-content a.lp-mail{color:var(--blue);font-weight:700;text-decoration:none;}
+
+@media (max-width:700px){
+  .lp-hero h1{font-size:28px;}
+  .lp-features{grid-template-columns:1fr;}
+  .lp-preview-row{grid-template-columns:1fr 1fr;}
+  .lp-nav{display:none;}
+  .lp-content{padding:24px 18px;margin:20px 14px;}
+}
