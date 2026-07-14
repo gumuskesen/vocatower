@@ -95,10 +95,15 @@
      answers, then least-recently-seen. vocabByEn maps lowercase english
      word -> vocab entry ({en,tr,exEn,exTr,difficulty,category}) so the
      Review Words screen can show real translations/examples. */
+  /* Sadece oyuncunun DAHA ÖNCE EN AZ BİR KEZ yanlış cevapladığı kelimeleri
+     döndürür — hiç yanlış yapılmamış kelimeler (görülmemiş veya her zaman
+     doğru bilinen "ustalaşılmış" kelimeler) asla tekrar listesine girmez.
+     Her doğru tekrar box'ı yükseltir; box MAX_BOX'a ulaşınca kelime listeden
+     doğal olarak düşer (ustalaşıldı sayılır). */
   function getReviewWords(vocabByEn, n){
     var m = getMastery();
     var entries = Object.keys(m).map(function(k){ return {key:k, rec:m[k]}; });
-    entries = entries.filter(function(e){ return e.rec.box < MAX_BOX && vocabByEn[e.key]; });
+    entries = entries.filter(function(e){ return e.rec.wrong > 0 && e.rec.box < MAX_BOX && vocabByEn[e.key]; });
     entries.sort(function(a,b){
       if(a.rec.box !== b.rec.box) return a.rec.box - b.rec.box;
       if(b.rec.wrong !== a.rec.wrong) return b.rec.wrong - a.rec.wrong;

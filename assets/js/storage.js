@@ -6,7 +6,8 @@
     badges: 'vocatower_badges',
     progress: 'vocatower_progress',
     history: 'vocatower_history',
-    mastery: 'vocatower_mastery'
+    mastery: 'vocatower_mastery',
+    levelmaps: 'vocatower_levelmaps'
   };
 
   function safeGet(key, fallback){
@@ -31,7 +32,7 @@
   }
 
   var SCHEMA_VERSION_KEY = 'vocatower_schema_version';
-  var CURRENT_SCHEMA_VERSION = 2;
+  var CURRENT_SCHEMA_VERSION = 3;
 
   /* Oyuncu ilerlemesini asla silmeyen, yalnızca eksik alanları tamamlayan
      tek seferlik açılış geçişi. Var olan geçerli veriye asla dokunmaz —
@@ -58,6 +59,11 @@
       if(stats && typeof stats === 'object' && !Array.isArray(stats.playDates)){
         stats.playDates = [];
         safeSet(STORAGE_KEYS.stats, stats);
+      }
+
+      var levelmaps = safeGet(STORAGE_KEYS.levelmaps, null);
+      if(levelmaps !== null && (typeof levelmaps !== 'object' || Array.isArray(levelmaps))){
+        safeSet(STORAGE_KEYS.levelmaps, {});
       }
 
       if(version < CURRENT_SCHEMA_VERSION){

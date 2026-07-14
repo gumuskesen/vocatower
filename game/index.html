@@ -128,27 +128,48 @@
   .goal-bar{height:14px;background:#D8E2EE;border-radius:8px;overflow:hidden;}
   .goal-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#72B396,#9BD0B6);width:0%;transition:width 1.2s cubic-bezier(.2,.8,.3,1);position:relative;}
 
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .cat{border:none;cursor:pointer;text-align:left;background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:7px;transition:transform .12s ease;font-family:inherit;color:var(--ink);}
-  .cat:active{transform:scale(.97);}
-  .cat .emoji{font-size:28px;}
-  .cat h3{font-size:14px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .cat{border:none;cursor:pointer;text-align:left;background:var(--fg-bg-surface,var(--card));border-radius:var(--fg-radius-lg,var(--radius));padding:16px;box-shadow:var(--fg-shadow-md,var(--shadow));display:flex;flex-direction:column;gap:8px;transition:transform .12s ease,box-shadow .12s ease;font-family:inherit;color:var(--ink);border:1px solid var(--fg-border-soft,transparent);}
+  .cat:active{transform:scale(.96) translateY(1px);box-shadow:var(--fg-shadow-sm,var(--shadow));}
+  .cat .emoji{font-size:30px;}
+  .cat h3{font-size:14.5px;font-weight:800;}
   .cat p{font-size:11.5px;color:var(--ink-soft);line-height:1.35;}
-  .tag{align-self:flex-start;font-size:10px;font-weight:700;color:#fff;padding:3px 9px;border-radius:10px;letter-spacing:.3px;}
-  .cat.b .tag{background:var(--blue);} .cat.g .tag{background:var(--green);}
-  .cat.p .tag{background:var(--purple);} .cat.a .tag{background:var(--amber);}
+  .tag{align-self:flex-start;font-size:10px;font-weight:700;color:#fff;padding:3px 10px;border-radius:999px;letter-spacing:.3px;}
+  .cat.b .tag{background:var(--fg-accent-secondary,var(--blue));} .cat.g .tag{background:var(--fg-accent-tertiary,var(--green));}
+  .cat.p .tag{background:var(--fg-accent-quaternary,var(--purple));} .cat.a .tag{background:var(--fg-accent-gold,var(--amber));}
+  .cat-progress{margin-top:2px;}
+  .cat-progress .cp-line{display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;}
+  .cat-progress .cp-bar{height:8px;border-radius:999px;background:var(--fg-bg-surface-sunken,#E2E9F1);overflow:hidden;}
+  .cat-progress .cp-fill{height:100%;border-radius:999px;background:var(--fg-accent-tertiary,var(--green));transition:width .5s ease;}
 
-  .game-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  /* ---------- SEVİYE HARİTASI ---------- */
+  .lm-summary{text-align:center;margin-bottom:18px;}
+  .lm-summary .lm-pct{font-size:30px;font-weight:800;color:var(--fg-accent-secondary,var(--blue));}
+  .lm-summary .lm-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .lm-path{display:flex;flex-direction:column;align-items:center;gap:0;padding:8px 0 30px;}
+  .lm-node-wrap{display:flex;flex-direction:column;align-items:center;}
+  .lm-node{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;background:var(--fg-bg-surface-sunken,#E2E9F1);box-shadow:var(--fg-shadow-sm,0 2px 6px rgba(0,0,0,.08));border:none;cursor:pointer;font-family:inherit;position:relative;flex-shrink:0;}
+  .lm-node.locked{background:var(--fg-bg-surface-sunken,#E2E9F1);color:var(--fg-text-faint,#B7C2CF);cursor:not-allowed;box-shadow:none;}
+  .lm-node.done{background:var(--fg-accent-tertiary,var(--green));}
+  .lm-node.current{background:var(--fg-accent-primary,var(--fg-terracotta,#E08A5B));animation:lmPulse 1.6s ease-in-out infinite;}
+  @keyframes lmPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(224,138,91,.35);}50%{transform:scale(1.08);box-shadow:0 0 0 10px rgba(224,138,91,0);}}
+  .lm-connector{width:5px;height:26px;background:var(--fg-bg-surface-sunken,#DDE6EE);border-radius:3px;}
+  .lm-connector.done{background:var(--fg-accent-tertiary,var(--green));}
+  .lm-node-label{font-size:10.5px;color:var(--ink-soft);margin-top:4px;font-weight:700;max-width:90px;text-align:center;}
+
+  .game-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;}
   .back{border:none;background:var(--card);box-shadow:var(--shadow);width:42px;height:42px;border-radius:14px;font-size:18px;cursor:pointer;color:var(--ink);flex-shrink:0;}
-  .game-title{font-size:15px;font-weight:700;flex:1;}
-  .timer{background:var(--card);border-radius:14px;padding:8px 14px;font-weight:700;box-shadow:var(--shadow);font-size:14px;min-width:60px;text-align:center;}
+  .game-head-text{flex:1;min-width:0;padding-top:2px;}
+  .game-title{font-size:16px;font-weight:800;}
+  .game-subtitle{font-size:11px;color:var(--ink-soft);margin-top:4px;letter-spacing:.4px;font-weight:700;text-transform:uppercase;line-height:1.4;min-height:14px;}
+  .timer{background:var(--card);border-radius:14px;padding:8px 14px;font-weight:700;box-shadow:var(--shadow);font-size:14px;min-width:60px;text-align:center;flex-shrink:0;}
   .timer.low{color:var(--red-soft);}
-  .score-pill{background:var(--card);border-radius:14px;padding:8px 14px;font-weight:700;box-shadow:var(--shadow);font-size:14px;}
+  .score-pill{background:var(--card);border-radius:14px;padding:8px 14px;font-weight:700;box-shadow:var(--shadow);font-size:14px;flex-shrink:0;align-self:center;}
 
-  .qcard{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 18px;margin-bottom:14px;text-align:center;}
+  .qcard{background:var(--card);border-radius:var(--fg-radius-xl,var(--radius));box-shadow:var(--shadow);padding:32px 22px;margin-bottom:14px;text-align:center;}
   .qcard .hint{font-size:11.5px;color:var(--ink-soft);margin-bottom:10px;letter-spacing:.5px;font-weight:700;}
-  .q-en{font-size:19px;line-height:1.55;font-weight:700;}
-  .q-tr{font-size:13.5px;color:var(--ink-soft);margin-top:10px;line-height:1.5;}
+  .q-en{font-size:23px;line-height:1.5;font-weight:800;}
+  .q-tr{font-size:14.5px;color:var(--ink-soft);margin-top:14px;line-height:1.5;}
   .tap-tip{font-size:11px;color:#A9B7C9;margin-top:12px;}
   .w{cursor:pointer;border-bottom:1.5px dotted #B9C9DC;border-radius:4px;padding:0 1px;}
   .w:active,.w.hl{background:#FFF3D9;border-bottom-color:var(--amber);}
@@ -163,7 +184,8 @@
 
   .opts{display:grid;gap:10px;}
   .opts.two-col{grid-template-columns:1fr 1fr;}
-  .opt{border:2.5px solid #E2E9F1;background:var(--card);border-radius:16px;padding:14px 12px;font-size:15px;font-weight:600;cursor:pointer;text-align:center;font-family:inherit;color:var(--ink);transition:border-color .15s;}
+  .opt{border:2.5px solid #E2E9F1;background:var(--card);border-radius:18px;padding:15px 12px;font-size:15px;font-weight:600;cursor:pointer;text-align:center;font-family:inherit;color:var(--ink);transition:border-color .15s,transform .1s,box-shadow .1s;box-shadow:0 3px 0 rgba(51,65,92,.06);}
+  .opt:active{transform:translateY(2px) scale(.98);box-shadow:0 1px 0 rgba(51,65,92,.06);}
   .opt small{display:block;font-weight:500;font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
   .opt .flag{font-size:30px;display:block;margin-bottom:4px;}
   .opt.correct{border-color:var(--green);background:#EAF5EF;}
@@ -188,8 +210,9 @@
   .pkey:active{background:#FBF3E4;transform:translateY(2px);}
   .note-word{display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap;}
 
-  .btn{border:none;border-radius:16px;padding:14px 22px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff;background:var(--blue);box-shadow:var(--shadow);width:100%;margin-top:8px;}
-  .btn.ghost{background:#E2E9F1;color:var(--ink);}
+  .btn{border:none;border-radius:18px;padding:14px 22px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff;background:var(--blue);box-shadow:0 4px 0 rgba(51,65,92,.18),var(--shadow);width:100%;margin-top:8px;transition:transform .1s,box-shadow .1s;}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(51,65,92,.18);}
+  .btn.ghost{background:#E2E9F1;color:var(--ink);box-shadow:0 4px 0 rgba(51,65,92,.08);}
   .btn.small{width:auto;padding:10px 16px;font-size:13px;margin:4px;}
 
   .result{text-align:center;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:30px 20px;}
@@ -376,7 +399,10 @@
   <div id="buildingJourney" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">🏙️ Bina Yolculuğu</div>
+      <div class="game-head-text">
+        <div class="game-title">🏙️ Bina Yolculuğu</div>
+        <div class="game-subtitle">10 gökdelen boyunca ilerlemeni gör</div>
+      </div>
     </div>
     <div class="gb-single">
       <div class="bj-summary">
@@ -391,12 +417,14 @@
   <div id="reviewWords" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">🧠 Kelime Tekrarı</div>
+      <div class="game-head-text">
+        <div class="game-title">🧠 Kelime Tekrarı</div>
+        <div class="game-subtitle" id="rvHint">İNGİLİZCESİNİ SEÇ</div>
+      </div>
       <div class="score-pill" id="rvScore">✅ 0</div>
     </div>
     <div class="game-body" id="rvPlay">
       <div class="qcard">
-        <div class="hint" id="rvHint">İNGİLİZCESİNİ SEÇ</div>
         <div class="q-en" id="rvQ"></div>
         <div class="q-tr" id="rvTr"></div>
       </div>
@@ -407,11 +435,29 @@
     </div>
   </div>
 
+  <!-- ============ SEVİYE HARİTASI (mod başına bağımsız ilerleme) ============ -->
+  <div id="levelMap" class="hidden">
+    <div class="game-head">
+      <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
+      <div class="game-title" id="lmTitle">Seviye Haritası</div>
+    </div>
+    <div class="gb-single">
+      <div class="lm-summary">
+        <div class="lm-pct" id="lmPct">0%</div>
+        <div class="lm-sub" id="lmSub">Seviye 1 / 30</div>
+      </div>
+      <div class="lm-path" id="lmPath"></div>
+    </div>
+  </div>
+
   <!-- ============ QUIZ (Gökdelen / Ülke) ============ -->
   <div id="quiz" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title" id="quizTitle"></div>
+      <div class="game-head-text">
+        <div class="game-title" id="quizTitle"></div>
+        <div class="game-subtitle" id="quizHint"></div>
+      </div>
       <div class="score-pill hidden" id="quizScore">✅ 0</div>
       <div class="timer hidden" id="quizTimer">60</div>
     </div>
@@ -419,7 +465,6 @@
       <div>
         <div class="progress-dots" id="quizDots"></div>
         <div class="qcard">
-          <div class="hint" id="quizHint"></div>
           <div class="q-en" id="quizQEn"></div>
           <div class="q-tr" id="quizQTr"></div>
           <div class="tap-tip">👆 İngilizce kelimelere dokun → Türkçesini gör</div>
@@ -433,7 +478,10 @@
   <div id="scramble" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">🪐 Kelime Bulmacası</div>
+      <div class="game-head-text">
+        <div class="game-title">🪐 Kelime Bulmacası</div>
+        <div class="game-subtitle">Karışık harflerden doğru kelimeyi kur</div>
+      </div>
       <div class="score-pill" id="scRound">1/5</div>
     </div>
     <div class="gb-single">
@@ -452,12 +500,14 @@
   <div id="piano" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">🎹 Nota Kelimeleri</div>
+      <div class="game-head-text">
+        <div class="game-title">🎹 Nota Kelimeleri</div>
+        <div class="game-subtitle">Bu kelimeyi notalarla çal</div>
+      </div>
       <div class="score-pill" id="pnRound">1/3</div>
     </div>
     <div class="gb-single">
     <div class="qcard">
-      <div class="hint">BU KELİMEYİ NOTALARLA ÇAL</div>
       <div class="q-en" id="pnMeaning"></div>
       <div class="q-tr">Notalar aynı zamanda harfler! (Do=C, Re=D, Mi=E, Fa=F, Sol=G, La=A, Si=B)</div>
       <div class="note-word" id="pnSlots"></div>
@@ -480,12 +530,14 @@
   <div id="picmatch" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">🖼️ Resim Eşleştirme</div>
+      <div class="game-head-text">
+        <div class="game-title">🖼️ Resim Eşleştirme</div>
+        <div class="game-subtitle">Bu resim hangi kelime?</div>
+      </div>
       <div class="score-pill" id="pmRound">1/8</div>
     </div>
     <div class="game-body">
       <div class="qcard">
-        <div class="hint">BU RESİM HANGİ KELİME? · WHICH WORD IS THIS?</div>
         <div class="big-emoji" id="pmEmoji">🍎</div>
       </div>
       <div class="opts two-col" id="pmOpts"></div>
@@ -496,12 +548,14 @@
   <div id="memory" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">🃏 Hafıza Kartları</div>
+      <div class="game-head-text">
+        <div class="game-title">🃏 Hafıza Kartları</div>
+        <div class="game-subtitle">İngilizce kelimeyi Türkçesiyle eşleştir</div>
+      </div>
       <div class="score-pill" id="memMoves">0 hamle</div>
     </div>
     <div class="gb-single">
     <div class="qcard" style="padding:12px;">
-      <div class="hint">İNGİLİZCE KELİMEYİ TÜRKÇESİYLE EŞLEŞTİR</div>
       <div class="mem-grid" id="memGrid"></div>
     </div>
     </div>
@@ -511,12 +565,14 @@
   <div id="listen" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">🎧 Dinle ve Bul</div>
+      <div class="game-head-text">
+        <div class="game-title">🎧 Dinle ve Bul</div>
+        <div class="game-subtitle">Kelimeyi dinle, doğrusunu seç</div>
+      </div>
       <div class="score-pill" id="lsRound">1/8</div>
     </div>
     <div class="game-body">
       <div class="qcard">
-        <div class="hint">KELİMEYİ DİNLE, DOĞRUSUNU SEÇ</div>
         <button class="big-emoji speak-btn" style="font-size:56px;" onclick="lsSpeak()" aria-label="Kelimeyi tekrar dinle">🔊</button>
         <div class="q-tr">Tekrar dinlemek için hoparlöre dokun</div>
         <button class="btn ghost small" onclick="lsHint()">💡 İpucu: Türkçesini göster</button>
@@ -530,12 +586,14 @@
   <div id="spelling" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">✍️ Yazım Arısı</div>
+      <div class="game-head-text">
+        <div class="game-title">✍️ Yazım Arısı</div>
+        <div class="game-subtitle">Kelimeyi dinle ve harflerle yaz</div>
+      </div>
       <div class="score-pill" id="spRound">1/5</div>
     </div>
     <div class="gb-single">
     <div class="qcard">
-      <div class="hint">KELİMEYİ DİNLE VE YAZ · LISTEN AND SPELL</div>
       <div class="q-en" id="spMeaning"></div>
       <button class="btn ghost small" onclick="spSpeak()">🔊 Dinle</button>
       <div class="answer-slots" id="spSlots"></div>
@@ -550,12 +608,14 @@
   <div id="fillgap" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">📝 Boşluk Doldurma</div>
+      <div class="game-head-text">
+        <div class="game-title">📝 Boşluk Doldurma</div>
+        <div class="game-subtitle">Cümledeki eksik kelimeyi tamamla</div>
+      </div>
       <div class="score-pill" id="fgRound">1/8</div>
     </div>
     <div class="game-body">
       <div class="qcard">
-        <div class="hint">EKSİK KELİMEYİ TAMAMLA</div>
         <div class="q-en" id="fgSentence"></div>
         <div class="q-tr" id="fgTr"></div>
         <div class="tap-tip">👆 Kelimelere dokun → Türkçesini gör</div>
@@ -568,12 +628,14 @@
   <div id="mapdet" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">🗺️ Harita Dedektifi</div>
+      <div class="game-head-text">
+        <div class="game-title">🗺️ Harita Dedektifi</div>
+        <div class="game-subtitle" id="mdClueNo">1. İPUCU · CLUE 1</div>
+      </div>
       <div class="score-pill" id="mdRound">1/5</div>
     </div>
     <div class="game-body">
       <div class="qcard">
-        <div class="hint" id="mdClueNo">1. İPUCU · CLUE 1</div>
         <div class="q-en" id="mdClue"></div>
         <div class="q-tr" id="mdClueTr"></div>
         <button class="btn ghost small" onclick="mdMoreClue()">🔍 Bir ipucu daha (-10 XP)</button>
@@ -587,12 +649,14 @@
   <div id="snake" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">🐍 Kelime Yılanı</div>
+      <div class="game-head-text">
+        <div class="game-title">🐍 Kelime Yılanı</div>
+        <div class="game-subtitle">Harfleri kullanarak kelimeyi oluştur</div>
+      </div>
       <div class="score-pill" id="snRound">1/8</div>
     </div>
     <div class="game-body">
       <div class="qcard">
-        <div class="hint">HARFLERİ KULLANARAK KELİMEYİ OLUŞTUR</div>
         <div class="q-tr" id="snTr"></div>
         <div class="answer-slots" id="snSlots"></div>
         <div class="letters" id="snLetters"></div>
@@ -611,7 +675,10 @@
   <div id="rocket" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">🚀 Roket Yarışı</div>
+      <div class="game-head-text">
+        <div class="game-title">🚀 Roket Yarışı</div>
+        <div class="game-subtitle">Rakip roketten önce doğru cevapla</div>
+      </div>
       <div class="score-pill" id="rkScore">✅ 0</div>
     </div>
     <div class="game-body">
@@ -633,12 +700,14 @@
   <div id="crossword" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title">🧩 Çapraz Bulmaca</div>
+      <div class="game-head-text">
+        <div class="game-title">🧩 Çapraz Bulmaca</div>
+        <div class="game-subtitle">Önce ipucu seç, sonra harflere dokun</div>
+      </div>
       <div class="score-pill" id="cwPuzNo">1/2</div>
     </div>
     <div class="gb-single">
     <div class="qcard" style="padding:14px;">
-      <div class="hint">ÖNCE İPUCU SEÇ, SONRA HARFLERE DOKUN</div>
       <div class="cw-clues" id="cwClues"></div>
       <div class="cw-grid" id="cwGrid"></div>
       <div class="letters" id="cwLetters"></div>
@@ -652,11 +721,13 @@
   <div id="story" class="hidden">
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
-      <div class="game-title" id="stTitle">📖 Mini Hikaye</div>
+      <div class="game-head-text">
+        <div class="game-title" id="stTitle">📖 Mini Hikaye</div>
+        <div class="game-subtitle" id="stSubtitle">Hikayeyi oku · kelimelere dokunarak çevir</div>
+      </div>
     </div>
     <div id="stReadPart" class="gb-single">
       <div class="qcard">
-        <div class="hint">HİKAYEYİ OKU · KELİMELERE DOKUNARAK ÇEVİR</div>
         <div class="story-text" id="stText"></div>
         <div class="story-tr hidden" id="stTr"></div>
         <button class="btn ghost small" onclick="stToggleTr()">🇹🇷 Türkçesini Göster/Gizle</button>
@@ -667,7 +738,6 @@
     <div id="stQuizPart" class="hidden gb-single">
       <div class="progress-dots" id="stDots"></div>
       <div class="qcard">
-        <div class="hint">HİKAYE SORUSU</div>
         <div class="q-en" id="stQEn"></div>
         <div class="q-tr" id="stQTr"></div>
       </div>
@@ -693,6 +763,7 @@
 <script src="../assets/js/vocab.js"></script>
 <script src="../assets/js/buildings.js"></script>
 <script src="../assets/js/history.js"></script>
+<script src="../assets/js/levelmaps.js"></script>
 <script src="../assets/js/avatars.js"></script>
 <script src="../assets/js/profile.js"></script>
 <script src="../assets/js/rewards.js"></script>
@@ -840,7 +911,7 @@ function renderAchievementsScreen(){
   box.innerHTML = html;
 }
 function show(id){
-  ['home','onboarding','achievements','buildingJourney','reviewWords','quiz','scramble','piano','picmatch','memory','listen','spelling','fillgap','mapdet','snake','rocket','crossword','story','resultScreen']
+  ['home','onboarding','achievements','buildingJourney','reviewWords','levelMap','quiz','scramble','piano','picmatch','memory','listen','spelling','fillgap','mapdet','snake','rocket','crossword','story','resultScreen']
     .forEach(function(s){document.getElementById(s).classList.add('hidden');});
   document.getElementById(id).classList.remove('hidden');
   hideBubble();
@@ -1082,36 +1153,97 @@ function showResult(e,t,d,x,reward){
   }
   show('resultScreen');
   renderTower();
-  setTimeout(showMotivation, 700);
+  if(reward && reward.levelResult && reward.levelResult.leveledUp){
+    setTimeout(function(){ showLevelUpToast(reward.levelResult); }, 600);
+  } else {
+    setTimeout(showMotivation, 700);
+  }
 }
 
 /* ================= ANA EKRAN OYUN LİSTESİ ================= */
 var MODES = [
- {cls:'b', e:'🏙️', tag:'BİLGİ YARIŞMASI', n:'Gökdelen Bilgini', d:'Bina bilgileri + kelimeler', fn:function(){startQuiz('buildings');}},
- {cls:'g', e:'🌍', tag:'ZAMANA KARŞI', n:'Ülke Avcısı', d:'60 saniyede kaç soru?', fn:function(){startQuiz('countries');}},
- {cls:'p', e:'🖼️', tag:'RESİM', n:'Resim Eşleştirme', d:'Resmi doğru kelimeyle eşleştir', fn:startPicmatch},
- {cls:'a', e:'🎧', tag:'DİNLEME', n:'Dinle ve Bul', d:'Telaffuzu duy, kelimeyi seç', fn:startListen},
- {cls:'g', e:'🃏', tag:'HAFIZA', n:'Hafıza Kartları', d:'İngilizce-Türkçe çiftleri bul', fn:startMemory},
- {cls:'b', e:'✍️', tag:'YAZIM', n:'Yazım Arısı', d:'Duy ve harf harf yaz', fn:startSpelling},
- {cls:'a', e:'📝', tag:'CÜMLE', n:'Boşluk Doldurma', d:'Cümledeki eksik kelimeyi bul', fn:startFillgap},
- {cls:'p', e:'🗺️', tag:'DEDEKTİF', n:'Harita Dedektifi', d:'İpuçlarıyla ülkeyi bul', fn:startMapdet},
- {cls:'g', e:'🐍', tag:'ZİNCİR', n:'Kelime Yılanı', d:'Harflerden kelime kur', fn:startSnake},
- {cls:'a', e:'🚀', tag:'YARIŞ', n:'Roket Yarışı', d:'Rakip roketten önce uzaya çık!', fn:startRocket},
- {cls:'b', e:'🧩', tag:'BULMACA', n:'Çapraz Bulmaca', d:'Kelimeleri karelere yerleştir', fn:startCrossword},
- {cls:'p', e:'📖', tag:'HİKAYE', n:'Mini Hikayeler', d:'Oku, dokun-çevir, cevapla', fn:startStory},
- {cls:'p', e:'🪐', tag:'BULMACA', n:'Kelime Bulmacası', d:'Karışık harflerden kelime kur', fn:startScramble},
- {cls:'a', e:'🎹', tag:'NOTA OYUNU', n:'Nota Kelimeleri', d:'Piyanoyla kelime çal!', fn:startPiano},
- {cls:'b', e:'🧠', tag:'TEKRAR', n:'Kelime Tekrarı', d:'Zorlandığın kelimeleri tekrar et', fn:startReview},
+ {key:'quiz_buildings', cls:'b', e:'🏙️', tag:'BİLGİ YARIŞMASI', n:'Gökdelen Bilgini', d:'Bina bilgileri + kelimeler', fn:function(){startQuiz('buildings');}},
+ {key:'quiz_countries', cls:'g', e:'🌍', tag:'ZAMANA KARŞI', n:'Ülke Avcısı', d:'60 saniyede kaç soru?', fn:function(){startQuiz('countries');}},
+ {key:'picmatch', cls:'p', e:'🖼️', tag:'RESİM', n:'Resim Eşleştirme', d:'Resmi doğru kelimeyle eşleştir', fn:startPicmatch},
+ {key:'listen', cls:'a', e:'🎧', tag:'DİNLEME', n:'Dinle ve Bul', d:'Telaffuzu duy, kelimeyi seç', fn:startListen},
+ {key:'memory', cls:'g', e:'🃏', tag:'HAFIZA', n:'Hafıza Kartları', d:'İngilizce-Türkçe çiftleri bul', fn:startMemory},
+ {key:'spelling', cls:'b', e:'✍️', tag:'YAZIM', n:'Yazım Arısı', d:'Duy ve harf harf yaz', fn:startSpelling},
+ {key:'fillgap', cls:'a', e:'📝', tag:'CÜMLE', n:'Boşluk Doldurma', d:'Cümledeki eksik kelimeyi bul', fn:startFillgap},
+ {key:'mapdet', cls:'p', e:'🗺️', tag:'DEDEKTİF', n:'Harita Dedektifi', d:'İpuçlarıyla ülkeyi bul', fn:startMapdet},
+ {key:'snake', cls:'g', e:'🐍', tag:'ZİNCİR', n:'Kelime Yılanı', d:'Harflerden kelime kur', fn:startSnake},
+ {key:'rocket', cls:'a', e:'🚀', tag:'YARIŞ', n:'Roket Yarışı', d:'Rakip roketten önce uzaya çık!', fn:startRocket},
+ {key:'crossword', cls:'b', e:'🧩', tag:'BULMACA', n:'Çapraz Bulmaca', d:'Kelimeleri karelere yerleştir', fn:startCrossword},
+ {key:'story', cls:'p', e:'📖', tag:'HİKAYE', n:'Mini Hikayeler', d:'Oku, dokun-çevir, cevapla', fn:startStory},
+ {key:'scramble', cls:'p', e:'🪐', tag:'BULMACA', n:'Kelime Bulmacası', d:'Karışık harflerden kelime kur', fn:startScramble},
+ {key:'piano', cls:'a', e:'🎹', tag:'NOTA OYUNU', n:'Nota Kelimeleri', d:'Piyanoyla kelime çal!', fn:startPiano},
+ {key:'review', cls:'b', e:'🧠', tag:'TEKRAR', n:'Kelime Tekrarı', d:'Zorlandığın kelimeleri tekrar et', fn:startReview},
 ];
 function renderModes(){
   var g=document.getElementById('modeGrid'); g.innerHTML='';
   MODES.forEach(function(m){
     var b=document.createElement('button');
     b.className='cat '+m.cls;
-    b.innerHTML='<span class="emoji">'+m.e+'</span><span class="tag">'+m.tag+'</span><h3>'+m.n+'</h3><p>'+m.d+'</p>';
-    b.onclick=m.fn;
+    var level = window.getModeLevel ? window.getModeLevel(m.key) : 1;
+    var pct = window.getModePercent ? window.getModePercent(m.key) : 0;
+    b.innerHTML='<span class="emoji">'+m.e+'</span><span class="tag">'+m.tag+'</span><h3>'+m.n+'</h3><p>'+m.d+'</p>'+
+      '<div class="cat-progress"><div class="cp-line"><span>Seviye '+level+'</span><span>%'+pct+'</span></div>'+
+      '<div class="cp-bar"><div class="cp-fill" style="width:'+pct+'%"></div></div></div>';
+    b.onclick=function(){ openLevelMap(m); };
     g.appendChild(b);
   });
+}
+
+/* ================= SEVİYE HARİTASI ================= */
+var lmCurrentMode=null;
+function openLevelMap(modeEntry){
+  lmCurrentMode = modeEntry;
+  renderLevelMap();
+  show('levelMap');
+}
+function renderLevelMap(){
+  var m = lmCurrentMode;
+  document.getElementById('lmTitle').textContent = m.e+' '+m.n;
+  var mm = window.getModeMap(m.key);
+  var cap = window.LEVEL_CAP;
+  var pct = window.getModePercent(m.key);
+  document.getElementById('lmPct').textContent = '%'+pct;
+  document.getElementById('lmSub').textContent = 'Seviye '+mm.level+' / '+cap;
+  var path = document.getElementById('lmPath'); path.innerHTML='';
+  for(var lvl=1; lvl<=cap; lvl++){
+    if(lvl>1){
+      var conn = document.createElement('div');
+      conn.className = 'lm-connector'+(mm.completed.indexOf(lvl-1)>=0 ? ' done' : '');
+      path.appendChild(conn);
+    }
+    var wrap = document.createElement('div'); wrap.className='lm-node-wrap';
+    var node = document.createElement('button'); node.type='button';
+    var state = mm.completed.indexOf(lvl)>=0 ? 'done' : (lvl===mm.level ? 'current' : (lvl<mm.level ? 'done' : 'locked'));
+    node.className = 'lm-node '+state;
+    node.textContent = state==='locked' ? '🔒' : (state==='done' ? '✓' : lvl);
+    node.disabled = state==='locked';
+    node.onclick = (function(l, entry){ return function(){ entry.fn(); }; })(lvl, m);
+    wrap.appendChild(node);
+    var label = document.createElement('div'); label.className='lm-node-label'; label.textContent='Seviye '+lvl;
+    wrap.appendChild(label);
+    path.appendChild(wrap);
+  }
+}
+function showLevelUpToast(levelResult){
+  if(!levelResult || !levelResult.leveledUp) return;
+  var overlay = document.createElement('div');
+  overlay.className = 'motiv-overlay badge-unlock-overlay';
+  overlay.innerHTML =
+    '<div class="motiv-card badge-unlock-card">' +
+      '<div class="badge-unlock-icon">🎉</div>' +
+      '<div class="motiv-msg">Seviye Atladın!</div>' +
+      '<div class="badge-unlock-title">Seviye '+levelResult.level+' açıldı</div>' +
+      '<div class="motiv-close">devam etmek için dokun</div>' +
+    '</div>';
+  var closed=false;
+  function close(){ if(closed) return; closed=true; if(overlay.parentNode) overlay.remove(); }
+  overlay.onclick = close;
+  document.body.appendChild(overlay);
+  setTimeout(close, 3200);
 }
 
 /* ================= 1-2) QUIZ ================= */
@@ -1191,7 +1323,7 @@ function buildQuizList(cat,count){
 function startQuiz(cat){
   window._activeSession = {mode:'quiz', done:false};
   var timed = cat==='countries';
-  qState={list:buildQuizList(cat,timed?30:8), i:0, correct:0, answered:0, timed:timed, time:60, locked:false, results:[]};
+  qState={list:buildQuizList(cat,timed?30:8), i:0, correct:0, answered:0, timed:timed, time:60, locked:false, results:[], cat:cat};
   document.getElementById('quizTitle').textContent = cat==='buildings' ? '🏙️ Gökdelen Bilgini' : '🌍 Ülke Avcısı';
   document.getElementById('quizTimer').classList.toggle('hidden', !timed);
   document.getElementById('quizScore').classList.toggle('hidden', !timed);
@@ -1251,7 +1383,7 @@ function finishQuiz(){
   var total = s.timed ? s.answered : s.list.length;
   var good = s.correct >= total*0.7 && s.correct>0;
   if(good) sfx('win');
-  var reward = completeGameSession('quiz', {correct:s.correct, total:total, perfect: !s.timed && total>0 && s.correct===total});
+  var reward = completeGameSession('quiz', {correct:s.correct, total:total, perfect: !s.timed && total>0 && s.correct===total, levelKey:'quiz_'+s.cat});
   showResult(good?'🏆':'💪', good?'Harikasın!':'İyi deneme!',
     s.correct+' / '+total+' doğru'+(s.timed?' · Zamana karşı!':''),
     '+'+(s.correct*10)+' XP · Kulen '+s.correct+' kat yükseldi!', reward);
@@ -1896,7 +2028,6 @@ var CW_PUZZLES = [
    {word:'EGG',    tr:'Yumurta 🥚', dir:'D', r:0, c:4},
  ]},
 ];
-var CW_TOTAL_SLOTS = CW_PUZZLES.reduce(function(sum,p){return sum+p.slots.length;},0);
 var cwState=null;
 function cwCells(slot){
   var cells=[];
@@ -1905,23 +2036,69 @@ function cwCells(slot){
   }
   return cells;
 }
+/* Rastgele çapraz bulmaca üreteci: tüm kelime veritabanından (VOCAB) her
+   seferinde farklı bir "yatay" kelime ve onunla kesişen 2 "dikey" kelime
+   seçer. pickUnseen sayesinde son çözülen kelimeler tekrar seçilmez, havuz
+   tükenince sıfırlanır — böylece her bulmaca farklı hisseder. */
+function cwWordPool(minLen, maxLen){
+  return VOCAB.filter(function(w){
+    return /^[a-z]+$/.test(w.en) && w.en.length>=minLen && w.en.length<=maxLen;
+  });
+}
+function buildCrosswordPuzzle(){
+  var acrossPool = cwWordPool(5,8);
+  for(var attempt=0; attempt<15; attempt++){
+    var picks = window.pickUnseen ? window.pickUnseen('crossword_across', acrossPool, 1, function(w){return w.en;}) : [rand(acrossPool)];
+    var acrossEntry = picks[0];
+    if(!acrossEntry) break;
+    var across = acrossEntry.en.toUpperCase();
+    var downPool = cwWordPool(3,6).filter(function(w){ return w.en.toUpperCase()!==across; });
+    var downSlots = [];
+    var cols = shuffle(across.split('').map(function(ch,i){return i;}));
+    for(var ci=0; ci<cols.length && downSlots.length<2; ci++){
+      var col = cols[ci];
+      var letter = across[col];
+      var matches = downPool.filter(function(w){ return w.en[0].toUpperCase()===letter; });
+      if(matches.length===0) continue;
+      var dpicks = window.pickUnseen ? window.pickUnseen('crossword_down', matches, 1, function(w){return w.en;}) : [rand(matches)];
+      var picked = dpicks[0];
+      if(!picked) continue;
+      downSlots.push({word:picked.en.toUpperCase(), tr:picked.tr, dir:'D', r:0, c:col});
+      downPool = downPool.filter(function(w){return w.en!==picked.en;});
+    }
+    if(downSlots.length>=2){
+      var rows = Math.max.apply(null, downSlots.map(function(s){return s.word.length;}));
+      return {rows:rows, cols:across.length, slots:[{word:across, tr:acrossEntry.tr, dir:'A', r:0, c:0}].concat(downSlots)};
+    }
+  }
+  return null;
+}
+function buildCrosswordSession(count){
+  var puzzles=[];
+  for(var i=0;i<count;i++){
+    puzzles.push(buildCrosswordPuzzle() || rand(CW_PUZZLES));
+  }
+  return puzzles;
+}
 function startCrossword(){
   window._activeSession = {mode:'crossword', done:false};
-  cwState={pi:0, done:[], active:-1, fill:{}, correctWords:0};
+  var puzzles = buildCrosswordSession(3);
+  var totalSlots = puzzles.reduce(function(sum,p){return sum+p.slots.length;},0);
+  cwState={pi:0, done:[], active:-1, fill:{}, correctWords:0, puzzles:puzzles, totalSlots:totalSlots};
   cwLoad();
   show('crossword');
 }
 function cwLoad(){
-  var s=cwState, puz=CW_PUZZLES[s.pi];
+  var s=cwState, puz=s.puzzles[s.pi];
   s.done=[]; s.active=-1; s.fill={};
-  document.getElementById('cwPuzNo').textContent=(s.pi+1)+'/'+CW_PUZZLES.length;
+  document.getElementById('cwPuzNo').textContent=(s.pi+1)+'/'+s.puzzles.length;
   document.getElementById('cwFeedback').textContent='';
   document.getElementById('cwFeedback').className='feedback';
   renderCw();
 }
 function cwKey(r,c){ return r+'_'+c; }
 function renderCw(){
-  var s=cwState, puz=CW_PUZZLES[s.pi];
+  var s=cwState, puz=s.puzzles[s.pi];
   var used={};
   puz.slots.forEach(function(sl,si){ cwCells(sl).forEach(function(rc){ used[cwKey(rc[0],rc[1])]=true; }); });
   var lockedCells={};
@@ -1980,7 +2157,7 @@ function renderCw(){
   }
 }
 function cwType(L){
-  var s=cwState, puz=CW_PUZZLES[s.pi];
+  var s=cwState, puz=s.puzzles[s.pi];
   if(s.active<0) return;
   var sl=puz.slots[s.active];
   var lockedCells={};
@@ -2015,8 +2192,8 @@ function cwType(L){
         sfx('win');
         setTimeout(function(){
           s.pi++;
-          if(s.pi>=CW_PUZZLES.length){
-            var reward = completeGameSession('crossword', {correct:s.correctWords, total:CW_TOTAL_SLOTS, perfect:s.correctWords===CW_TOTAL_SLOTS});
+          if(s.pi>=s.puzzles.length){
+            var reward = completeGameSession('crossword', {correct:s.correctWords, total:s.totalSlots, perfect:s.correctWords===s.totalSlots});
             showResult('🧩','Tüm Bulmacalar Çözüldü!', s.correctWords+' kelime yerleştirdin','+'+(s.correctWords*15)+' XP', reward);
           } else { s.bankCache={}; cwLoad(); }
         },1000);
@@ -2031,7 +2208,7 @@ function cwType(L){
   renderCw();
 }
 function cwClearSlot(){
-  var s=cwState, puz=CW_PUZZLES[s.pi];
+  var s=cwState, puz=s.puzzles[s.pi];
   if(s.active<0) return;
   cwCells(puz.slots[s.active]).forEach(function(rc){ delete s.fill[cwKey(rc[0],rc[1])]; });
   renderCw();
@@ -2114,6 +2291,7 @@ function startStory(){
   document.getElementById('stTr').classList.add('hidden');
   document.getElementById('stReadPart').classList.remove('hidden');
   document.getElementById('stQuizPart').classList.add('hidden');
+  document.getElementById('stSubtitle').textContent = 'Hikayeyi oku · kelimelere dokunarak çevir';
   show('story');
 }
 function stToggleTr(){ document.getElementById('stTr').classList.toggle('hidden'); }
@@ -2121,6 +2299,7 @@ function stSpeakStory(){ speak(stState.story.text); }
 function stStartQuestions(){
   document.getElementById('stReadPart').classList.add('hidden');
   document.getElementById('stQuizPart').classList.remove('hidden');
+  document.getElementById('stSubtitle').textContent = 'Hikaye sorusu';
   renderStQ();
 }
 function renderStQ(){

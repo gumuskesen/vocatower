@@ -76,7 +76,8 @@
   function completeGameSession(mode, data){
     data = data || {};
     if(window._activeSession && window._activeSession.mode === mode && window._activeSession.done){
-      return {goldEarned:0, breakdown:[], newBadges:[], duplicate:true};
+      var dupKey = data.levelKey || mode;
+      return {goldEarned:0, breakdown:[], newBadges:[], duplicate:true, levelResult:{passed:false, leveledUp:false, level:window.getModeLevel?window.getModeLevel(dupKey):1}};
     }
     if(window._activeSession) window._activeSession.done = true;
 
@@ -101,7 +102,12 @@
 
     var newBadges = window.checkAchievements ? window.checkAchievements(stats) : [];
 
-    return {goldEarned:goldEarned, breakdown:breakdown, newBadges:newBadges, stats:stats};
+    var levelKey = data.levelKey || mode;
+    var levelResult = window.completeLevelIfPassed
+      ? window.completeLevelIfPassed(levelKey, data.correct||0, data.total||0)
+      : {passed:false, leveledUp:false, level:1};
+
+    return {goldEarned:goldEarned, breakdown:breakdown, newBadges:newBadges, stats:stats, levelResult:levelResult};
   }
 
   window.getStats = getStats;
