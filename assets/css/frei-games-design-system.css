@@ -32,10 +32,12 @@
      --------------------------------------------------------------- */
 
   /* Base palette (raw hues — prefer the semantic tokens below in components) */
-  --fg-cream:            #FBF3E7;   /* warm app background */
-  --fg-cream-dark:       #F3E6D3;   /* secondary background / section alt */
-  --fg-beige:            #EDE0CB;   /* tertiary background, wells, tracks */
-  --fg-warm-white:       #FFFDF8;   /* card surface (never pure #fff) */
+  /* Design Bible v1.0 / deployment_plan_v2: exact warm background (#F7EFE3)
+     and inner-panel beige (#F1E6D2) — no almost-white surfaces anywhere. */
+  --fg-cream:            #F7EFE3;   /* warm app background */
+  --fg-cream-dark:       #EFE0C8;   /* secondary background / section alt */
+  --fg-beige:            #E6D5B8;   /* tertiary background, wells, tracks */
+  --fg-warm-white:       #F1E6D2;   /* card / panel surface — warm clay beige, never white */
 
   --fg-terracotta:       #E08A5B;   /* primary accent */
   --fg-terracotta-dark:  #C96F42;   /* primary accent, pressed/deep */
