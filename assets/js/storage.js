@@ -7,7 +7,8 @@
     progress: 'vocatower_progress',
     history: 'vocatower_history',
     mastery: 'vocatower_mastery',
-    levelmaps: 'vocatower_levelmaps'
+    levelmaps: 'vocatower_levelmaps',
+    favorites: 'vocatower_favorites'
   };
 
   function safeGet(key, fallback){
@@ -64,6 +65,11 @@
       var levelmaps = safeGet(STORAGE_KEYS.levelmaps, null);
       if(levelmaps !== null && (typeof levelmaps !== 'object' || Array.isArray(levelmaps))){
         safeSet(STORAGE_KEYS.levelmaps, {});
+      }
+
+      var favorites = safeGet(STORAGE_KEYS.favorites, null);
+      if(favorites !== null && (typeof favorites !== 'object' || Array.isArray(favorites))){
+        safeSet(STORAGE_KEYS.favorites, {});
       }
 
       if(version < CURRENT_SCHEMA_VERSION){

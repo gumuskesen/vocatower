@@ -145,6 +145,49 @@
   .rc-remaining{font-size:12.5px;font-weight:700;margin-top:8px;color:var(--ink);}
   .rc-cta{margin-top:6px;}
 
+  /* ---------- RC2: yeni nesil bitiş ekranı (şimdilik yalnızca Gökdelen
+     Bilgini) — assets/images/ui/completion-popups/completion_skyscraper.png
+     referansı. Diğer modlar hâlâ .rc- ailesini (showResult) kullanır. ---------- */
+  .rc2-wrap{position:relative;padding:50px 6px 20px;max-width:440px;margin:0 auto;}
+  .rc2-confetti{position:absolute;inset:0;pointer-events:none;overflow:visible;}
+  .rc2-confetti span{position:absolute;width:9px;height:20px;border-radius:6px;opacity:.9;animation:confettiFloat 3.4s ease-in-out infinite;}
+  .rc2-confetti span:nth-child(1){left:1%;top:10%;background:#7FA3B0;transform:rotate(-20deg);animation-delay:0s;}
+  .rc2-confetti span:nth-child(2){left:9%;top:34%;background:#E0AE4D;transform:rotate(15deg);animation-delay:.25s;}
+  .rc2-confetti span:nth-child(3){left:3%;top:58%;background:#E08A5B;transform:rotate(-30deg);animation-delay:.5s;}
+  .rc2-confetti span:nth-child(4){left:13%;top:78%;background:#8FAE87;transform:rotate(24deg);animation-delay:.75s;}
+  .rc2-confetti span:nth-child(5){left:24%;top:6%;background:#B3A1C7;transform:rotate(-12deg);animation-delay:1s;}
+  .rc2-confetti span:nth-child(6){right:1%;top:9%;background:#E08A5B;transform:rotate(18deg);animation-delay:.1s;}
+  .rc2-confetti span:nth-child(7){right:8%;top:32%;background:#7FA3B0;transform:rotate(-24deg);animation-delay:.4s;}
+  .rc2-confetti span:nth-child(8){right:2%;top:56%;background:#B3A1C7;transform:rotate(30deg);animation-delay:.65s;}
+  .rc2-confetti span:nth-child(9){right:12%;top:76%;background:#E0AE4D;transform:rotate(-16deg);animation-delay:.9s;}
+  .rc2-confetti span:nth-child(10){right:22%;top:4%;background:#8FAE87;transform:rotate(20deg);animation-delay:1.2s;}
+  .rc2-confetti span:nth-child(11){left:38%;top:1%;background:#E0AE4D;transform:rotate(-22deg);animation-delay:.35s;}
+  .rc2-confetti span:nth-child(12){right:36%;top:2%;background:#7FA3B0;transform:rotate(26deg);animation-delay:.85s;}
+  .rc2-confetti span:nth-child(13){left:18%;top:90%;background:#E08A5B;transform:rotate(12deg);animation-delay:1.1s;}
+  .rc2-confetti span:nth-child(14){right:18%;top:92%;background:#B3A1C7;transform:rotate(-18deg);animation-delay:1.4s;}
+  .rc2-card{position:relative;background:var(--fg-bg-surface,var(--card));border-radius:34px;box-shadow:0 4px 0 rgba(110,85,64,.14),0 18px 36px rgba(110,85,64,.2);padding:56px 22px 24px;text-align:center;}
+  .rc2-medallion{position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:84px;height:84px;border-radius:50%;background:var(--fg-bg-surface,#fff);box-shadow:0 4px 0 rgba(110,85,64,.16),0 10px 18px rgba(110,85,64,.26);display:flex;align-items:center;justify-content:center;border:5px solid var(--fg-bg-app,var(--bg));}
+  .rc2-medallion img{width:56px;height:56px;object-fit:contain;}
+  .rc2-title{font-size:23px;font-weight:800;color:var(--ink);margin-bottom:10px;line-height:1.3;}
+  .rc2-stat{font-size:15px;color:var(--ink-soft);font-weight:700;margin-bottom:6px;}
+  .rc2-xp{font-size:20px;font-weight:800;color:var(--fg-accent-tertiary,var(--green));margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px;}
+  .rc2-xp .rc2-star-ico{font-size:22px;}
+  .rc2-box{background:var(--fg-bg-surface-sunken,#F1E6D2);border-radius:20px;padding:16px 18px;margin-bottom:14px;text-align:left;box-shadow:inset 0 1px 3px rgba(110,85,64,.08);}
+  .rc2-box .rw-title{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:8px;}
+  .rc2-box .rw-line{font-size:14px;color:var(--ink-soft);font-weight:600;display:flex;justify-content:space-between;padding:4px 0;}
+  .rc2-box .rw-total{font-size:16px;font-weight:800;color:var(--ink);border-top:2px dashed var(--fg-beige,#E6D5B8);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;}
+  .rc2-coin{display:inline-block;}
+  .rc2-progress{text-align:center;}
+  .rc2-motiv{font-size:15px;font-weight:800;margin-bottom:12px;line-height:1.4;color:var(--ink);}
+  .rc2-bignum{display:flex;align-items:center;justify-content:center;gap:10px;font-size:32px;font-weight:800;color:var(--fg-accent-tertiary,var(--green));}
+  .rc2-bignum-icon{font-size:26px;}
+  .rc2-bignum-caption{font-size:12.5px;color:var(--ink-soft);margin:2px 0 14px;}
+  .rc2-goal-label{font-size:13.5px;font-weight:700;margin-bottom:8px;color:var(--ink);}
+  .rc2-bar{height:18px;border-radius:999px;background:var(--fg-bg-surface,#E6D5B8);overflow:hidden;box-shadow:inset 0 2px 4px rgba(110,85,64,.14);}
+  .rc2-bar-fill{height:100%;border-radius:999px;background:linear-gradient(180deg,#9BD0B6,var(--fg-accent-tertiary,#72B396));width:0%;transition:width 1s cubic-bezier(.2,.8,.3,1);}
+  .rc2-remaining{font-size:13.5px;font-weight:700;margin-top:10px;color:var(--ink);}
+  .rc2-cta{margin-top:8px;font-size:17px;}
+
   .tower-card{background:linear-gradient(180deg,#D9CDEA 0%,#F7EFE3 100%);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 18px;margin-bottom:16px;display:flex;gap:20px;align-items:center;overflow:hidden;position:relative;}
   .tower-card::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#FFF3D9 0%,transparent 70%);opacity:.8;}
   .bk-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0;position:relative;z-index:1;}
@@ -179,6 +222,27 @@
   .cat-progress .cp-line{display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;}
   .cat-progress .cp-bar{height:8px;border-radius:999px;background:var(--fg-bg-surface-sunken,#E6D5B8);overflow:hidden;}
   .cat-progress .cp-fill{height:100%;border-radius:999px;background:var(--fg-accent-tertiary,var(--green));transition:width .5s ease;}
+
+  /* ---------- GC2: yeni nesil oyun kartı (şimdilik yalnızca Gökdelen
+     Bilgini) — assets/images/ui/gamecards/gamecard_skyscraper.png referansı.
+     Diğer modlar hâlâ .cat sınıfını kullanır; bu bilerek ayrı bir bileşen
+     ailesi, ileride tek tek diğer modlara da uygulanabilir. ---------- */
+  .gc2-card{grid-column:1/-1;max-width:420px;margin:0 auto;width:100%;position:relative;cursor:pointer;background:var(--fg-bg-surface,var(--card));border-radius:32px;box-shadow:0 3px 0 rgba(110,85,64,.14),0 14px 28px rgba(110,85,64,.16);padding:26px 22px 24px;text-align:left;border:1px solid var(--fg-border-soft,transparent);transition:transform .12s ease,box-shadow .12s ease;}
+  .gc2-card:active{transform:scale(.985) translateY(1px);}
+  .gc2-card:focus-visible{outline:3px solid var(--fg-accent-secondary,var(--blue));outline-offset:3px;}
+  .gc2-star{position:absolute;top:20px;right:20px;width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#F6C84B,#E0AE4D);box-shadow:0 4px 0 #B8862C,0 6px 10px rgba(110,85,64,.25);transition:transform .1s ease,box-shadow .1s ease;}
+  .gc2-star:active{transform:translateY(3px);box-shadow:0 1px 0 #B8862C,0 2px 4px rgba(110,85,64,.2);}
+  .gc2-star:not(.active){background:linear-gradient(180deg,var(--fg-bg-surface-sunken,#E6D5B8),#D9C4A0);box-shadow:0 4px 0 #C0AB86,0 6px 10px rgba(110,85,64,.14);}
+  .gc2-star:focus-visible{outline:3px solid var(--fg-accent-secondary,var(--blue));outline-offset:2px;}
+  .gc2-icon-wrap{display:flex;justify-content:center;margin:4px 0 18px;}
+  .gc2-icon{width:150px;height:150px;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(110,85,64,.22));}
+  .gc2-tag{display:table;margin:0 auto 16px;font-size:13px;font-weight:800;color:#fff;padding:8px 22px;border-radius:999px;letter-spacing:.3px;background:linear-gradient(180deg,var(--fg-dusty-blue,#7FA3B0),var(--fg-dusty-blue-dark,#5C8794));box-shadow:0 3px 0 rgba(0,0,0,.12);}
+  .gc2-title{font-size:26px;font-weight:800;color:var(--ink);margin-bottom:6px;line-height:1.2;}
+  .gc2-desc{font-size:14px;color:var(--ink-soft);margin-bottom:20px;line-height:1.4;}
+  .gc2-progress-row{display:flex;justify-content:space-between;align-items:baseline;font-size:17px;font-weight:800;color:var(--ink);margin-bottom:10px;}
+  .gc2-progress-track{position:relative;height:16px;border-radius:999px;background:var(--fg-bg-surface-sunken,#E6D5B8);box-shadow:inset 0 2px 4px rgba(110,85,64,.18);overflow:visible;}
+  .gc2-progress-fill{height:100%;border-radius:999px;background:linear-gradient(180deg,#9BD0B6,var(--fg-accent-tertiary,#72B396));transition:width .6s cubic-bezier(.2,.8,.3,1);}
+  .gc2-progress-cap{position:absolute;left:0;top:50%;transform:translate(-15%,-50%);width:20px;height:20px;border-radius:50%;background:linear-gradient(180deg,#F6E4C4,#D9C4A0);box-shadow:0 2px 0 rgba(110,85,64,.25);}
 
   /* ---------- SEVİYE HARİTASI ---------- */
   .lm-summary{text-align:center;margin-bottom:18px;}
@@ -820,6 +884,33 @@
     </div>
   </div>
 
+  <!-- ============ RC2: yeni nesil bitiş ekranı (şimdilik yalnızca Gökdelen Bilgini) ============ -->
+  <div id="resultScreenSkyscraper" class="hidden">
+    <div class="rc2-wrap">
+      <div class="rc2-confetti" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="rc2-card">
+        <div class="rc2-medallion"><img src="../assets/images/icons/mode_quiz_buildings.png" alt="Gökdelen Bilgini"></div>
+        <h2 class="rc2-title">Gökdelen Bilgini Bitti!</h2>
+        <p class="rc2-stat" id="rs2Detail"></p>
+        <p class="rc2-xp" id="rs2Xp"></p>
+        <div id="rs2Reward" class="rc2-box"></div>
+        <div class="rc2-box rc2-progress">
+          <div class="rc2-motiv" id="rs2Motiv"></div>
+          <div class="rc2-bignum"><span class="rc2-bignum-icon">📚</span><span id="rs2WordCount">0</span></div>
+          <div class="rc2-bignum-caption">Şu ana kadar doğru bildiğin kelime</div>
+          <div class="rc2-goal-label">🎯 Hedef: <span id="rs2GoalMax">1000</span> kelime</div>
+          <div class="rc2-bar"><div class="rc2-bar-fill" id="rs2ProgFill"></div></div>
+          <div class="rc2-remaining" id="rs2Remaining"></div>
+        </div>
+        <button class="btn rc2-cta" onclick="goHome()">Devam Et →</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="../assets/js/storage.js"></script>
@@ -984,7 +1075,7 @@ function renderAchievementsScreen(){
   box.innerHTML = html;
 }
 function show(id){
-  ['home','onboarding','achievements','buildingJourney','reviewWords','levelMap','quiz','scramble','piano','picmatch','memory','listen','spelling','fillgap','mapdet','snake','rocket','crossword','story','resultScreen']
+  ['home','onboarding','achievements','buildingJourney','reviewWords','levelMap','quiz','scramble','piano','picmatch','memory','listen','spelling','fillgap','mapdet','snake','rocket','crossword','story','resultScreen','resultScreenSkyscraper']
     .forEach(function(s){document.getElementById(s).classList.add('hidden');});
   document.getElementById(id).classList.remove('hidden');
   hideBubble();
@@ -1220,6 +1311,49 @@ function showResult(e,t,d,x,reward){
   }
 }
 
+/* RC2: yeni nesil bitiş ekranı — şimdilik yalnızca Gökdelen Bilgini (quiz
+   modunun 'buildings' kategorisi) bunu kullanır. showResult() ile aynı
+   paylaşılan durumu (learnedWords, WORD_GOAL, MOTIV_MSGS, lastBalloonCount,
+   showLevelUpToast) okur; oyun mantığına veya ödül hesaplamasına dokunmaz —
+   yalnızca farklı bir DOM'a, farklı bir görsel düzende yazar. */
+function showResultSkyscraper(correct, total, reward){
+  document.getElementById('rs2Detail').textContent = correct+' / '+total+' doğru cevap';
+  document.getElementById('rs2Xp').innerHTML =
+    '<span class="rc2-star-ico">⭐</span><span>+'+(correct*10)+' XP</span><span class="rc2-star-ico">⭐</span>';
+
+  var rb = document.getElementById('rs2Reward');
+  if(reward && reward.breakdown && reward.breakdown.length){
+    var lines = reward.breakdown.map(function(b){
+      return '<div class="rw-line"><span>'+b.label+'</span><span>+'+b.amount+' <span class="rc2-coin">🪙</span></span></div>';
+    }).join('');
+    rb.innerHTML = '<div class="rw-title">🎁 Oyun Tamamlandı</div>'+lines+
+      '<div class="rw-total"><span>Toplam Kazanç</span><span>+'+reward.goldEarned+' <span class="rc2-coin">🪙</span></span></div>';
+    rb.classList.remove('hidden');
+  } else {
+    rb.innerHTML=''; rb.classList.add('hidden');
+  }
+
+  var cur = learnedWords.size;
+  var remaining = Math.max(0, WORD_GOAL-cur);
+  document.getElementById('rs2Motiv').textContent = rand(MOTIV_MSGS);
+  document.getElementById('rs2WordCount').textContent = cur;
+  document.getElementById('rs2GoalMax').textContent = WORD_GOAL;
+  document.getElementById('rs2Remaining').innerHTML = remaining>0
+    ? '🏁 Hedefe sadece <b>'+remaining+' kelime</b> kaldı!'
+    : '🎉 <b>HEDEFE ULAŞTIN!</b> Yeni hedef seni bekliyor!';
+  var fill2 = document.getElementById('rs2ProgFill');
+  fill2.style.width = Math.min(100, lastBalloonCount/WORD_GOAL*100)+'%';
+  setTimeout(function(){ fill2.style.width = Math.min(100, cur/WORD_GOAL*100)+'%'; }, 200);
+  if(cur>lastBalloonCount) setTimeout(function(){sfx('tick');},700);
+  lastBalloonCount = cur;
+
+  show('resultScreenSkyscraper');
+  renderTower();
+  if(reward && reward.levelResult && reward.levelResult.leveledUp){
+    setTimeout(function(){ showLevelUpToast(reward.levelResult); }, 900);
+  }
+}
+
 /* ================= ANA EKRAN OYUN LİSTESİ ================= */
 var MODES = [
  {key:'quiz_buildings', cls:'b', e:'🏙️', tag:'BİLGİ YARIŞMASI', n:'Gökdelen Bilgini', d:'Bina bilgileri + kelimeler', fn:function(){startQuiz('buildings');}},
@@ -1238,9 +1372,81 @@ var MODES = [
  {key:'piano', cls:'a', e:'🎹', tag:'NOTA OYUNU', n:'Nota Kelimeleri', d:'Piyanoyla kelime çal!', fn:startPiano},
  {key:'review', cls:'b', e:'🧠', tag:'TEKRAR', n:'Kelime Tekrarı', d:'Zorlandığın kelimeleri tekrar et', fn:startReview},
 ];
+/* Kademeli görsel geçiş: yalnızca Gökdelen Bilgini (quiz_buildings) yeni
+   GC2 kart bileşenini kullanır; kalan tüm modlar mevcut .cat tasarımıyla
+   değişmeden çalışmaya devam eder. */
+var GC2_MIGRATED_KEYS = {quiz_buildings:true};
+function getFavorites(){
+  var f = window.safeGet(window.STORAGE_KEYS.favorites, null);
+  if(!f || typeof f !== 'object' || Array.isArray(f)) f = {};
+  return f;
+}
+function isFavoriteMode(key){ return !!getFavorites()[key]; }
+function toggleFavoriteMode(key){
+  var f = getFavorites();
+  f[key] = !f[key];
+  window.safeSet(window.STORAGE_KEYS.favorites, f);
+  sfx('tick');
+  renderModes();
+}
+function buildSkyscraperCard(m){
+  var level = window.getModeLevel ? window.getModeLevel(m.key) : 1;
+  var pct = window.getModePercent ? window.getModePercent(m.key) : 0;
+  var fav = isFavoriteMode(m.key);
+
+  var card = document.createElement('div');
+  card.className = 'gc2-card';
+  card.setAttribute('role','button');
+  card.setAttribute('tabindex','0');
+  card.setAttribute('aria-label', m.n+' — seviye haritasını aç');
+  card.onclick = function(){ openLevelMap(m); };
+  card.onkeydown = function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openLevelMap(m); } };
+
+  var star = document.createElement('button');
+  star.type = 'button';
+  star.className = 'gc2-star'+(fav?' active':'');
+  star.setAttribute('aria-pressed', fav?'true':'false');
+  star.setAttribute('aria-label', fav ? 'Favorilerden çıkar' : 'Favorilere ekle');
+  star.textContent = fav ? '⭐' : '☆';
+  star.onclick = function(e){ e.stopPropagation(); toggleFavoriteMode(m.key); };
+  card.appendChild(star);
+
+  var iconWrap = document.createElement('div'); iconWrap.className = 'gc2-icon-wrap';
+  var icon = document.createElement('img'); icon.className = 'gc2-icon'; icon.loading = 'lazy';
+  icon.src = '../assets/images/icons/mode_'+m.key+'.png'; icon.alt = m.n+' simgesi';
+  iconWrap.appendChild(icon);
+  card.appendChild(iconWrap);
+
+  var tag = document.createElement('div'); tag.className = 'gc2-tag'; tag.textContent = m.tag;
+  card.appendChild(tag);
+
+  var title = document.createElement('h3'); title.className = 'gc2-title'; title.textContent = m.n;
+  card.appendChild(title);
+
+  var desc = document.createElement('p'); desc.className = 'gc2-desc'; desc.textContent = m.d;
+  card.appendChild(desc);
+
+  var progRow = document.createElement('div'); progRow.className = 'gc2-progress-row';
+  var lvlSpan = document.createElement('span'); lvlSpan.textContent = 'Seviye '+level;
+  var pctSpan = document.createElement('span'); pctSpan.textContent = '%'+pct;
+  progRow.appendChild(lvlSpan); progRow.appendChild(pctSpan);
+  card.appendChild(progRow);
+
+  var track = document.createElement('div'); track.className = 'gc2-progress-track';
+  var fill = document.createElement('div'); fill.className = 'gc2-progress-fill'; fill.style.width = pct+'%';
+  var cap = document.createElement('span'); cap.className = 'gc2-progress-cap';
+  track.appendChild(fill); track.appendChild(cap);
+  card.appendChild(track);
+
+  return card;
+}
 function renderModes(){
   var g=document.getElementById('modeGrid'); g.innerHTML='';
   MODES.forEach(function(m){
+    if(GC2_MIGRATED_KEYS[m.key]){
+      g.appendChild(buildSkyscraperCard(m));
+      return;
+    }
     var b=document.createElement('button');
     b.className='cat '+m.cls;
     var level = window.getModeLevel ? window.getModeLevel(m.key) : 1;
@@ -1481,9 +1687,14 @@ function finishQuiz(){
   var good = s.correct >= total*0.7 && s.correct>0;
   if(good) sfx('win');
   var reward = completeGameSession('quiz', {correct:s.correct, total:total, perfect: !s.timed && total>0 && s.correct===total, levelKey:'quiz_'+s.cat});
-  showResult(good?'🏆':'💪', good?'Harikasın!':'İyi deneme!',
-    s.correct+' / '+total+' doğru'+(s.timed?' · Zamana karşı!':''),
-    '+'+(s.correct*10)+' XP · Kulen '+s.correct+' kat yükseldi!', reward);
+  if(s.cat === 'buildings'){
+    /* Gökdelen Bilgini: yeni RC2 bitiş ekranı (bkz. showResultSkyscraper). */
+    showResultSkyscraper(s.correct, total, reward);
+  } else {
+    showResult(good?'🏆':'💪', good?'Harikasın!':'İyi deneme!',
+      s.correct+' / '+total+' doğru'+(s.timed?' · Zamana karşı!':''),
+      '+'+(s.correct*10)+' XP · Kulen '+s.correct+' kat yükseldi!', reward);
+  }
 }
 
 /* ================= 3) RESİM EŞLEŞTİRME ================= */
