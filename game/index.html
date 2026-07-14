@@ -55,8 +55,9 @@
 
   /* ---------- ROZETLER ---------- */
   .ach-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
-  .ach-card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px;text-align:center;}
+  .ach-card{background:var(--fg-bg-surface,var(--card));border-radius:var(--fg-radius-lg,18px);box-shadow:var(--fg-shadow-md,var(--shadow));padding:14px;text-align:center;}
   .ach-card .ach-icon{font-size:34px;margin-bottom:6px;}
+  .ach-card .ach-icon-img{width:64px;height:64px;object-fit:contain;margin-bottom:6px;filter:drop-shadow(0 3px 4px rgba(110,85,64,.18));}
   .ach-card .ach-title{font-weight:700;font-size:13.5px;margin-bottom:3px;}
   .ach-card .ach-desc{font-size:11px;color:var(--ink-soft);line-height:1.4;min-height:30px;}
   .ach-card .ach-progress{font-size:11px;color:var(--blue);font-weight:700;margin-top:6px;}
@@ -100,14 +101,47 @@
 
   .badge-unlock-card{padding-top:34px;}
   .badge-unlock-icon{font-size:54px;margin-bottom:6px;animation:badgePop .6s cubic-bezier(.2,.9,.3,1.3);}
+  .badge-unlock-icon-img{width:88px;height:88px;object-fit:contain;margin-bottom:6px;animation:badgePop .6s cubic-bezier(.2,.9,.3,1.3);filter:drop-shadow(0 4px 6px rgba(110,85,64,.2));}
   @keyframes badgePop{0%{transform:scale(0) rotate(-15deg);opacity:0}60%{transform:scale(1.15) rotate(6deg);opacity:1}100%{transform:scale(1) rotate(0)}}
   .badge-unlock-title{font-size:18px;font-weight:700;color:var(--blue);margin:4px 0;}
   .badge-unlock-reward{font-size:15px;font-weight:700;color:#7A510C;margin-top:10px;}
 
-  .reward-summary{background:#FFF7E8;border-radius:16px;padding:12px 14px;margin-top:14px;text-align:left;}
-  .reward-summary .rw-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;}
-  .reward-summary .rw-line{font-size:13px;color:var(--ink-soft);display:flex;justify-content:space-between;padding:2px 0;}
-  .reward-summary .rw-total{font-size:14.5px;font-weight:700;color:#7A510C;border-top:1.5px dashed #E9D6A8;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;}
+  /* ---------- EVRENSEL OYUN BİTİŞ EKRANI (tüm oyunlarda TEK tasarım) ---------- */
+  .result-wrap{position:relative;padding:44px 6px 20px;max-width:440px;margin:0 auto;}
+  .rc-confetti{position:absolute;inset:0;pointer-events:none;overflow:visible;}
+  .rc-confetti span{position:absolute;width:8px;height:16px;border-radius:5px;opacity:.85;animation:confettiFloat 3.2s ease-in-out infinite;}
+  .rc-confetti span:nth-child(1){left:2%;top:6%;background:#7FA3B0;transform:rotate(18deg);animation-delay:0s;}
+  .rc-confetti span:nth-child(2){left:10%;top:32%;background:#E0AE4D;transform:rotate(-12deg);animation-delay:.3s;}
+  .rc-confetti span:nth-child(3){left:4%;top:58%;background:#B3A1C7;transform:rotate(30deg);animation-delay:.6s;}
+  .rc-confetti span:nth-child(4){left:14%;top:80%;background:#E08A5B;transform:rotate(-20deg);animation-delay:.9s;}
+  .rc-confetti span:nth-child(5){left:22%;top:10%;background:#8FAE87;transform:rotate(10deg);animation-delay:1.2s;}
+  .rc-confetti span:nth-child(6){right:2%;top:8%;background:#B3A1C7;transform:rotate(-16deg);animation-delay:.15s;}
+  .rc-confetti span:nth-child(7){right:9%;top:30%;background:#7FA3B0;transform:rotate(22deg);animation-delay:.45s;}
+  .rc-confetti span:nth-child(8){right:3%;top:56%;background:#E0AE4D;transform:rotate(-28deg);animation-delay:.75s;}
+  .rc-confetti span:nth-child(9){right:13%;top:78%;background:#8FAE87;transform:rotate(14deg);animation-delay:1.05s;}
+  .rc-confetti span:nth-child(10){right:20%;top:4%;background:#E08A5B;transform:rotate(-10deg);animation-delay:1.35s;}
+  .rc-confetti span:nth-child(11){left:36%;top:2%;background:#E0AE4D;transform:rotate(24deg);animation-delay:.5s;}
+  .rc-confetti span:nth-child(12){right:34%;top:3%;background:#7FA3B0;transform:rotate(-18deg);animation-delay:1s;}
+  @keyframes confettiFloat{0%,100%{transform:translateY(0) rotate(var(--r,0deg));}50%{transform:translateY(-8px) rotate(var(--r,0deg));}}
+  .result-card{position:relative;background:var(--fg-bg-surface,var(--card));border-radius:32px;box-shadow:0 16px 34px rgba(110,85,64,.18);padding:50px 20px 24px;text-align:center;}
+  .rc-badge{position:absolute;top:-32px;left:50%;transform:translateX(-50%);width:72px;height:72px;border-radius:50%;background:var(--fg-bg-surface,#fff);box-shadow:0 8px 16px rgba(110,85,64,.24);display:flex;align-items:center;justify-content:center;font-size:36px;border:4px solid var(--fg-bg-app,var(--bg));}
+  .rc-title{font-size:21px;font-weight:800;color:var(--ink);margin-bottom:8px;line-height:1.3;}
+  .rc-stat{font-size:14px;color:var(--ink-soft);font-weight:700;margin-bottom:2px;}
+  .rc-xp{font-size:17px;font-weight:800;color:var(--fg-accent-tertiary,var(--green));margin-bottom:16px;}
+  .rc-box{background:var(--fg-bg-surface-sunken,#FFF7E8);border-radius:18px;padding:14px 16px;margin-bottom:12px;text-align:left;}
+  .rc-box .rw-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+  .rc-box .rw-line{font-size:13px;color:var(--ink-soft);display:flex;justify-content:space-between;padding:3px 0;}
+  .rc-box .rw-total{font-size:14.5px;font-weight:700;color:#7A510C;border-top:1.5px dashed #E9D6A8;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;}
+  .rc-progress{text-align:center;}
+  .rc-motiv{font-size:14px;font-weight:700;margin-bottom:10px;line-height:1.4;color:var(--ink);}
+  .rc-bignum{display:flex;align-items:center;justify-content:center;gap:8px;font-size:28px;font-weight:800;color:var(--fg-accent-tertiary,var(--green));}
+  .rc-bignum-icon{font-size:24px;}
+  .rc-bignum-caption{font-size:12px;color:var(--ink-soft);margin:2px 0 12px;}
+  .rc-goal-label{font-size:12.5px;font-weight:700;margin-bottom:6px;color:var(--ink);}
+  .rc-bar{height:16px;border-radius:999px;background:var(--fg-bg-surface,#DCE6EE);overflow:hidden;}
+  .rc-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#72B396,#9BD0B6);width:0%;transition:width 1s cubic-bezier(.2,.8,.3,1);}
+  .rc-remaining{font-size:12.5px;font-weight:700;margin-top:8px;color:var(--ink);}
+  .rc-cta{margin-top:6px;}
 
   .tower-card{background:linear-gradient(180deg,#D6E4F3 0%,#F5F9FD 100%);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 18px;margin-bottom:16px;display:flex;gap:20px;align-items:center;overflow:hidden;position:relative;}
   .tower-card::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#FFF3D9 0%,transparent 70%);opacity:.8;}
@@ -129,9 +163,11 @@
   .goal-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#72B396,#9BD0B6);width:0%;transition:width 1.2s cubic-bezier(.2,.8,.3,1);position:relative;}
 
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  .cat{border:none;cursor:pointer;text-align:left;background:var(--fg-bg-surface,var(--card));border-radius:var(--fg-radius-lg,var(--radius));padding:16px;box-shadow:var(--fg-shadow-md,var(--shadow));display:flex;flex-direction:column;gap:8px;transition:transform .12s ease,box-shadow .12s ease;font-family:inherit;color:var(--ink);border:1px solid var(--fg-border-soft,transparent);}
+  .cat{border:none;cursor:pointer;text-align:left;background:var(--fg-bg-surface,var(--card));border-radius:var(--fg-radius-lg,var(--radius));padding:14px;box-shadow:var(--fg-shadow-md,var(--shadow));display:flex;flex-direction:column;gap:8px;transition:transform .12s ease,box-shadow .12s ease;font-family:inherit;color:var(--ink);border:1px solid var(--fg-border-soft,transparent);}
   .cat:active{transform:scale(.96) translateY(1px);box-shadow:var(--fg-shadow-sm,var(--shadow));}
-  .cat .emoji{font-size:30px;}
+  .cat-top{display:flex;align-items:flex-start;justify-content:space-between;}
+  .cat-icon{width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(110,85,64,.18));}
+  .cat-star{font-size:19px;background:var(--fg-bg-surface-sunken,#F3E9D6);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -2px 3px rgba(110,85,64,.12);flex-shrink:0;}
   .cat h3{font-size:14.5px;font-weight:800;}
   .cat p{font-size:11.5px;color:var(--ink-soft);line-height:1.35;}
   .tag{align-self:flex-start;font-size:10px;font-weight:700;color:#fff;padding:3px 10px;border-radius:999px;letter-spacing:.3px;}
@@ -215,10 +251,6 @@
   .btn.ghost{background:#E2E9F1;color:var(--ink);box-shadow:0 4px 0 rgba(51,65,92,.08);}
   .btn.small{width:auto;padding:10px 16px;font-size:13px;margin:4px;}
 
-  .result{text-align:center;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:30px 20px;}
-  .result .big{font-size:46px;margin-bottom:10px;}
-  .result h2{margin-bottom:8px;font-size:20px;}
-  .result p{color:var(--ink-soft);font-size:14px;margin-bottom:6px;}
   .demo-note{margin-top:18px;text-align:center;font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
   .feedback{min-height:24px;text-align:center;font-weight:700;font-size:14px;margin-top:10px;}
   .feedback.ok{color:#4E9670;} .feedback.no{color:var(--red-soft);}
@@ -282,7 +314,7 @@
     .game-body{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start;}
     .game-body > div > .qcard, .game-body > .qcard{margin-bottom:0;}
     .gb-single{max-width:660px;margin:0 auto;}
-    .result{max-width:480px;margin:0 auto;}
+    .result-wrap{max-width:480px;margin:0 auto;}
     .mem-grid{grid-template-columns:repeat(4,1fr);}
     .mem-card{font-size:15px;}
     .big-emoji{font-size:92px;}
@@ -745,15 +777,30 @@
     </div>
   </div>
 
-  <!-- ============ SONUÇ ============ -->
+  <!-- ============ SONUÇ (TÜM OYUNLARDA TEK ORTAK TASARIM) ============ -->
   <div id="resultScreen" class="hidden">
-    <div class="result">
-      <div class="big" id="resEmoji">🏆</div>
-      <h2 id="resTitle"></h2>
-      <p id="resDetail"></p>
-      <p id="resXp"></p>
-      <div id="resReward" class="reward-summary"></div>
-      <button class="btn" onclick="goHome()">Kuleme Dön 🏙️</button>
+    <div class="result-wrap">
+      <div class="rc-confetti" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span>
+      </div>
+      <div class="result-card">
+        <div class="rc-badge" id="resEmoji">🏆</div>
+        <h2 class="rc-title" id="resTitle"></h2>
+        <p class="rc-stat" id="resDetail"></p>
+        <p class="rc-xp" id="resXp"></p>
+        <div id="resReward" class="rc-box"></div>
+        <div class="rc-box rc-progress">
+          <div class="rc-motiv" id="resMotiv"></div>
+          <div class="rc-bignum"><span class="rc-bignum-icon">📚</span><span id="resWordCount">0</span></div>
+          <div class="rc-bignum-caption">Şu ana kadar doğru bildiğin kelime</div>
+          <div class="rc-goal-label">🎯 Hedef: <span id="resGoalMax">1000</span> kelime</div>
+          <div class="rc-bar"><div class="rc-bar-fill" id="resProgFill"></div></div>
+          <div class="rc-remaining" id="resRemaining"></div>
+        </div>
+        <button class="btn rc-cta" onclick="goHome()">Devam Et →</button>
+      </div>
     </div>
   </div>
 
@@ -892,14 +939,24 @@ function openAchievements(){
   renderAchievementsScreen();
   show('achievements');
 }
+var BADGE_ART_IDS = {
+  'first-step':1,'word-explorer':1,'word-collector':1,'word-master':1,
+  'perfect-round':1,'perfect-five':1,'tower-starter':1,'tower-builder':1,
+  'tower-architect':1,'tower-legend':1,'memory-rookie':1,'listening-star':1,
+  'spelling-bee':1,'story-reader':1,'puzzle-solver':1,'rocket-pilot':1,
+  'daily-learner':1,'weekly-hero':1,'gold-saver':1,'treasure-master':1
+};
 function renderAchievementsScreen(){
   var badges = window.getBadges ? window.getBadges() : [];
   var unlockedCount = badges.filter(function(b){return b.unlocked;}).length;
   var box = document.getElementById('achList');
   var html = '<div class="ach-summary">'+unlockedCount+' / '+badges.length+' rozet kazanıldı 🏅</div><div class="ach-grid">';
   badges.forEach(function(b){
+    var iconHtml = BADGE_ART_IDS[b.id]
+      ? '<img class="ach-icon-img" src="../assets/images/badges/badge_'+b.id+'.png" alt="" loading="lazy">'
+      : '<div class="ach-icon">'+b.icon+'</div>';
     html += '<div class="ach-card '+(b.unlocked?'':'locked')+'">' +
-      '<div class="ach-icon">'+b.icon+'</div>' +
+      iconHtml +
       '<div class="ach-title">'+b.title+'</div>' +
       '<div class="ach-desc">'+b.description+'</div>' +
       (b.unlocked
@@ -1096,7 +1153,11 @@ function hideBubble(){
 }
 document.addEventListener('click', hideBubble);
 
-/* ================= MOTİVASYON BALONU ================= */
+/* ================= EVRENSEL OYUN BİTİŞ EKRANI ================= */
+/* Tüm oyun modları tarafından çağrılan TEK ortak sonuç ekranı. Tasarım
+   (kart, rozet çentiği, ödül kutusu, ilerleme kutusu, buton) her zaman
+   aynıdır — yalnızca ikon/başlık/alt başlık/XP/istatistik/ilerleme
+   değerleri oyundan oyuna değişir. */
 var MOTIV_MSGS = [
 "Harika gidiyorsun! 🚀",
 "Kulen yükseliyor, kelimelerin artıyor! 🏗️",
@@ -1105,36 +1166,6 @@ var MOTIV_MSGS = [
 "Dünya senin, kelimeler cebinde! 🌍",
 "Gezegenler bile seni alkışlıyor! 🪐"
 ];
-function showMotivation(){
-  var cur = learnedWords.size;
-  var overlay=document.createElement('div');
-  overlay.className='motiv-overlay';
-  var remaining = Math.max(0, WORD_GOAL-cur);
-  var remainText = remaining>0
-    ? '🏁 Hedefe sadece <b>'+remaining+' kelime</b> kaldı!'
-    : '🎉 <b>HEDEFE ULAŞTIN!</b> Yeni hedef seni bekliyor!';
-  overlay.innerHTML =
-    '<div class="motiv-card">'+
-      '<div class="motiv-balloon">🎈</div>'+
-      '<div class="motiv-msg">'+rand(MOTIV_MSGS)+'</div>'+
-      '<div class="motiv-count">📚 '+cur+'</div>'+
-      '<div class="motiv-sub">şu ana kadar doğru bildiğin kelime</div>'+
-      '<div class="motiv-goal">'+
-        '<div class="goal-text">🎯 Hedef: '+WORD_GOAL+' kelime</div>'+
-        '<div class="goal-bar"><div class="goal-fill" id="motivFill"></div></div>'+
-        '<div class="motiv-remaining">'+remainText+'</div>'+
-      '</div>'+
-      '<div class="motiv-close">devam etmek için dokun</div>'+
-    '</div>';
-  overlay.onclick=function(){ overlay.remove(); };
-  document.body.appendChild(overlay);
-  var fill=document.getElementById('motivFill');
-  fill.style.width = Math.min(100, lastBalloonCount/WORD_GOAL*100)+'%';
-  setTimeout(function(){ fill.style.width = Math.min(100, cur/WORD_GOAL*100)+'%'; }, 120);
-  if(cur>lastBalloonCount) setTimeout(function(){sfx('tick');},600);
-  lastBalloonCount = cur;
-  setTimeout(function(){ if(overlay.parentNode) overlay.remove(); }, 6000);
-}
 function showResult(e,t,d,x,reward){
   document.getElementById('resEmoji').textContent=e;
   document.getElementById('resTitle').textContent=t;
@@ -1151,12 +1182,25 @@ function showResult(e,t,d,x,reward){
   } else {
     rb.innerHTML=''; rb.classList.add('hidden');
   }
+
+  var cur = learnedWords.size;
+  var remaining = Math.max(0, WORD_GOAL-cur);
+  document.getElementById('resMotiv').textContent = rand(MOTIV_MSGS);
+  document.getElementById('resWordCount').textContent = cur;
+  document.getElementById('resGoalMax').textContent = WORD_GOAL;
+  document.getElementById('resRemaining').innerHTML = remaining>0
+    ? '🏁 Hedefe sadece <b>'+remaining+' kelime</b> kaldı!'
+    : '🎉 <b>HEDEFE ULAŞTIN!</b> Yeni hedef seni bekliyor!';
+  var fill=document.getElementById('resProgFill');
+  fill.style.width = Math.min(100, lastBalloonCount/WORD_GOAL*100)+'%';
+  setTimeout(function(){ fill.style.width = Math.min(100, cur/WORD_GOAL*100)+'%'; }, 200);
+  if(cur>lastBalloonCount) setTimeout(function(){sfx('tick');},700);
+  lastBalloonCount = cur;
+
   show('resultScreen');
   renderTower();
   if(reward && reward.levelResult && reward.levelResult.leveledUp){
-    setTimeout(function(){ showLevelUpToast(reward.levelResult); }, 600);
-  } else {
-    setTimeout(showMotivation, 700);
+    setTimeout(function(){ showLevelUpToast(reward.levelResult); }, 900);
   }
 }
 
@@ -1185,7 +1229,12 @@ function renderModes(){
     b.className='cat '+m.cls;
     var level = window.getModeLevel ? window.getModeLevel(m.key) : 1;
     var pct = window.getModePercent ? window.getModePercent(m.key) : 0;
-    b.innerHTML='<span class="emoji">'+m.e+'</span><span class="tag">'+m.tag+'</span><h3>'+m.n+'</h3><p>'+m.d+'</p>'+
+    b.innerHTML=
+      '<div class="cat-top">'+
+        '<img class="cat-icon" src="../assets/images/icons/mode_'+m.key+'.png" alt="" loading="lazy">'+
+        '<span class="cat-star">⭐</span>'+
+      '</div>'+
+      '<span class="tag">'+m.tag+'</span><h3>'+m.n+'</h3><p>'+m.d+'</p>'+
       '<div class="cat-progress"><div class="cp-line"><span>Seviye '+level+'</span><span>%'+pct+'</span></div>'+
       '<div class="cp-bar"><div class="cp-fill" style="width:'+pct+'%"></div></div></div>';
     b.onclick=function(){ openLevelMap(m); };

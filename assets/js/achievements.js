@@ -115,9 +115,11 @@
   function showBadgeUnlockPopup(badge, onClose){
     var overlay = document.createElement('div');
     overlay.className = 'motiv-overlay badge-unlock-overlay';
+    var iconHtml = '<img class="badge-unlock-icon-img" src="../assets/images/badges/badge_'+badge.id+'.png" alt="" ' +
+      'onerror="this.outerHTML=\'<div class=&quot;badge-unlock-icon&quot;>'+badge.icon+'</div>\'">';
     overlay.innerHTML =
       '<div class="motiv-card badge-unlock-card">' +
-        '<div class="badge-unlock-icon">'+badge.icon+'</div>' +
+        iconHtml +
         '<div class="motiv-msg">Yeni Rozet! 🎉</div>' +
         '<div class="badge-unlock-title">'+badge.title+'</div>' +
         '<div class="motiv-sub">'+badge.description+'</div>' +
