@@ -297,3 +297,48 @@ a{color:inherit;}
   .lp-badge-img{height:76px;}
   .lp-avatar-img{width:56px;height:56px;}
 }
+
+/* ---------- Gelecek Projeler ---------- */
+.lp-upcoming{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.lp-up-card{
+  position:relative;
+  background:var(--fg-surface-card);
+  border:1.5px solid var(--fg-border-soft);
+  border-radius:var(--fg-radius-lg);
+  box-shadow:var(--fg-shadow-md);
+  padding:22px 18px;text-align:center;
+  transition:transform var(--fg-motion-base) var(--fg-ease-soft), box-shadow var(--fg-motion-base);
+}
+.lp-up-card:hover{transform:translateY(-5px);box-shadow:var(--fg-shadow-lg);}
+.lp-up-card img{width:150px;height:150px;border-radius:18%;margin:6px auto 14px;box-shadow:var(--fg-shadow-md);}
+.lp-up-card h3{font-size:19px;font-weight:var(--fg-font-weight-black);margin-bottom:2px;}
+.lp-up-slogan{font-size:13px;font-weight:var(--fg-font-weight-black);color:var(--fg-terracotta-dark);margin-bottom:10px;}
+.lp-up-card p{font-size:13px;color:var(--fg-text-secondary);line-height:1.55;}
+.lp-up-pill{
+  position:absolute;top:14px;right:14px;
+  background:var(--fg-surface-accent-gold);
+  color:var(--fg-warm-brown);
+  font-size:10px;font-weight:var(--fg-font-weight-black);letter-spacing:1px;
+  border-radius:var(--fg-radius-pill);padding:6px 12px;
+  box-shadow:var(--fg-shadow-sm);
+}
+.lp-up-pill.idea{background:var(--fg-surface-accent-tertiary);color:var(--fg-white);}
+.lp-up-motto{
+  display:inline-block;margin-top:12px;
+  font-size:10.5px;font-weight:var(--fg-font-weight-black);letter-spacing:1.2px;
+  color:var(--fg-brown-soft);
+  background:var(--fg-bg-app);
+  border:1.5px solid var(--fg-border-soft);
+  border-radius:var(--fg-radius-pill);padding:7px 14px;
+}
+.lp-up-idea{border-style:dashed;border-width:2px;}
+.lp-up-ph{
+  width:150px;height:150px;border-radius:18%;
+  margin:6px auto 14px;
+  background:var(--fg-bg-app);
+  border:2.5px dashed var(--fg-border-strong, var(--fg-border-soft));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--fg-shadow-sm);
+}
+.lp-up-ph span{font-size:64px;filter:saturate(.9);}
+@media (max-width:980px){ .lp-upcoming{grid-template-columns:1fr;max-width:420px;margin:0 auto;} }
