@@ -244,19 +244,31 @@
   .lm-row{display:flex;flex-direction:row;align-items:flex-start;justify-content:center;}
   .lm-row.rev{flex-direction:row-reverse;}
   .lm-node-wrap{display:flex;flex-direction:column;align-items:center;position:relative;flex-shrink:0;}
-  .lm-node{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;color:#fff;background:var(--fg-bg-surface-sunken,#E6D5B8) center/cover no-repeat;box-shadow:var(--fg-shadow-sm,0 2px 6px rgba(0,0,0,.08));border:none;cursor:pointer;font-family:inherit;position:relative;flex-shrink:0;text-shadow:0 1px 3px rgba(0,0,0,.45);}
+  .lm-node{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;color:#fff;background:var(--fg-bg-surface-sunken,#E6D5B8) center/cover no-repeat;box-shadow:var(--fg-shadow-sm,0 2px 6px rgba(0,0,0,.08));border:none;cursor:pointer;font-family:inherit;position:relative;z-index:1;flex-shrink:0;text-shadow:0 1px 3px rgba(0,0,0,.45);}
   .lm-node.locked{background-image:url('../assets/images/ui/levelmap/level_node_locked.png');color:var(--fg-text-faint,#A08966);cursor:not-allowed;box-shadow:none;}
   .lm-node.done{background-image:url('../assets/images/ui/levelmap/level_node_completed.png');}
   .lm-node.current{background-image:url('../assets/images/ui/levelmap/level_node_current.png');animation:lmPulse 1.6s ease-in-out infinite;}
   @keyframes lmPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(179,161,199,.4);}50%{transform:scale(1.1);box-shadow:0 0 0 12px rgba(179,161,199,0);}}
-  .lm-connector{background:var(--fg-bg-surface-sunken,#EDE0CB);border-radius:3px;}
-  .lm-connector.h{width:22px;height:6px;margin-top:27px;flex-shrink:0;}
-  .lm-connector.v{width:6px;height:24px;}
+  /* .lm-connector: level_path.png/level_path_glow.png üretim dokusundan
+     tek bir "çubuk" bölgesi (kaynak 1774x887 üzerinde 304,426 - 424,459)
+     kırpılıp her bağlayıcı kutusuna sığdırılır — germe/bozulma olmadan.
+     .done sınıfı zaten renderLevelMap() içinde hesaplanıyor (ilerleme
+     mantığı değişmedi); burada sadece hangi dokunun kullanılacağını seçer.
+     Kırpma/ölçek aynı kalır; bağlayıcı kutusu düğüm halkasının altına
+     girecek kadar (10px her uçtan) genişletilip aynı dokunun ek bir
+     tekrarı repeat-x ile gösterilir — germe yok, sadece tekrar. z-index:0
+     ile düğüm/etiket/karakterin (z-index:1) her zaman üstte kalması
+     garanti edilir. */
+  .lm-connector{border-radius:3px;position:relative;z-index:0;}
+  .lm-connector.h{width:42px;height:6px;margin-top:27px;margin-left:-10px;margin-right:-10px;flex-shrink:0;background-image:url('../assets/images/ui/levelmap/level_path.png');background-size:323px 161px;background-position:-55px -77px;background-repeat:repeat-x;}
+  .lm-connector.h.done{background-image:url('../assets/images/ui/levelmap/level_path_glow.png');}
+  .lm-connector.v{width:6px;height:24px;position:relative;}
+  .lm-connector.v::before{content:'';position:absolute;top:50%;left:50%;width:44px;height:6px;transform:translate(-50%,-50%) rotate(90deg);border-radius:3px;background-image:url('../assets/images/ui/levelmap/level_path.png');background-size:323px 161px;background-position:-55px -77px;background-repeat:repeat-x;}
+  .lm-connector.v.done::before{background-image:url('../assets/images/ui/levelmap/level_path_glow.png');}
   .lm-connector.v.left{align-self:flex-start;margin-left:27px;}
   .lm-connector.v.right{align-self:flex-end;margin-right:27px;}
-  .lm-connector.done{background:var(--fg-accent-tertiary,var(--green));}
-  .lm-node-label{font-size:10px;color:var(--ink-soft);margin-top:4px;font-weight:700;max-width:70px;text-align:center;}
-  .lm-character{position:absolute;top:-6px;right:-30px;font-size:26px;animation:lmWave 1.8s ease-in-out infinite;}
+  .lm-node-label{font-size:10px;color:var(--ink-soft);margin-top:4px;font-weight:700;max-width:70px;text-align:center;position:relative;z-index:1;}
+  .lm-character{position:absolute;top:-6px;right:-30px;font-size:26px;z-index:1;animation:lmWave 1.8s ease-in-out infinite;}
   @keyframes lmWave{0%,100%{transform:rotate(-8deg) translateY(0);}50%{transform:rotate(8deg) translateY(-4px);}}
   .lm-legend{display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin-top:20px;background:var(--fg-bg-surface,var(--card));border-radius:14px;padding:12px 16px;box-shadow:var(--fg-shadow-sm,var(--shadow));}
   .lm-legend div{font-size:11.5px;font-weight:700;color:var(--ink-soft);display:flex;align-items:center;gap:8px;}
@@ -1533,7 +1545,10 @@ function renderLevelMap(){
       var node = document.createElement('button'); node.type='button';
       var state = mm.completed.indexOf(L)>=0 ? 'done' : (L===mm.level ? 'current' : (L<mm.level ? 'done' : 'locked'));
       node.className = 'lm-node '+state;
-      node.textContent = state==='locked' ? '🔒' : (state==='done' ? '✓' : L);
+      /* Görünür glif overlay'i kaldırıldı — üretim PNG'leri (kilit/onay/
+         rozet) kendi durum sembolünü zaten içeriyor; metin ikonu üstüne
+         binmesin diye node.textContent artık boş bırakılıyor. Erişilebilir
+         ad aria-label üzerinden korunuyor (bkz. aşağıda). */
       node.disabled = state==='locked';
       node.setAttribute('aria-label', 'Seviye '+L+', '+(state==='done'?'tamamlandı':state==='current'?'mevcut':'kilitli'));
       if(state==='current') node.setAttribute('aria-current', 'step');
