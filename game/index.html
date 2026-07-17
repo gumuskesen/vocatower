@@ -244,7 +244,12 @@
   .lm-row{display:flex;flex-direction:row;align-items:flex-start;justify-content:center;}
   .lm-row.rev{flex-direction:row-reverse;}
   .lm-node-wrap{display:flex;flex-direction:column;align-items:center;position:relative;flex-shrink:0;}
-  .lm-node{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;color:#fff;background:var(--fg-bg-surface-sunken,#E6D5B8) center/cover no-repeat;box-shadow:var(--fg-shadow-sm,0 2px 6px rgba(0,0,0,.08));border:none;cursor:pointer;font-family:inherit;position:relative;z-index:1;flex-shrink:0;text-shadow:0 1px 3px rgba(0,0,0,.45);}
+  /* background-size:135% tek bir paylaşılan yakınlaştırma: üretim rozet
+     PNG'lerinin (tamamlandı/mevcut/kilitli/normal) tuval içinde gereksiz
+     boş halka bıraktığı ölçüldü (görünür içerik yarıçapı ~%65-74); 135%
+     zoom bunu ~%90-100'e çıkarıp ince bir çerçeve payı bırakır — PNG'ler
+     değişmedi, tüm durumlar için tek paylaşılan kural. */
+  .lm-node{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;color:#fff;background:var(--fg-bg-surface-sunken,#E6D5B8) center/135% no-repeat;box-shadow:var(--fg-shadow-sm,0 2px 6px rgba(0,0,0,.08));border:none;cursor:pointer;font-family:inherit;position:relative;z-index:1;flex-shrink:0;text-shadow:0 1px 3px rgba(0,0,0,.45);}
   .lm-node.locked{background-image:url('../assets/images/ui/levelmap/level_node_locked.png');color:var(--fg-text-faint,#A08966);cursor:not-allowed;box-shadow:none;}
   .lm-node.done{background-image:url('../assets/images/ui/levelmap/level_node_completed.png');}
   .lm-node.current{background-image:url('../assets/images/ui/levelmap/level_node_current.png');animation:lmPulse 1.6s ease-in-out infinite;}
@@ -268,8 +273,13 @@
   .lm-connector.v.left{align-self:flex-start;margin-left:27px;}
   .lm-connector.v.right{align-self:flex-end;margin-right:27px;}
   .lm-node-label{font-size:10px;color:var(--ink-soft);margin-top:4px;font-weight:700;max-width:70px;text-align:center;position:relative;z-index:1;}
-  .lm-character{position:absolute;top:-6px;right:-30px;font-size:26px;z-index:1;animation:lmWave 1.8s ease-in-out infinite;}
-  @keyframes lmWave{0%,100%{transform:rotate(-8deg) translateY(0);}50%{transform:rotate(8deg) translateY(-4px);}}
+  /* .lm-character: mevcut düğümün yanında oyuncunun seçtiği avatarı
+     gösterir (window.renderAvatarImage ile aynı yardımcı, Ana Sayfa
+     profil başlığıyla aynı kaynak/geri dönüş davranışı). img kendi
+     içinde width/height:100% + border-radius:inherit kullanıyor, bu
+     yüzden bu kutunun genişlik/yükseklik/border-radius tanımlı olması
+     gerekiyor. */
+  .lm-character{position:absolute;top:-6px;right:-30px;width:28px;height:28px;border-radius:50%;overflow:hidden;background:var(--fg-bg-surface-sunken,#E6D5B8);border:2px solid var(--fg-bg-surface,#fff);box-shadow:var(--fg-shadow-sm,0 1px 4px rgba(0,0,0,.25));z-index:1;}
   .lm-legend{display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin-top:20px;background:var(--fg-bg-surface,var(--card));border-radius:14px;padding:12px 16px;box-shadow:var(--fg-shadow-sm,var(--shadow));}
   .lm-legend div{font-size:11.5px;font-weight:700;color:var(--ink-soft);display:flex;align-items:center;gap:8px;}
   .lm-legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
@@ -1511,11 +1521,12 @@ function openLevelMap(modeEntry){
   show('levelMap');
 }
 var LM_ROW_SIZE = 3;
-var LM_CHARACTERS = ['🧑‍🎓','🙋‍♀️','🧑‍🚀','🙋‍♂️','🧙‍♀️'];
 function renderLevelMap(){
   var m = lmCurrentMode;
   document.getElementById('lmTitle').textContent = m.e+' '+m.n;
   var mm = window.getModeMap(m.key);
+  var lmProfile = window.getProfile ? window.getProfile() : null;
+  var lmAvatarId = lmProfile ? lmProfile.avatarId : 'avatar-01';
   var cap = window.LEVEL_CAP;
   var pct = window.getModePercent(m.key);
   document.getElementById('lmPct').textContent = '%'+pct;
@@ -1556,10 +1567,11 @@ function renderLevelMap(){
       wrap.appendChild(node);
       var label = document.createElement('div'); label.className='lm-node-label'; label.textContent='Seviye '+L;
       wrap.appendChild(label);
-      if(rowIdx===currentRow && L===mm.level){
+      if(rowIdx===currentRow && L===mm.level && window.renderAvatarImage){
         var chara = document.createElement('div');
         chara.className = 'lm-character';
-        chara.textContent = LM_CHARACTERS[rowIdx % LM_CHARACTERS.length];
+        chara.setAttribute('aria-hidden', 'true');
+        chara.innerHTML = window.renderAvatarImage(lmAvatarId, 28);
         wrap.appendChild(chara);
       }
       row.appendChild(wrap);
