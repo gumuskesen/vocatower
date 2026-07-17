@@ -236,6 +236,11 @@
   .lm-summary .lm-pct{font-size:30px;font-weight:800;color:var(--fg-accent-secondary,var(--blue));}
   .lm-summary .lm-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
   .lm-path{display:flex;flex-direction:column;align-items:center;gap:0;padding:8px 4px 24px;}
+  /* .lm-track: satırlar + dikey bağlayıcıların ortak sabit genişlikli
+     çerçevesi (3 düğüm + 2 yatay bağlayıcı = 60*3 + 22*2). .lm-connector.v
+     bu genişliğe göre hizalanır — ekranın tam genişliğine göre değil —
+     böylece her viewport'ta doğru düğüm sütununa değer, sürüklenmez. */
+  .lm-track{display:flex;flex-direction:column;gap:0;width:calc(60px*3 + 22px*2);}
   .lm-row{display:flex;flex-direction:row;align-items:flex-start;justify-content:center;}
   .lm-row.rev{flex-direction:row-reverse;}
   .lm-node-wrap{display:flex;flex-direction:column;align-items:center;position:relative;flex-shrink:0;}
@@ -1504,6 +1509,11 @@ function renderLevelMap(){
   document.getElementById('lmPct').textContent = '%'+pct;
   document.getElementById('lmSub').textContent = 'Seviye '+mm.level+' / '+cap;
   var path = document.getElementById('lmPath'); path.innerHTML='';
+  /* .lm-track: satırlarla aynı genişlikte, sabit ölçülü bir sarmalayıcı —
+     dikey bağlayıcılar (.lm-connector.v) bu sarmalayıcıya göre hizalanır,
+     tüm ekran genişliğine göre değil. Böylece 390/768/1440px'de hep aynı
+     düğüm sütununa değer. */
+  var track = document.createElement('div'); track.className='lm-track';
   var currentRow = Math.floor((mm.level-1)/LM_ROW_SIZE);
   var lvl = 1;
   var rowIdx = 0;
@@ -1539,14 +1549,15 @@ function renderLevelMap(){
       }
       row.appendChild(wrap);
     });
-    path.appendChild(row);
+    track.appendChild(row);
     if(lvl<=cap){
       var vconn = document.createElement('div');
       vconn.className = 'lm-connector v'+(reversed?' left':' right')+(mm.completed.indexOf(lvl-1)>=0 ? ' done' : '');
-      path.appendChild(vconn);
+      track.appendChild(vconn);
     }
     rowIdx++;
   }
+  path.appendChild(track);
   var legend = document.createElement('div');
   legend.className = 'lm-legend';
   legend.innerHTML =
