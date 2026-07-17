@@ -1418,7 +1418,7 @@ function renderResultScreen(cfg){
 
 /* ================= ANA EKRAN OYUN LİSTESİ ================= */
 var MODES = [
- {key:'quiz_buildings', cls:'b', e:'🏙️', tag:'BİLGİ YARIŞMASI', n:'Gökdelen Bilgini', d:'Bina bilgileri + kelimeler', icon:'../assets/images/ui/icons/modes/mode_skyscraper.png', fn:function(){startQuiz('buildings');}},
+ {key:'quiz_buildings', cls:'b', e:'🏙️', tag:'BİLGİ YARIŞMASI', n:'Gökdelen Bilgini', d:'Bina bilgileri + kelimeler', fn:function(){startQuiz('buildings');}},
  {key:'quiz_countries', cls:'g', e:'🌍', tag:'ZAMANA KARŞI', n:'Ülke Avcısı', d:'60 saniyede kaç soru?', fn:function(){startQuiz('countries');}},
  {key:'picmatch', cls:'p', e:'🖼️', tag:'RESİM', n:'Resim Eşleştirme', d:'Resmi doğru kelimeyle eşleştir', fn:startPicmatch},
  {key:'listen', cls:'a', e:'🎧', tag:'DİNLEME', n:'Dinle ve Bul', d:'Telaffuzu duy, kelimeyi seç', fn:startListen},
@@ -1434,14 +1434,35 @@ var MODES = [
  {key:'piano', cls:'a', e:'🎹', tag:'NOTA OYUNU', n:'Nota Kelimeleri', d:'Piyanoyla kelime çal!', fn:startPiano},
  {key:'review', cls:'b', e:'🧠', tag:'TEKRAR', n:'Kelime Tekrarı', d:'Zorlandığın kelimeleri tekrar et', fn:startReview},
 ];
+/* Mod anahtarı -> üretim ikon dosyası eşlemesi. Dosya adları anahtarlarla
+   birebir örtüşmediği için (ör. 'fillgap' -> mode_fill_blank.png,
+   'quiz_buildings' -> mode_skyscraper.png) merkezi, açık bir eşleme
+   kullanılır; dosya adı tahmini yapılmaz. */
+var MODE_ICONS = {
+  quiz_buildings: 'mode_skyscraper.png',
+  quiz_countries: 'mode_country.png',
+  picmatch: 'mode_picture.png',
+  listen: 'mode_listening.png',
+  memory: 'mode_memory.png',
+  spelling: 'mode_spelling.png',
+  fillgap: 'mode_fill_blank.png',
+  mapdet: 'mode_map_detective.png',
+  snake: 'mode_word_snake.png',
+  rocket: 'mode_rocket.png',
+  crossword: 'mode_crossword.png',
+  story: 'mode_mini_stories.png',
+  scramble: 'mode_word_puzzle.png',
+  piano: 'mode_piano.png',
+  review: 'mode_review.png'
+};
 /* VTGameCard: single reusable game-mode card component. Every mode on
    the Home grid is built through this one function (see .cat rules in
-   CSS for the shared visual implementation). m.icon optionally overrides
-   the default icon path per mode; everything else is fully data-driven. */
+   CSS for the shared visual implementation); icon path comes from the
+   MODE_ICONS mapping above, everything else is fully data-driven. */
 function VTGameCard(m){
   var level = window.getModeLevel ? window.getModeLevel(m.key) : 1;
   var pct = window.getModePercent ? window.getModePercent(m.key) : 0;
-  var iconSrc = m.icon || ('../assets/images/icons/mode_'+m.key+'.png');
+  var iconSrc = '../assets/images/ui/icons/modes/'+MODE_ICONS[m.key];
   var card = document.createElement('article');
   card.className = 'cat '+m.cls;
   card.setAttribute('role','button');
