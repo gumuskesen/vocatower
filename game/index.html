@@ -21,12 +21,20 @@
   .hidden{display:none !important;}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 
-  .topbar{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--radius);padding:12px 16px;box-shadow:var(--shadow);margin-bottom:14px;flex-wrap:wrap;}
-  .avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2.5px solid #D9C4A0;flex-shrink:0;background:#EFE0C8;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  /* Profile Header: one identity row (avatar + name/level) plus one
+     stats row (resource pills grouped tightly, status indicators grouped
+     tightly, separated from each other) — same markup reflows at every
+     width via flex-wrap, no separate mobile/desktop structure. */
+  .topbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px;background:var(--card);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);margin-bottom:14px;}
+  .tb-identity{display:flex;align-items:center;gap:12px;flex:1 1 auto;min-width:0;}
+  .avatar{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2.5px solid #D9C4A0;flex-shrink:0;background:#EFE0C8;display:flex;align-items:center;justify-content:center;overflow:hidden;}
   .avatar img{width:100%;height:100%;object-fit:cover;display:block;}
   .topbar .who{flex:1;min-width:0;}
-  .topbar .name{font-weight:700;font-size:15px;}
-  .topbar .lvl{font-size:12px;color:var(--ink-soft);}
+  .topbar .name{margin:0;font-weight:700;font-size:16px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .topbar .lvl{margin:2px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.3;}
+  .tb-stats{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;flex:1 1 100%;}
+  .tb-resources{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+  .tb-status{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
   .xp-pill{background:#F0EBDD;border-radius:14px;padding:6px 12px;font-size:13px;font-weight:700;color:#7C5C1C;white-space:nowrap;}
   .gold-pill{background:#FFF3D9;border-radius:14px;padding:6px 12px;font-size:13px;font-weight:700;color:#7A510C;white-space:nowrap;}
   .badge-pill{background:#EAF5EF;border-radius:14px;padding:6px 12px;font-size:13px;font-weight:700;color:#3E7A5A;white-space:nowrap;}
@@ -108,85 +116,75 @@
   .badge-unlock-title{font-size:18px;font-weight:700;color:var(--blue);margin:4px 0;}
   .badge-unlock-reward{font-size:15px;font-weight:700;color:#7A510C;margin-top:10px;}
 
-  /* ---------- EVRENSEL OYUN BİTİŞ EKRANI (tüm oyunlarda TEK tasarım) ---------- */
-  .result-wrap{position:relative;padding:44px 6px 20px;max-width:440px;margin:0 auto;}
+  /* ---------- SONUÇ EKRANI v3 (tüm oyunlarda TEK paylaşılan bitiş ekranı,
+     tüm modlar dahil Gökdelen Bilgini — ayrıcalıklı ikinci bir tasarım yok) ---------- */
+  .result-wrap{position:relative;padding:50px 6px 20px;max-width:460px;margin:0 auto;}
   .rc-confetti{position:absolute;inset:0;pointer-events:none;overflow:visible;}
-  .rc-confetti span{position:absolute;width:8px;height:16px;border-radius:5px;opacity:.85;animation:confettiFloat 3.2s ease-in-out infinite;}
-  .rc-confetti span:nth-child(1){left:2%;top:6%;background:#7FA3B0;transform:rotate(18deg);animation-delay:0s;}
-  .rc-confetti span:nth-child(2){left:10%;top:32%;background:#E0AE4D;transform:rotate(-12deg);animation-delay:.3s;}
-  .rc-confetti span:nth-child(3){left:4%;top:58%;background:#B3A1C7;transform:rotate(30deg);animation-delay:.6s;}
-  .rc-confetti span:nth-child(4){left:14%;top:80%;background:#E08A5B;transform:rotate(-20deg);animation-delay:.9s;}
-  .rc-confetti span:nth-child(5){left:22%;top:10%;background:#8FAE87;transform:rotate(10deg);animation-delay:1.2s;}
-  .rc-confetti span:nth-child(6){right:2%;top:8%;background:#B3A1C7;transform:rotate(-16deg);animation-delay:.15s;}
-  .rc-confetti span:nth-child(7){right:9%;top:30%;background:#7FA3B0;transform:rotate(22deg);animation-delay:.45s;}
-  .rc-confetti span:nth-child(8){right:3%;top:56%;background:#E0AE4D;transform:rotate(-28deg);animation-delay:.75s;}
-  .rc-confetti span:nth-child(9){right:13%;top:78%;background:#8FAE87;transform:rotate(14deg);animation-delay:1.05s;}
-  .rc-confetti span:nth-child(10){right:20%;top:4%;background:#E08A5B;transform:rotate(-10deg);animation-delay:1.35s;}
-  .rc-confetti span:nth-child(11){left:36%;top:2%;background:#E0AE4D;transform:rotate(24deg);animation-delay:.5s;}
-  .rc-confetti span:nth-child(12){right:34%;top:3%;background:#7FA3B0;transform:rotate(-18deg);animation-delay:1s;}
+  .rc-confetti span{position:absolute;width:9px;height:20px;border-radius:6px;opacity:.9;animation:confettiFloat 3.4s ease-in-out infinite;}
+  .rc-confetti span:nth-child(1){left:1%;top:10%;background:#7FA3B0;transform:rotate(-20deg);animation-delay:0s;}
+  .rc-confetti span:nth-child(2){left:9%;top:34%;background:#E0AE4D;transform:rotate(15deg);animation-delay:.25s;}
+  .rc-confetti span:nth-child(3){left:3%;top:58%;background:#E08A5B;transform:rotate(-30deg);animation-delay:.5s;}
+  .rc-confetti span:nth-child(4){left:13%;top:78%;background:#8FAE87;transform:rotate(24deg);animation-delay:.75s;}
+  .rc-confetti span:nth-child(5){left:24%;top:6%;background:#B3A1C7;transform:rotate(-12deg);animation-delay:1s;}
+  .rc-confetti span:nth-child(6){right:1%;top:9%;background:#E08A5B;transform:rotate(18deg);animation-delay:.1s;}
+  .rc-confetti span:nth-child(7){right:8%;top:32%;background:#7FA3B0;transform:rotate(-24deg);animation-delay:.4s;}
+  .rc-confetti span:nth-child(8){right:2%;top:56%;background:#B3A1C7;transform:rotate(30deg);animation-delay:.65s;}
+  .rc-confetti span:nth-child(9){right:12%;top:76%;background:#E0AE4D;transform:rotate(-16deg);animation-delay:.9s;}
+  .rc-confetti span:nth-child(10){right:22%;top:4%;background:#8FAE87;transform:rotate(20deg);animation-delay:1.2s;}
+  .rc-confetti span:nth-child(11){left:38%;top:1%;background:#E0AE4D;transform:rotate(-22deg);animation-delay:.35s;}
+  .rc-confetti span:nth-child(12){right:36%;top:2%;background:#7FA3B0;transform:rotate(26deg);animation-delay:.85s;}
+  .rc-confetti span:nth-child(13){left:18%;top:90%;background:#E08A5B;transform:rotate(12deg);animation-delay:1.1s;}
+  .rc-confetti span:nth-child(14){right:18%;top:92%;background:#B3A1C7;transform:rotate(-18deg);animation-delay:1.4s;}
   @keyframes confettiFloat{0%,100%{transform:translateY(0) rotate(var(--r,0deg));}50%{transform:translateY(-8px) rotate(var(--r,0deg));}}
-  .result-card{position:relative;background:var(--fg-bg-surface,var(--card));border-radius:32px;box-shadow:0 16px 34px rgba(110,85,64,.18);padding:50px 20px 24px;text-align:center;}
-  .rc-badge{position:absolute;top:-32px;left:50%;transform:translateX(-50%);width:72px;height:72px;border-radius:50%;background:var(--fg-bg-surface,#fff);box-shadow:0 8px 16px rgba(110,85,64,.24);display:flex;align-items:center;justify-content:center;font-size:36px;border:4px solid var(--fg-bg-app,var(--bg));}
-  .rc-title{font-size:21px;font-weight:800;color:var(--ink);margin-bottom:8px;line-height:1.3;}
-  .rc-stat{font-size:14px;color:var(--ink-soft);font-weight:700;margin-bottom:2px;}
-  .rc-xp{font-size:17px;font-weight:800;color:var(--fg-accent-tertiary,var(--green));margin-bottom:16px;}
-  .rc-box{background:var(--fg-bg-surface-sunken,#FFF7E8);border-radius:18px;padding:14px 16px;margin-bottom:12px;text-align:left;}
-  .rc-box .rw-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;}
-  .rc-box .rw-line{font-size:13px;color:var(--ink-soft);display:flex;justify-content:space-between;padding:3px 0;}
-  .rc-box .rw-total{font-size:14.5px;font-weight:700;color:#7A510C;border-top:1.5px dashed #E9D6A8;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;}
-  .rc-progress{text-align:center;}
-  .rc-motiv{font-size:14px;font-weight:700;margin-bottom:10px;line-height:1.4;color:var(--ink);}
-  .rc-bignum{display:flex;align-items:center;justify-content:center;gap:8px;font-size:28px;font-weight:800;color:var(--fg-accent-tertiary,var(--green));}
-  .rc-bignum-icon{font-size:24px;}
-  .rc-bignum-caption{font-size:12px;color:var(--ink-soft);margin:2px 0 12px;}
-  .rc-goal-label{font-size:12.5px;font-weight:700;margin-bottom:6px;color:var(--ink);}
-  .rc-bar{height:16px;border-radius:999px;background:var(--fg-bg-surface,#EDE0CB);overflow:hidden;}
-  .rc-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#72B396,#9BD0B6);width:0%;transition:width 1s cubic-bezier(.2,.8,.3,1);}
-  .rc-remaining{font-size:12.5px;font-weight:700;margin-top:8px;color:var(--ink);}
-  .rc-cta{margin-top:6px;}
 
-  /* ---------- RC2: yeni nesil bitiş ekranı (şimdilik yalnızca Gökdelen
-     Bilgini) — assets/images/ui/completion-popups/completion_skyscraper.png
-     referansı. Diğer modlar hâlâ .rc- ailesini (showResult) kullanır. ---------- */
-  .rc2-wrap{position:relative;padding:50px 6px 20px;max-width:440px;margin:0 auto;}
-  .rc2-confetti{position:absolute;inset:0;pointer-events:none;overflow:visible;}
-  .rc2-confetti span{position:absolute;width:9px;height:20px;border-radius:6px;opacity:.9;animation:confettiFloat 3.4s ease-in-out infinite;}
-  .rc2-confetti span:nth-child(1){left:1%;top:10%;background:#7FA3B0;transform:rotate(-20deg);animation-delay:0s;}
-  .rc2-confetti span:nth-child(2){left:9%;top:34%;background:#E0AE4D;transform:rotate(15deg);animation-delay:.25s;}
-  .rc2-confetti span:nth-child(3){left:3%;top:58%;background:#E08A5B;transform:rotate(-30deg);animation-delay:.5s;}
-  .rc2-confetti span:nth-child(4){left:13%;top:78%;background:#8FAE87;transform:rotate(24deg);animation-delay:.75s;}
-  .rc2-confetti span:nth-child(5){left:24%;top:6%;background:#B3A1C7;transform:rotate(-12deg);animation-delay:1s;}
-  .rc2-confetti span:nth-child(6){right:1%;top:9%;background:#E08A5B;transform:rotate(18deg);animation-delay:.1s;}
-  .rc2-confetti span:nth-child(7){right:8%;top:32%;background:#7FA3B0;transform:rotate(-24deg);animation-delay:.4s;}
-  .rc2-confetti span:nth-child(8){right:2%;top:56%;background:#B3A1C7;transform:rotate(30deg);animation-delay:.65s;}
-  .rc2-confetti span:nth-child(9){right:12%;top:76%;background:#E0AE4D;transform:rotate(-16deg);animation-delay:.9s;}
-  .rc2-confetti span:nth-child(10){right:22%;top:4%;background:#8FAE87;transform:rotate(20deg);animation-delay:1.2s;}
-  .rc2-confetti span:nth-child(11){left:38%;top:1%;background:#E0AE4D;transform:rotate(-22deg);animation-delay:.35s;}
-  .rc2-confetti span:nth-child(12){right:36%;top:2%;background:#7FA3B0;transform:rotate(26deg);animation-delay:.85s;}
-  .rc2-confetti span:nth-child(13){left:18%;top:90%;background:#E08A5B;transform:rotate(12deg);animation-delay:1.1s;}
-  .rc2-confetti span:nth-child(14){right:18%;top:92%;background:#B3A1C7;transform:rotate(-18deg);animation-delay:1.4s;}
-  .rc2-card{position:relative;background:var(--fg-bg-surface,var(--card));border-radius:34px;box-shadow:0 4px 0 rgba(110,85,64,.14),0 18px 36px rgba(110,85,64,.2);padding:56px 22px 24px;text-align:center;}
-  .rc2-medallion{position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:84px;height:84px;border-radius:50%;background:var(--fg-bg-surface,#fff);box-shadow:0 4px 0 rgba(110,85,64,.16),0 10px 18px rgba(110,85,64,.26);display:flex;align-items:center;justify-content:center;border:5px solid var(--fg-bg-app,var(--bg));}
-  .rc2-medallion img{width:56px;height:56px;object-fit:contain;}
-  .rc2-title{font-size:23px;font-weight:800;color:var(--ink);margin-bottom:10px;line-height:1.3;}
-  .rc2-stat{font-size:15px;color:var(--ink-soft);font-weight:700;margin-bottom:6px;}
-  .rc2-xp{font-size:20px;font-weight:800;color:var(--fg-accent-tertiary,var(--green));margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px;}
-  .rc2-xp .rc2-star-ico{font-size:22px;}
-  .rc2-box{background:var(--fg-bg-surface-sunken,#F1E6D2);border-radius:20px;padding:16px 18px;margin-bottom:14px;text-align:left;box-shadow:inset 0 1px 3px rgba(110,85,64,.08);}
-  .rc2-box .rw-title{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:8px;}
-  .rc2-box .rw-line{font-size:14px;color:var(--ink-soft);font-weight:600;display:flex;justify-content:space-between;padding:4px 0;}
-  .rc2-box .rw-total{font-size:16px;font-weight:800;color:var(--ink);border-top:2px dashed var(--fg-beige,#E6D5B8);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;}
-  .rc2-coin{display:inline-block;}
-  .rc2-progress{text-align:center;}
-  .rc2-motiv{font-size:15px;font-weight:800;margin-bottom:12px;line-height:1.4;color:var(--ink);}
-  .rc2-bignum{display:flex;align-items:center;justify-content:center;gap:10px;font-size:32px;font-weight:800;color:var(--fg-accent-tertiary,var(--green));}
-  .rc2-bignum-icon{font-size:26px;}
-  .rc2-bignum-caption{font-size:12.5px;color:var(--ink-soft);margin:2px 0 14px;}
-  .rc2-goal-label{font-size:13.5px;font-weight:700;margin-bottom:8px;color:var(--ink);}
-  .rc2-bar{height:18px;border-radius:999px;background:var(--fg-bg-surface,#E6D5B8);overflow:hidden;box-shadow:inset 0 2px 4px rgba(110,85,64,.14);}
-  .rc2-bar-fill{height:100%;border-radius:999px;background:linear-gradient(180deg,#9BD0B6,var(--fg-accent-tertiary,#72B396));width:0%;transition:width 1s cubic-bezier(.2,.8,.3,1);}
-  .rc2-remaining{font-size:13.5px;font-weight:700;margin-top:10px;color:var(--ink);}
-  .rc2-cta{margin-top:8px;font-size:17px;}
+  .result-card{position:relative;background:var(--fg-bg-surface,var(--card));border-radius:34px;box-shadow:0 4px 0 rgba(110,85,64,.14),0 18px 36px rgba(110,85,64,.2);padding:56px 22px 24px;text-align:center;animation:cardIn .35s cubic-bezier(.2,.9,.3,1.2);}
+  .rc-badge{position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:84px;height:84px;border-radius:50%;background:var(--fg-bg-surface,#fff);box-shadow:0 4px 0 rgba(110,85,64,.16),0 10px 18px rgba(110,85,64,.26);display:flex;align-items:center;justify-content:center;border:5px solid var(--fg-bg-app,var(--bg));}
+  .rc-badge-emoji{font-size:38px;}
+  .rc-badge-img{width:56px;height:56px;object-fit:contain;}
+  .rc-title{font-size:23px;font-weight:800;color:var(--ink);margin-bottom:8px;line-height:1.3;}
+  .rc-stat{font-size:15px;color:var(--ink-soft);font-weight:700;margin-bottom:14px;}
+
+  /* performans özeti: doğru/toplam + doğruluk yüzdesi (toplam mevcutsa) */
+  .rc-perf{display:flex;flex-direction:column;align-items:center;margin-bottom:18px;}
+  .rc-perf-frac{font-size:32px;font-weight:800;color:var(--ink);line-height:1;}
+  .rc-perf-slash{margin:0 4px;color:var(--ink-soft);font-weight:600;}
+  .rc-perf-label{font-size:12px;color:var(--ink-soft);font-weight:700;margin-top:2px;}
+  .rc-perf-acc{margin-top:6px;display:inline-block;font-size:13px;font-weight:800;color:#7A510C;background:#FFF3D9;border-radius:999px;padding:3px 12px;}
+
+  /* kazanılan XP/Altın: toplam öne çıkar, döküm ikincil kalır */
+  .rc-rewards{margin-bottom:14px;}
+  .rc-reward-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;}
+  .rc-reward-chip{display:flex;align-items:center;gap:6px;background:var(--fg-bg-surface-sunken,#F1E6D2);border-radius:999px;padding:8px 16px;font-size:16px;font-weight:800;box-shadow:inset 0 1px 3px rgba(110,85,64,.08);}
+  .rc-reward-chip-icon{font-size:17px;}
+  .rc-reward-chip--xp{color:var(--fg-accent-tertiary,var(--green));}
+  .rc-reward-chip--gold{color:#7A510C;}
+  .rc-reward-detail{font-size:12.5px;color:var(--ink-soft);font-weight:600;display:flex;flex-direction:column;gap:2px;padding:0 6px;}
+  .rc-reward-detail .rw-line{display:flex;justify-content:space-between;gap:8px;padding:2px 0;}
+
+  /* ilerleme: kule (bina) ilerlemesi ile kelime hedefi ilerlemesi ayrı ayrı */
+  .rc-progress-section{background:var(--fg-bg-surface-sunken,#F1E6D2);border-radius:22px;padding:16px 18px;margin-bottom:14px;text-align:center;box-shadow:inset 0 1px 3px rgba(110,85,64,.08);}
+  .rc-motiv{font-size:14px;font-weight:800;margin-bottom:12px;line-height:1.4;color:var(--ink);}
+  .rc-progress-block{text-align:left;margin-bottom:12px;}
+  .rc-progress-block:last-child{margin-bottom:0;}
+  .rc-progress-head{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--ink);margin-bottom:5px;}
+  .rc-progress-icon{font-size:14px;flex-shrink:0;}
+  .rc-progress-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rc-progress-pct{color:var(--ink-soft);font-weight:700;flex-shrink:0;}
+  .rc-bar{height:14px;border-radius:999px;background:var(--fg-bg-surface,#E6D5B8);overflow:hidden;box-shadow:inset 0 2px 4px rgba(110,85,64,.14);}
+  .rc-bar-fill{display:block;height:100%;border-radius:999px;width:0%;transition:width 1s cubic-bezier(.2,.8,.3,1);}
+  .rc-bar-fill--tower{background:linear-gradient(90deg,#B3A1C7,#8FAE87);}
+  .rc-bar-fill--words{background:linear-gradient(90deg,#72B396,#9BD0B6);}
+  .rc-progress-caption{font-size:11.5px;font-weight:700;margin-top:5px;color:var(--ink-soft);}
+  .rc-remaining{font-size:11.5px;font-weight:700;margin-top:5px;color:var(--ink);}
+
+  .rc-cta{margin-top:6px;font-size:17px;min-height:44px;}
+  .rc-cta:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+
+  @media (prefers-reduced-motion:reduce){
+    .rc-confetti span{animation:none;}
+    .result-card{animation:none;}
+    .rc-bar-fill{transition:none;}
+  }
 
   .tower-card{background:linear-gradient(180deg,#D9CDEA 0%,#F7EFE3 100%);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 18px;margin-bottom:16px;display:flex;gap:20px;align-items:center;overflow:hidden;position:relative;}
   .tower-card::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#FFF3D9 0%,transparent 70%);opacity:.8;}
@@ -195,54 +193,43 @@
   .bk-ghost{fill:#EDE0CB;stroke:#D8C6AA;stroke-width:1;}
   .bk-fill{fill:url(#bkGrad);}
   #bkClipRect{transition:y 1.1s cubic-bezier(.2,.8,.3,1), height 1.1s cubic-bezier(.2,.8,.3,1);}
-  .bk-cap{font-size:11.5px;color:var(--ink-soft);margin-top:8px;font-weight:700;text-align:center;line-height:1.5;}
-  .bk-cap b{color:var(--ink);font-size:14px;}
+  /* Tower Progress Card caption: explicit hierarchy so the primary
+     progress value (floor count) reads first, current building second,
+     overall % third — no reliance on default element margins. */
+  .bk-cap{margin:10px 0 0;max-width:96px;text-align:center;}
+  .bk-floor-line{font-size:20px;font-weight:800;color:var(--ink);line-height:1.15;}
+  .bk-floor-unit{margin-left:4px;font-size:11.5px;font-weight:700;color:var(--ink-soft);}
+  .bk-building-line{margin:4px 0 0;font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.3;}
+  .bk-pct-line{margin:2px 0 0;font-size:11px;font-weight:700;color:var(--ink-soft);}
   .tower-info{flex:1;min-width:0;position:relative;z-index:1;}
-  .tower-info h2{font-size:18px;margin-bottom:6px;}
-  .tower-info p{font-size:13px;color:var(--ink-soft);line-height:1.55;}
+  .tower-info h2{margin:0 0 6px;font-size:18px;line-height:1.25;}
+  .tower-info p{margin:0 0 12px;font-size:13px;color:var(--ink-soft);line-height:1.55;}
   .tower-info b{color:var(--blue);}
 
-  .goal-line{margin-top:10px;}
-  .goal-text{font-size:12px;font-weight:700;margin-bottom:5px;}
+  .goal-line{margin:0;padding-top:10px;border-top:1px solid var(--fg-border-soft,transparent);}
+  .goal-text{margin:0 0 5px;font-size:12.5px;font-weight:700;}
   .goal-bar{height:14px;background:#EDE0CB;border-radius:8px;overflow:hidden;}
   .goal-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#72B396,#9BD0B6);width:0%;transition:width 1.2s cubic-bezier(.2,.8,.3,1);position:relative;}
 
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  .cat{border:none;cursor:pointer;text-align:left;background:var(--fg-bg-surface,var(--card));border-radius:var(--fg-radius-lg,var(--radius));padding:14px;box-shadow:var(--fg-shadow-md,var(--shadow));display:flex;flex-direction:column;gap:8px;transition:transform .12s ease,box-shadow .12s ease;font-family:inherit;color:var(--ink);border:1px solid var(--fg-border-soft,transparent);}
+  /* ---------- VTGameCard: single reusable game-mode card, used by
+     every mode on the Home grid (see VTGameCard() in JS). Spacing below
+     is fully explicit (no reliance on default h3/p browser margins) so
+     the vertical rhythm is deliberate and consistent on every card. ---------- */
+  .cat{position:relative;border:none;cursor:pointer;text-align:left;background:var(--fg-bg-surface,var(--card));border-radius:var(--fg-radius-lg,var(--radius));padding:16px;box-shadow:var(--fg-shadow-md,var(--shadow));display:flex;flex-direction:column;transition:transform .12s ease,box-shadow .12s ease;font-family:inherit;color:var(--ink);border:1px solid var(--fg-border-soft,transparent);}
   .cat:active{transform:scale(.96) translateY(1px);box-shadow:var(--fg-shadow-sm,var(--shadow));}
-  .cat-top{display:flex;align-items:flex-start;justify-content:space-between;}
-  .cat-icon{width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(110,85,64,.18));}
-  .cat-star{font-size:19px;background:var(--fg-bg-surface-sunken,#F3E9D6);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -2px 3px rgba(110,85,64,.12);flex-shrink:0;}
-  .cat h3{font-size:14.5px;font-weight:800;}
-  .cat p{font-size:11.5px;color:var(--ink-soft);line-height:1.35;}
-  .tag{align-self:flex-start;font-size:10px;font-weight:700;color:#fff;padding:3px 10px;border-radius:999px;letter-spacing:.3px;}
-  .cat.b .tag{background:var(--fg-accent-secondary,var(--blue));} .cat.g .tag{background:var(--fg-accent-tertiary,var(--green));}
-  .cat.p .tag{background:var(--fg-accent-quaternary,var(--purple));} .cat.a .tag{background:var(--fg-accent-gold,var(--amber));}
-  .cat-progress{margin-top:2px;}
-  .cat-progress .cp-line{display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;}
-  .cat-progress .cp-bar{height:8px;border-radius:999px;background:var(--fg-bg-surface-sunken,#E6D5B8);overflow:hidden;}
-  .cat-progress .cp-fill{height:100%;border-radius:999px;background:var(--fg-accent-tertiary,var(--green));transition:width .5s ease;}
-
-  /* ---------- GC2: yeni nesil oyun kartı (şimdilik yalnızca Gökdelen
-     Bilgini) — assets/images/ui/gamecards/gamecard_skyscraper.png referansı.
-     Diğer modlar hâlâ .cat sınıfını kullanır; bu bilerek ayrı bir bileşen
-     ailesi, ileride tek tek diğer modlara da uygulanabilir. ---------- */
-  .gc2-card{grid-column:1/-1;max-width:420px;margin:0 auto;width:100%;position:relative;cursor:pointer;background:var(--fg-bg-surface,var(--card));border-radius:32px;box-shadow:0 3px 0 rgba(110,85,64,.14),0 14px 28px rgba(110,85,64,.16);padding:26px 22px 24px;text-align:left;border:1px solid var(--fg-border-soft,transparent);transition:transform .12s ease,box-shadow .12s ease;}
-  .gc2-card:active{transform:scale(.985) translateY(1px);}
-  .gc2-card:focus-visible{outline:3px solid var(--fg-accent-secondary,var(--blue));outline-offset:3px;}
-  .gc2-star{position:absolute;top:20px;right:20px;width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#F6C84B,#E0AE4D);box-shadow:0 4px 0 #B8862C,0 6px 10px rgba(110,85,64,.25);transition:transform .1s ease,box-shadow .1s ease;}
-  .gc2-star:active{transform:translateY(3px);box-shadow:0 1px 0 #B8862C,0 2px 4px rgba(110,85,64,.2);}
-  .gc2-star:not(.active){background:linear-gradient(180deg,var(--fg-bg-surface-sunken,#E6D5B8),#D9C4A0);box-shadow:0 4px 0 #C0AB86,0 6px 10px rgba(110,85,64,.14);}
-  .gc2-star:focus-visible{outline:3px solid var(--fg-accent-secondary,var(--blue));outline-offset:2px;}
-  .gc2-icon-wrap{display:flex;justify-content:center;margin:4px 0 18px;}
-  .gc2-icon{width:150px;height:150px;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(110,85,64,.22));}
-  .gc2-tag{display:table;margin:0 auto 16px;font-size:13px;font-weight:800;color:#fff;padding:8px 22px;border-radius:999px;letter-spacing:.3px;background:linear-gradient(180deg,var(--fg-dusty-blue,#7FA3B0),var(--fg-dusty-blue-dark,#5C8794));box-shadow:0 3px 0 rgba(0,0,0,.12);}
-  .gc2-title{font-size:26px;font-weight:800;color:var(--ink);margin-bottom:6px;line-height:1.2;}
-  .gc2-desc{font-size:14px;color:var(--ink-soft);margin-bottom:20px;line-height:1.4;}
-  .gc2-progress-row{display:flex;justify-content:space-between;align-items:baseline;font-size:17px;font-weight:800;color:var(--ink);margin-bottom:10px;}
-  .gc2-progress-track{position:relative;height:16px;border-radius:999px;background:var(--fg-bg-surface-sunken,#E6D5B8);box-shadow:inset 0 2px 4px rgba(110,85,64,.18);overflow:visible;}
-  .gc2-progress-fill{height:100%;border-radius:999px;background:linear-gradient(180deg,#9BD0B6,var(--fg-accent-tertiary,#72B396));transition:width .6s cubic-bezier(.2,.8,.3,1);}
-  .gc2-progress-cap{position:absolute;left:0;top:50%;transform:translate(-15%,-50%);width:20px;height:20px;border-radius:50%;background:linear-gradient(180deg,#F6E4C4,#D9C4A0);box-shadow:0 2px 0 rgba(110,85,64,.25);}
+  .cat h3{margin:0 0 3px;font-size:15px;font-weight:800;letter-spacing:-.1px;line-height:1.25;}
+  .cat p{margin:0;font-size:11.5px;color:var(--ink-soft);line-height:1.42;}
+  .cat .favorite{position:absolute;top:25px;right:16px;width:34px;height:34px;border-radius:50%;border:none;padding:0;font-size:18px;display:flex;align-items:center;justify-content:center;background:var(--fg-bg-surface-sunken,#F3E9D6);box-shadow:inset 0 -2px 3px rgba(110,85,64,.12);cursor:pointer;}
+  .cat .mode-icon-wrap{line-height:0;margin:0 0 10px;}
+  .cat .mode-icon{width:52px;height:52px;object-fit:contain;display:block;filter:drop-shadow(0 3px 4px rgba(110,85,64,.18));}
+  .cat .category-pill{align-self:flex-start;display:inline-block;margin:0 0 6px;font-size:10.5px;font-weight:700;color:#fff;padding:4px 11px;border-radius:999px;letter-spacing:.4px;}
+  .cat.b .category-pill{background:var(--fg-accent-secondary,var(--blue));} .cat.g .category-pill{background:var(--fg-accent-tertiary,var(--green));}
+  .cat.p .category-pill{background:var(--fg-accent-quaternary,var(--purple));} .cat.a .category-pill{background:var(--fg-accent-gold,var(--amber));}
+  .cat .card-spacer{flex:1 1 auto;min-height:8px;}
+  .cat .level-row{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;font-weight:700;color:var(--ink-soft);margin:0 0 6px;}
+  .cat .progress-track{height:9px;border-radius:999px;background:var(--fg-bg-surface-sunken,#E6D5B8);overflow:hidden;}
+  .cat .progress-fill{height:100%;border-radius:999px;background:var(--fg-accent-tertiary,var(--green));transition:width .5s ease;}
 
   /* ---------- SEVİYE HARİTASI ---------- */
   .lm-summary{text-align:center;margin-bottom:18px;}
@@ -282,11 +269,11 @@
   .timer.low{color:var(--red-soft);}
   .score-pill{background:var(--card);border-radius:14px;padding:8px 14px;font-weight:700;box-shadow:var(--shadow);font-size:14px;flex-shrink:0;align-self:center;}
 
-  .qcard{background:var(--card);border-radius:var(--fg-radius-xl,var(--radius));box-shadow:var(--shadow);padding:32px 22px;margin-bottom:14px;text-align:center;}
-  .qcard .hint{font-size:11.5px;color:var(--ink-soft);margin-bottom:10px;letter-spacing:.5px;font-weight:700;}
-  .q-en{font-size:23px;line-height:1.5;font-weight:800;}
-  .q-tr{font-size:14.5px;color:var(--ink-soft);margin-top:14px;line-height:1.5;}
-  .tap-tip{font-size:11px;color:#A08966;margin-top:12px;}
+  .qcard{background:var(--card);border-radius:var(--fg-radius-xl,var(--radius));box-shadow:var(--shadow);padding:34px 24px;margin-bottom:20px;text-align:center;}
+  .qcard .hint{margin:0 0 10px;font-size:11.5px;color:var(--ink-soft);letter-spacing:.5px;font-weight:700;}
+  .q-en{margin:0;font-size:24px;line-height:1.35;font-weight:800;letter-spacing:-.2px;}
+  .q-tr{margin:16px 0 0;font-size:14.5px;color:var(--ink-soft);line-height:1.5;}
+  .tap-tip{margin:14px 0 0;font-size:11px;color:#A08966;}
   .w{cursor:pointer;border-bottom:1.5px dotted #B9C9DC;border-radius:4px;padding:0 1px;}
   .w:active,.w.hl{background:#FFF3D9;border-bottom-color:var(--amber);}
   .w:focus-visible{outline:2px solid var(--blue);outline-offset:1px;}
@@ -298,14 +285,16 @@
   #bubble::after{content:'';position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border:7px solid transparent;border-top-color:#5C3D25;border-bottom:none;}
   #bubble .b-en{color:#F5D9A8;}
 
-  .opts{display:grid;gap:10px;}
+  .opts{display:grid;gap:12px;}
   .opts.two-col{grid-template-columns:1fr 1fr;}
-  .opt{border:2.5px solid #E6D5B8;background:var(--card);border-radius:18px;padding:15px 12px;font-size:15px;font-weight:600;cursor:pointer;text-align:center;font-family:inherit;color:var(--ink);transition:border-color .15s,transform .1s,box-shadow .1s;box-shadow:0 3px 0 rgba(51,65,92,.06);}
+  .opt{border:2.5px solid #E6D5B8;background:var(--card);border-radius:18px;padding:15px 12px;min-height:44px;font-size:15px;font-weight:600;line-height:1.35;cursor:pointer;text-align:center;font-family:inherit;color:var(--ink);transition:border-color .15s,border-width .15s,transform .1s,box-shadow .1s;box-shadow:0 3px 0 rgba(51,65,92,.06);}
+  .opt:hover{border-color:#D9C4A0;transform:translateY(-1px);box-shadow:0 4px 0 rgba(51,65,92,.08);}
+  .opt:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
   .opt:active{transform:translateY(2px) scale(.98);box-shadow:0 1px 0 rgba(51,65,92,.06);}
-  .opt small{display:block;font-weight:500;font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .opt small{display:block;font-weight:500;font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
   .opt .flag{font-size:30px;display:block;margin-bottom:4px;}
-  .opt.correct{border-color:var(--green);background:#EAF5EF;}
-  .opt.wrong{border-color:var(--red-soft);background:#FBEFEF;}
+  .opt.correct{border-color:var(--green);border-width:3px;background:#EAF5EF;font-weight:800;}
+  .opt.wrong{border-color:var(--red-soft);border-width:3px;background:#FBEFEF;text-decoration:line-through;}
 
   .progress-dots{display:flex;gap:6px;justify-content:center;margin-bottom:14px;flex-wrap:wrap;}
   .dot{width:9px;height:9px;border-radius:50%;background:#D9C4A0;}
@@ -386,9 +375,10 @@
     #home .side{position:sticky;top:20px;}
     .tower-card{margin-bottom:0;flex-direction:column;align-items:center;text-align:center;padding:26px 20px;}
     .bk{width:124px;height:308px;}
+    .bk-cap{max-width:124px;}
     .tower-info h2{font-size:19px;}
     .tower-info p{font-size:13.5px;}
-    .grid{grid-template-columns:repeat(3,1fr);}
+    .grid{grid-template-columns:repeat(2,1fr);}
     .demo-note{margin-top:14px;}
 
     .game-body{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start;}
@@ -406,6 +396,14 @@
     .pkey{width:52px;height:140px;}
     .story-text{font-size:18px;}
   }
+
+  /* Home game grid: the 700px tier above keeps 2 columns (matches the
+     proven ~172px mobile card width, avoiding cramped/wrapped titles at
+     tablet widths); 3 columns only once the sidebar+main split has room
+     for cards that size comfortably again. */
+  @media (min-width:1000px){
+    .grid{grid-template-columns:repeat(3,1fr);}
+  }
 </style>
 </head>
 <body>
@@ -416,16 +414,24 @@
   <div id="home">
     <div class="side">
     <div class="topbar">
-      <div class="avatar" id="topbarAvatar"></div>
-      <div class="who">
-        <div class="name" id="topbarName">Kaşif</div>
-        <div class="lvl" id="lvlText">Seviye 1 · Çırak Mimar</div>
+      <div class="tb-identity">
+        <div class="avatar" id="topbarAvatar"></div>
+        <div class="who">
+          <div class="name" id="topbarName">Kaşif</div>
+          <div class="lvl" id="lvlText">Seviye 1 · Çırak Mimar</div>
+        </div>
       </div>
-      <div class="xp-pill">⭐ <span id="xpText">0</span> XP</div>
-      <div class="gold-pill">🪙 <span id="goldText">0</span></div>
-      <div class="badge-pill">🏅 <span id="badgeCountText">0</span></div>
-      <button class="settings-btn" id="btnAchievements" onclick="openAchievements()" aria-label="Rozetlerim">🏅</button>
-      <button class="settings-btn" id="btnProfileSettings" onclick="openProfileSettings()" aria-label="Profil ayarları">⚙️</button>
+      <div class="tb-stats">
+        <div class="tb-resources">
+          <div class="xp-pill">⭐ <span id="xpText">0</span> XP</div>
+          <div class="gold-pill">🪙 <span id="goldText">0</span></div>
+        </div>
+        <div class="tb-status">
+          <div class="badge-pill">🏅 <span id="badgeCountText">0</span></div>
+          <button class="settings-btn" id="btnAchievements" onclick="openAchievements()" aria-label="Rozetlerim">🏅</button>
+          <button class="settings-btn" id="btnProfileSettings" onclick="openProfileSettings()" aria-label="Profil ayarları">⚙️</button>
+        </div>
+      </div>
     </div>
 
     <div class="tower-card" onclick="openBuildingJourney()" role="button" tabindex="0" style="cursor:pointer;" onkeydown="if(event.key==='Enter')openBuildingJourney();">
@@ -453,7 +459,11 @@
           </g>
           <rect x="0" y="292" width="120" height="4" rx="2" fill="#B9C6D6"/>
         </svg>
-        <div class="bk-cap"><b><span id="floorCount">0</span> / 1000 kat</b><br><span id="bkBuildingName">🏢 Flatiron Building</span> · Genel %<span id="bkPct">0</span></div>
+        <div class="bk-cap">
+          <div class="bk-floor-line"><span id="floorCount">0</span><span class="bk-floor-unit">/ 1000 kat</span></div>
+          <div class="bk-building-line"><span id="bkBuildingName">🏢 Flatiron Building</span></div>
+          <div class="bk-pct-line">Genel %<span id="bkPct">0</span></div>
+        </div>
       </div>
       <div class="tower-info">
         <h2>Bina Yolculuğun 🏗️</h2>
@@ -857,56 +867,53 @@
     </div>
   </div>
 
-  <!-- ============ SONUÇ (TÜM OYUNLARDA TEK ORTAK TASARIM) ============ -->
+  <!-- ============ SONUÇ EKRANI v3 (tüm oyunlarda TEK paylaşılan bitiş ekranı) ============ -->
   <div id="resultScreen" class="hidden">
     <div class="result-wrap">
       <div class="rc-confetti" aria-hidden="true">
         <span></span><span></span><span></span><span></span><span></span>
         <span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span>
-      </div>
-      <div class="result-card">
-        <div class="rc-badge" id="resEmoji">🏆</div>
-        <h2 class="rc-title" id="resTitle"></h2>
-        <p class="rc-stat" id="resDetail"></p>
-        <p class="rc-xp" id="resXp"></p>
-        <div id="resReward" class="rc-box"></div>
-        <div class="rc-box rc-progress">
-          <div class="rc-motiv" id="resMotiv"></div>
-          <div class="rc-bignum"><span class="rc-bignum-icon">📚</span><span id="resWordCount">0</span></div>
-          <div class="rc-bignum-caption">Şu ana kadar doğru bildiğin kelime</div>
-          <div class="rc-goal-label">🎯 Hedef: <span id="resGoalMax">1000</span> kelime</div>
-          <div class="rc-bar"><div class="rc-bar-fill" id="resProgFill"></div></div>
-          <div class="rc-remaining" id="resRemaining"></div>
-        </div>
-        <button class="btn rc-cta" onclick="goHome()">Devam Et →</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ RC2: yeni nesil bitiş ekranı (şimdilik yalnızca Gökdelen Bilgini) ============ -->
-  <div id="resultScreenSkyscraper" class="hidden">
-    <div class="rc2-wrap">
-      <div class="rc2-confetti" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span>
         <span></span><span></span><span></span><span></span>
       </div>
-      <div class="rc2-card">
-        <div class="rc2-medallion"><img src="../assets/images/icons/mode_quiz_buildings.png" alt="Gökdelen Bilgini"></div>
-        <h2 class="rc2-title">Gökdelen Bilgini Bitti!</h2>
-        <p class="rc2-stat" id="rs2Detail"></p>
-        <p class="rc2-xp" id="rs2Xp"></p>
-        <div id="rs2Reward" class="rc2-box"></div>
-        <div class="rc2-box rc2-progress">
-          <div class="rc2-motiv" id="rs2Motiv"></div>
-          <div class="rc2-bignum"><span class="rc2-bignum-icon">📚</span><span id="rs2WordCount">0</span></div>
-          <div class="rc2-bignum-caption">Şu ana kadar doğru bildiğin kelime</div>
-          <div class="rc2-goal-label">🎯 Hedef: <span id="rs2GoalMax">1000</span> kelime</div>
-          <div class="rc2-bar"><div class="rc2-bar-fill" id="rs2ProgFill"></div></div>
-          <div class="rc2-remaining" id="rs2Remaining"></div>
+      <div class="result-card">
+        <div class="rc-badge">
+          <span class="rc-badge-emoji" id="resEmoji">🏆</span>
+          <img class="rc-badge-img hidden" id="resBadgeImg" src="" alt="">
         </div>
-        <button class="btn rc2-cta" onclick="goHome()">Devam Et →</button>
+        <h2 class="rc-title" id="resTitle"></h2>
+        <p class="rc-stat" id="resDetail"></p>
+
+        <div class="rc-perf hidden" id="resPerf">
+          <div class="rc-perf-frac"><span id="resCorrect">0</span><span class="rc-perf-slash">/</span><span id="resTotal">0</span></div>
+          <div class="rc-perf-label">doğru cevap</div>
+          <div class="rc-perf-acc" id="resAccuracy"></div>
+        </div>
+
+        <div class="rc-rewards">
+          <div class="rc-reward-row">
+            <div class="rc-reward-chip rc-reward-chip--xp"><span class="rc-reward-chip-icon">⭐</span><span id="resXp"></span></div>
+            <div class="rc-reward-chip rc-reward-chip--gold"><span class="rc-reward-chip-icon">🪙</span><span id="resGoldTotal"></span></div>
+          </div>
+          <div id="resReward" class="rc-reward-detail"></div>
+        </div>
+
+        <div class="rc-progress-section">
+          <div class="rc-motiv" id="resMotiv"></div>
+
+          <div class="rc-progress-block hidden" id="resTowerBlock">
+            <div class="rc-progress-head"><span class="rc-progress-icon">🏗️</span><span class="rc-progress-title" id="resBuildingName"></span><span class="rc-progress-pct" id="resTowerPct"></span></div>
+            <div class="rc-bar"><div class="rc-bar-fill rc-bar-fill--tower" id="resTowerFill"></div></div>
+            <div class="rc-progress-caption" id="resTowerCaption"></div>
+          </div>
+
+          <div class="rc-progress-block">
+            <div class="rc-progress-head"><span class="rc-progress-icon">📚</span><span class="rc-progress-title">Öğrenilen kelime</span><span class="rc-progress-pct" id="resWordCountLabel"></span></div>
+            <div class="rc-bar"><div class="rc-bar-fill rc-bar-fill--words" id="resProgFill"></div></div>
+            <div class="rc-remaining" id="resRemaining"></div>
+          </div>
+        </div>
+
+        <button class="btn rc-cta" onclick="goHome()">Devam Et →</button>
       </div>
     </div>
   </div>
@@ -1037,7 +1044,7 @@ function renderProfileBar(){
   var nm = document.getElementById('topbarName');
   var gd = document.getElementById('goldText');
   var bc = document.getElementById('badgeCountText');
-  if(av && window.renderAvatarImage) av.innerHTML = window.renderAvatarImage(profile ? profile.avatarId : 'avatar-01', 52);
+  if(av && window.renderAvatarImage) av.innerHTML = window.renderAvatarImage(profile ? profile.avatarId : 'avatar-01', 56);
   if(nm) nm.textContent = profile ? profile.username : 'Kaşif';
   if(gd) gd.textContent = stats ? stats.currentGold : 0;
   if(bc && window.getBadges) bc.textContent = window.getBadges().filter(function(b){return b.unlocked;}).length;
@@ -1075,7 +1082,7 @@ function renderAchievementsScreen(){
   box.innerHTML = html;
 }
 function show(id){
-  ['home','onboarding','achievements','buildingJourney','reviewWords','levelMap','quiz','scramble','piano','picmatch','memory','listen','spelling','fillgap','mapdet','snake','rocket','crossword','story','resultScreen','resultScreenSkyscraper']
+  ['home','onboarding','achievements','buildingJourney','reviewWords','levelMap','quiz','scramble','piano','picmatch','memory','listen','spelling','fillgap','mapdet','snake','rocket','crossword','story','resultScreen']
     .forEach(function(s){document.getElementById(s).classList.add('hidden');});
   document.getElementById(id).classList.remove('hidden');
   hideBubble();
@@ -1181,6 +1188,60 @@ function bootApp(){
 }
 function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;} return a; }
 function pick(arr,n){ return shuffle(arr).slice(0,n); }
+/* Shared option-button renderer (Question Panel audit, refactor #1).
+   Every gameplay mode independently repeated: clear container, create
+   button, assign class, assign content, attach click handler, append.
+   This replaces only that boilerplate — each mode still supplies its
+   own answer-checking logic via onClick, unchanged. items: array of
+   {html|text, onClick(btn)}. */
+function renderOptionButtons(containerId, items){
+  var box=document.getElementById(containerId);
+  box.innerHTML='';
+  items.forEach(function(item){
+    var b=document.createElement('button'); b.className='opt';
+    if(item.html!==undefined) b.innerHTML=item.html; else b.textContent=item.text;
+    b.onclick=function(e){ e.stopPropagation(); item.onClick(b); };
+    box.appendChild(b);
+  });
+}
+/* Shared multiple-choice answer feedback + advance flow (Question Panel
+   audit, refactor #2). Every mode independently repeated: reject a
+   double tap, lock the round, apply the correct/wrong button class,
+   play the feedback sound, optionally record word-result history /
+   award XP / mark a word learned, then after a fixed delay run the
+   mode's own advance-or-finish step. Each mode keeps full control of
+   its own state mutations via onResult, which may return false to
+   skip the delayed step entirely (preserves an early-exit case). cfg:
+   {isLocked(), setLocked(), btn, ok, recordWord, xp, learnWord,
+    onResult(ok), delay, after}. */
+function handleOptionAnswer(cfg){
+  if(cfg.isLocked()) return;
+  cfg.setLocked();
+  cfg.btn.classList.add(cfg.ok?'correct':'wrong');
+  sfx(cfg.ok?'correct':'wrong');
+  if(cfg.recordWord && window.recordWordResult) window.recordWordResult(cfg.recordWord, cfg.ok);
+  if(cfg.ok){
+    if(cfg.xp) addXP(cfg.xp);
+    if(cfg.learnWord) addLearned(cfg.learnWord);
+  }
+  var skip = cfg.onResult ? (cfg.onResult(cfg.ok)===false) : false;
+  if(skip) return;
+  setTimeout(cfg.after, cfg.delay);
+}
+/* Shared question-panel content renderer (Question Panel audit,
+   refactor #3). Several modes independently repeated: set an optional
+   hint/instruction line, set the primary text (tappable via
+   makeTappable(), or plain text — never forced either way), and set an
+   optional supporting/translation line. A mode simply omits whichever
+   field it doesn't have; nothing here is mandatory. */
+function renderQuestionContent(cfg){
+  if(cfg.hintId) document.getElementById(cfg.hintId).textContent = cfg.hint;
+  if(cfg.primaryId){
+    if(cfg.tappable) makeTappable(cfg.primaryText, document.getElementById(cfg.primaryId));
+    else document.getElementById(cfg.primaryId).textContent = cfg.primaryText;
+  }
+  if(cfg.supportingId) document.getElementById(cfg.supportingId).textContent = cfg.supportingText;
+}
 function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
 /* ================= SES EFEKTLERİ & KONUŞMA ================= */
@@ -1273,18 +1334,49 @@ var MOTIV_MSGS = [
 "Dünya senin, kelimeler cebinde! 🌍",
 "Gezegenler bile seni alkışlıyor! 🪐"
 ];
-function showResult(e,t,d,x,reward){
-  document.getElementById('resEmoji').textContent=e;
-  document.getElementById('resTitle').textContent=t;
-  document.getElementById('resDetail').textContent=d;
-  document.getElementById('resXp').textContent=x;
-  var rb=document.getElementById('resReward');
+/* Result Screen v3 — her modun ortak, tek paylaşılan bitiş ekranı render
+   fonksiyonu (Gökdelen Bilgini dahil, ayrıcalıklı ikinci bir ekran yok).
+   cfg: {
+     emoji, badgeImg,      // kutlama rozeti: emoji karakteri VEYA (varsa) mevcut mod ikonu görseli
+     title, detail,        // başlık ve destekleyici açıklama metni — mod anlamını korur
+     correct, total,       // ikisi de sayı ve total>0 ise doğru/toplam + doğruluk % gösterilir
+     xpText,                // mod tarafından zaten hesaplanmış XP metni (ör. '+80 XP') — değiştirilmez
+     reward                 // completeGameSession() dönüş değeri — altın/rozet/seviye hesapları aynen kullanılır
+   } */
+function renderResultScreen(cfg){
+  cfg = cfg || {};
+  var emojiEl = document.getElementById('resEmoji');
+  var imgEl = document.getElementById('resBadgeImg');
+  if(cfg.badgeImg){
+    imgEl.src = cfg.badgeImg;
+    imgEl.classList.remove('hidden');
+    emojiEl.classList.add('hidden');
+  } else {
+    emojiEl.textContent = cfg.emoji || '🏆';
+    emojiEl.classList.remove('hidden');
+    imgEl.classList.add('hidden');
+  }
+  document.getElementById('resTitle').textContent = cfg.title || '';
+  document.getElementById('resDetail').textContent = cfg.detail || '';
+
+  var perf = document.getElementById('resPerf');
+  if(typeof cfg.correct==='number' && typeof cfg.total==='number' && cfg.total>0){
+    document.getElementById('resCorrect').textContent = cfg.correct;
+    document.getElementById('resTotal').textContent = cfg.total;
+    document.getElementById('resAccuracy').textContent = '%'+Math.round(cfg.correct/cfg.total*100);
+    perf.classList.remove('hidden');
+  } else {
+    perf.classList.add('hidden');
+  }
+
+  document.getElementById('resXp').textContent = cfg.xpText || '';
+  var reward = cfg.reward;
+  document.getElementById('resGoldTotal').textContent = '+'+(reward && typeof reward.goldEarned==='number' ? reward.goldEarned : 0);
+  var rb = document.getElementById('resReward');
   if(reward && reward.breakdown && reward.breakdown.length){
-    var lines = reward.breakdown.map(function(b){
+    rb.innerHTML = reward.breakdown.map(function(b){
       return '<div class="rw-line"><span>'+b.label+'</span><span>+'+b.amount+' 🪙</span></div>';
     }).join('');
-    rb.innerHTML = '<div class="rw-title">🎁 Oyun Tamamlandı</div>'+lines+
-      '<div class="rw-total"><span>Toplam</span><span>+'+reward.goldEarned+' 🪙</span></div>';
     rb.classList.remove('hidden');
   } else {
     rb.innerHTML=''; rb.classList.add('hidden');
@@ -1293,8 +1385,7 @@ function showResult(e,t,d,x,reward){
   var cur = learnedWords.size;
   var remaining = Math.max(0, WORD_GOAL-cur);
   document.getElementById('resMotiv').textContent = rand(MOTIV_MSGS);
-  document.getElementById('resWordCount').textContent = cur;
-  document.getElementById('resGoalMax').textContent = WORD_GOAL;
+  document.getElementById('resWordCountLabel').textContent = cur+' / '+WORD_GOAL;
   document.getElementById('resRemaining').innerHTML = remaining>0
     ? '🏁 Hedefe sadece <b>'+remaining+' kelime</b> kaldı!'
     : '🎉 <b>HEDEFE ULAŞTIN!</b> Yeni hedef seni bekliyor!';
@@ -1304,50 +1395,21 @@ function showResult(e,t,d,x,reward){
   if(cur>lastBalloonCount) setTimeout(function(){sfx('tick');},700);
   lastBalloonCount = cur;
 
-  show('resultScreen');
-  renderTower();
-  if(reward && reward.levelResult && reward.levelResult.leveledUp){
-    setTimeout(function(){ showLevelUpToast(reward.levelResult); }, 900);
-  }
-}
-
-/* RC2: yeni nesil bitiş ekranı — şimdilik yalnızca Gökdelen Bilgini (quiz
-   modunun 'buildings' kategorisi) bunu kullanır. showResult() ile aynı
-   paylaşılan durumu (learnedWords, WORD_GOAL, MOTIV_MSGS, lastBalloonCount,
-   showLevelUpToast) okur; oyun mantığına veya ödül hesaplamasına dokunmaz —
-   yalnızca farklı bir DOM'a, farklı bir görsel düzende yazar. */
-function showResultSkyscraper(correct, total, reward){
-  document.getElementById('rs2Detail').textContent = correct+' / '+total+' doğru cevap';
-  document.getElementById('rs2Xp').innerHTML =
-    '<span class="rc2-star-ico">⭐</span><span>+'+(correct*10)+' XP</span><span class="rc2-star-ico">⭐</span>';
-
-  var rb = document.getElementById('rs2Reward');
-  if(reward && reward.breakdown && reward.breakdown.length){
-    var lines = reward.breakdown.map(function(b){
-      return '<div class="rw-line"><span>'+b.label+'</span><span>+'+b.amount+' <span class="rc2-coin">🪙</span></span></div>';
-    }).join('');
-    rb.innerHTML = '<div class="rw-title">🎁 Oyun Tamamlandı</div>'+lines+
-      '<div class="rw-total"><span>Toplam Kazanç</span><span>+'+reward.goldEarned+' <span class="rc2-coin">🪙</span></span></div>';
-    rb.classList.remove('hidden');
+  var towerBlock = document.getElementById('resTowerBlock');
+  var bprog = window.getBuildingProgress ? window.getBuildingProgress(floors) : null;
+  if(bprog){
+    document.getElementById('resBuildingName').textContent = bprog.current.icon+' '+bprog.current.name;
+    document.getElementById('resTowerPct').textContent = Math.round(bprog.currentPct*100)+'%';
+    document.getElementById('resTowerCaption').textContent = bprog.floorsIntoCurrent+' / '+bprog.current.floors+' kat';
+    var tfill = document.getElementById('resTowerFill');
+    tfill.style.width = '0%';
+    setTimeout(function(){ tfill.style.width = Math.round(bprog.currentPct*100)+'%'; }, 200);
+    towerBlock.classList.remove('hidden');
   } else {
-    rb.innerHTML=''; rb.classList.add('hidden');
+    towerBlock.classList.add('hidden');
   }
 
-  var cur = learnedWords.size;
-  var remaining = Math.max(0, WORD_GOAL-cur);
-  document.getElementById('rs2Motiv').textContent = rand(MOTIV_MSGS);
-  document.getElementById('rs2WordCount').textContent = cur;
-  document.getElementById('rs2GoalMax').textContent = WORD_GOAL;
-  document.getElementById('rs2Remaining').innerHTML = remaining>0
-    ? '🏁 Hedefe sadece <b>'+remaining+' kelime</b> kaldı!'
-    : '🎉 <b>HEDEFE ULAŞTIN!</b> Yeni hedef seni bekliyor!';
-  var fill2 = document.getElementById('rs2ProgFill');
-  fill2.style.width = Math.min(100, lastBalloonCount/WORD_GOAL*100)+'%';
-  setTimeout(function(){ fill2.style.width = Math.min(100, cur/WORD_GOAL*100)+'%'; }, 200);
-  if(cur>lastBalloonCount) setTimeout(function(){sfx('tick');},700);
-  lastBalloonCount = cur;
-
-  show('resultScreenSkyscraper');
+  show('resultScreen');
   renderTower();
   if(reward && reward.levelResult && reward.levelResult.leveledUp){
     setTimeout(function(){ showLevelUpToast(reward.levelResult); }, 900);
@@ -1356,7 +1418,7 @@ function showResultSkyscraper(correct, total, reward){
 
 /* ================= ANA EKRAN OYUN LİSTESİ ================= */
 var MODES = [
- {key:'quiz_buildings', cls:'b', e:'🏙️', tag:'BİLGİ YARIŞMASI', n:'Gökdelen Bilgini', d:'Bina bilgileri + kelimeler', fn:function(){startQuiz('buildings');}},
+ {key:'quiz_buildings', cls:'b', e:'🏙️', tag:'BİLGİ YARIŞMASI', n:'Gökdelen Bilgini', d:'Bina bilgileri + kelimeler', icon:'../assets/images/ui/icons/modes/mode_skyscraper.png', fn:function(){startQuiz('buildings');}},
  {key:'quiz_countries', cls:'g', e:'🌍', tag:'ZAMANA KARŞI', n:'Ülke Avcısı', d:'60 saniyede kaç soru?', fn:function(){startQuiz('countries');}},
  {key:'picmatch', cls:'p', e:'🖼️', tag:'RESİM', n:'Resim Eşleştirme', d:'Resmi doğru kelimeyle eşleştir', fn:startPicmatch},
  {key:'listen', cls:'a', e:'🎧', tag:'DİNLEME', n:'Dinle ve Bul', d:'Telaffuzu duy, kelimeyi seç', fn:startListen},
@@ -1372,96 +1434,35 @@ var MODES = [
  {key:'piano', cls:'a', e:'🎹', tag:'NOTA OYUNU', n:'Nota Kelimeleri', d:'Piyanoyla kelime çal!', fn:startPiano},
  {key:'review', cls:'b', e:'🧠', tag:'TEKRAR', n:'Kelime Tekrarı', d:'Zorlandığın kelimeleri tekrar et', fn:startReview},
 ];
-/* Kademeli görsel geçiş: yalnızca Gökdelen Bilgini (quiz_buildings) yeni
-   GC2 kart bileşenini kullanır; kalan tüm modlar mevcut .cat tasarımıyla
-   değişmeden çalışmaya devam eder. */
-var GC2_MIGRATED_KEYS = {quiz_buildings:true};
-function getFavorites(){
-  var f = window.safeGet(window.STORAGE_KEYS.favorites, null);
-  if(!f || typeof f !== 'object' || Array.isArray(f)) f = {};
-  return f;
-}
-function isFavoriteMode(key){ return !!getFavorites()[key]; }
-function toggleFavoriteMode(key){
-  var f = getFavorites();
-  f[key] = !f[key];
-  window.safeSet(window.STORAGE_KEYS.favorites, f);
-  sfx('tick');
-  renderModes();
-}
-function buildSkyscraperCard(m){
+/* VTGameCard: single reusable game-mode card component. Every mode on
+   the Home grid is built through this one function (see .cat rules in
+   CSS for the shared visual implementation). m.icon optionally overrides
+   the default icon path per mode; everything else is fully data-driven. */
+function VTGameCard(m){
   var level = window.getModeLevel ? window.getModeLevel(m.key) : 1;
   var pct = window.getModePercent ? window.getModePercent(m.key) : 0;
-  var fav = isFavoriteMode(m.key);
-
-  var card = document.createElement('div');
-  card.className = 'gc2-card';
+  var iconSrc = m.icon || ('../assets/images/icons/mode_'+m.key+'.png');
+  var card = document.createElement('article');
+  card.className = 'cat '+m.cls;
   card.setAttribute('role','button');
   card.setAttribute('tabindex','0');
   card.setAttribute('aria-label', m.n+' — seviye haritasını aç');
   card.onclick = function(){ openLevelMap(m); };
   card.onkeydown = function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openLevelMap(m); } };
-
-  var star = document.createElement('button');
-  star.type = 'button';
-  star.className = 'gc2-star'+(fav?' active':'');
-  star.setAttribute('aria-pressed', fav?'true':'false');
-  star.setAttribute('aria-label', fav ? 'Favorilerden çıkar' : 'Favorilere ekle');
-  star.textContent = fav ? '⭐' : '☆';
-  star.onclick = function(e){ e.stopPropagation(); toggleFavoriteMode(m.key); };
-  card.appendChild(star);
-
-  var iconWrap = document.createElement('div'); iconWrap.className = 'gc2-icon-wrap';
-  var icon = document.createElement('img'); icon.className = 'gc2-icon'; icon.loading = 'lazy';
-  icon.src = '../assets/images/icons/mode_'+m.key+'.png'; icon.alt = m.n+' simgesi';
-  iconWrap.appendChild(icon);
-  card.appendChild(iconWrap);
-
-  var tag = document.createElement('div'); tag.className = 'gc2-tag'; tag.textContent = m.tag;
-  card.appendChild(tag);
-
-  var title = document.createElement('h3'); title.className = 'gc2-title'; title.textContent = m.n;
-  card.appendChild(title);
-
-  var desc = document.createElement('p'); desc.className = 'gc2-desc'; desc.textContent = m.d;
-  card.appendChild(desc);
-
-  var progRow = document.createElement('div'); progRow.className = 'gc2-progress-row';
-  var lvlSpan = document.createElement('span'); lvlSpan.textContent = 'Seviye '+level;
-  var pctSpan = document.createElement('span'); pctSpan.textContent = '%'+pct;
-  progRow.appendChild(lvlSpan); progRow.appendChild(pctSpan);
-  card.appendChild(progRow);
-
-  var track = document.createElement('div'); track.className = 'gc2-progress-track';
-  var fill = document.createElement('div'); fill.className = 'gc2-progress-fill'; fill.style.width = pct+'%';
-  var cap = document.createElement('span'); cap.className = 'gc2-progress-cap';
-  track.appendChild(fill); track.appendChild(cap);
-  card.appendChild(track);
-
+  card.innerHTML =
+    '<button type="button" class="favorite" tabindex="-1" aria-hidden="true">⭐</button>'+
+    '<div class="mode-icon-wrap"><img class="mode-icon" src="'+iconSrc+'" alt="" loading="lazy"></div>'+
+    '<span class="category-pill">'+m.tag+'</span>'+
+    '<h3 class="title">'+m.n+'</h3>'+
+    '<p class="description">'+m.d+'</p>'+
+    '<div class="card-spacer"></div>'+
+    '<div class="level-row"><span>Seviye '+level+'</span><span>%'+pct+'</span></div>'+
+    '<div class="progress-track"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
   return card;
 }
 function renderModes(){
   var g=document.getElementById('modeGrid'); g.innerHTML='';
-  MODES.forEach(function(m){
-    if(GC2_MIGRATED_KEYS[m.key]){
-      g.appendChild(buildSkyscraperCard(m));
-      return;
-    }
-    var b=document.createElement('button');
-    b.className='cat '+m.cls;
-    var level = window.getModeLevel ? window.getModeLevel(m.key) : 1;
-    var pct = window.getModePercent ? window.getModePercent(m.key) : 0;
-    b.innerHTML=
-      '<div class="cat-top">'+
-        '<img class="cat-icon" src="../assets/images/icons/mode_'+m.key+'.png" alt="" loading="lazy">'+
-        '<span class="cat-star">⭐</span>'+
-      '</div>'+
-      '<span class="tag">'+m.tag+'</span><h3>'+m.n+'</h3><p>'+m.d+'</p>'+
-      '<div class="cat-progress"><div class="cp-line"><span>Seviye '+level+'</span><span>%'+pct+'</span></div>'+
-      '<div class="cp-bar"><div class="cp-fill" style="width:'+pct+'%"></div></div></div>';
-    b.onclick=function(){ openLevelMap(m); };
-    g.appendChild(b);
-  });
+  MODES.forEach(function(m){ g.appendChild(VTGameCard(m)); });
 }
 
 /* ================= SEVİYE HARİTASI ================= */
@@ -1654,31 +1655,35 @@ function renderQ(){
       dots.appendChild(d);
     });
   }
-  document.getElementById('quizHint').textContent=item.hint;
-  makeTappable(item.en, document.getElementById('quizQEn'));
-  document.getElementById('quizQTr').textContent='🇹🇷 '+item.tr;
-  var box=document.getElementById('quizOpts'); box.innerHTML='';
-  s.locked=false;
-  shuffle(item.opts.map(function(o,i){return {o:o,i:i};})).forEach(function(p){
-    var b=document.createElement('button'); b.className='opt';
-    b.innerHTML=p.o.label;
-    b.onclick=function(e){ e.stopPropagation(); qAnswer(b, p.i===item.a, item); };
-    box.appendChild(b);
+  renderQuestionContent({
+    hintId:'quizHint', hint:item.hint,
+    primaryId:'quizQEn', tappable:true, primaryText:item.en,
+    supportingId:'quizQTr', supportingText:'🇹🇷 '+item.tr
   });
+  s.locked=false;
+  renderOptionButtons('quizOpts', shuffle(item.opts.map(function(o,i){return {o:o,i:i};})).map(function(p){
+    return { html:p.o.label, onClick:function(b){ qAnswer(b, p.i===item.a, item); } };
+  }));
 }
 function qAnswer(btn, ok, item){
-  if(qState.locked) return; qState.locked=true;
-  qState.results[qState.i]=ok; qState.answered++;
-  btn.classList.add(ok?'correct':'wrong');
-  sfx(ok?'correct':'wrong');
-  if(item.w && window.recordWordResult) window.recordWordResult(item.w, ok);
-  if(ok){ qState.correct++; addXP(10); if(item.w) addLearned(item.w);
-    if(qState.timed) document.getElementById('quizScore').textContent='✅ '+qState.correct; }
-  setTimeout(function(){
-    qState.i++;
-    if(qState.i>=qState.list.length) finishQuiz();
-    else renderQ();
-  },700);
+  handleOptionAnswer({
+    isLocked:function(){ return qState.locked; },
+    setLocked:function(){ qState.locked=true; },
+    btn:btn, ok:ok,
+    recordWord: item.w || null,
+    xp: 10,
+    learnWord: item.w || null,
+    onResult:function(ok){
+      qState.results[qState.i]=ok; qState.answered++;
+      if(ok){ qState.correct++; if(qState.timed) document.getElementById('quizScore').textContent='✅ '+qState.correct; }
+    },
+    delay: 700,
+    after:function(){
+      qState.i++;
+      if(qState.i>=qState.list.length) finishQuiz();
+      else renderQ();
+    }
+  });
 }
 function finishQuiz(){
   stopAllTimers();
@@ -1688,12 +1693,20 @@ function finishQuiz(){
   if(good) sfx('win');
   var reward = completeGameSession('quiz', {correct:s.correct, total:total, perfect: !s.timed && total>0 && s.correct===total, levelKey:'quiz_'+s.cat});
   if(s.cat === 'buildings'){
-    /* Gökdelen Bilgini: yeni RC2 bitiş ekranı (bkz. showResultSkyscraper). */
-    showResultSkyscraper(s.correct, total, reward);
+    renderResultScreen({
+      badgeImg:'../assets/images/icons/mode_quiz_buildings.png',
+      title:'Gökdelen Bilgini Bitti!',
+      detail: s.correct+' / '+total+' doğru'+(s.timed?' · Zamana karşı!':''),
+      correct:s.correct, total:total,
+      xpText:'+'+(s.correct*10)+' XP', reward:reward
+    });
   } else {
-    showResult(good?'🏆':'💪', good?'Harikasın!':'İyi deneme!',
-      s.correct+' / '+total+' doğru'+(s.timed?' · Zamana karşı!':''),
-      '+'+(s.correct*10)+' XP · Kulen '+s.correct+' kat yükseldi!', reward);
+    renderResultScreen({
+      emoji: good?'🏆':'💪', title: good?'Harikasın!':'İyi deneme!',
+      detail: s.correct+' / '+total+' doğru'+(s.timed?' · Zamana karşı!':''),
+      correct:s.correct, total:total,
+      xpText:'+'+(s.correct*10)+' XP · Kulen '+s.correct+' kat yükseldi!', reward:reward
+    });
   }
 }
 
@@ -1724,29 +1737,29 @@ function renderPm(){
   document.getElementById('pmEmoji').textContent=item[1];
   var others=pick(EMOJI_WORDS.filter(function(w){return w[0]!==item[0];}),3);
   var opts=shuffle([item].concat(others));
-  var box=document.getElementById('pmOpts'); box.innerHTML='';
   s.locked=false;
-  opts.forEach(function(o){
-    var b=document.createElement('button'); b.className='opt';
-    b.innerHTML=o[0]+'<small>'+(DICT[o[0]]||'')+'</small>';
-    b.onclick=function(e){ e.stopPropagation();
-      if(s.locked) return; s.locked=true;
-      var ok=o[0]===item[0];
-      b.classList.add(ok?'correct':'wrong');
-      sfx(ok?'correct':'wrong');
-      if(window.recordWordResult) window.recordWordResult(item[0], ok);
-      if(ok){ s.correct++; addXP(10); addLearned(item[0]); }
-      setTimeout(function(){
-        s.i++;
-        if(s.i>=8){
-          if(s.correct>=6) sfx('win');
-          var reward = completeGameSession('picmatch', {correct:s.correct, total:8, perfect:s.correct===8});
-          showResult(s.correct>=6?'🖼️':'💪','Resim Eşleştirme Bitti!', s.correct+' / 8 doğru', '+'+(s.correct*10)+' XP', reward);
-        } else renderPm();
-      },700);
-    };
-    box.appendChild(b);
-  });
+  renderOptionButtons('pmOpts', opts.map(function(o){
+    return { html:o[0]+'<small>'+(DICT[o[0]]||'')+'</small>', onClick:function(b){
+      handleOptionAnswer({
+        isLocked:function(){ return s.locked; },
+        setLocked:function(){ s.locked=true; },
+        btn:b, ok: o[0]===item[0],
+        recordWord: item[0],
+        xp: 10,
+        learnWord: item[0],
+        onResult:function(ok){ if(ok) s.correct++; },
+        delay: 700,
+        after:function(){
+          s.i++;
+          if(s.i>=8){
+            if(s.correct>=6) sfx('win');
+            var reward = completeGameSession('picmatch', {correct:s.correct, total:8, perfect:s.correct===8});
+            renderResultScreen({emoji: s.correct>=6?'🖼️':'💪', title:'Resim Eşleştirme Bitti!', detail: s.correct+' / 8 doğru', correct:s.correct, total:8, xpText:'+'+(s.correct*10)+' XP', reward:reward});
+          } else renderPm();
+        }
+      });
+    }};
+  }));
 }
 
 /* ================= 4) DİNLE VE BUL ================= */
@@ -1765,28 +1778,29 @@ function renderLs(){
   var sameLen=WORDS.filter(function(w){return w[0]!==item[0] && Math.abs(w[0].length-item[0].length)<=1;});
   var others=pick(sameLen,3);
   var opts=shuffle([item].concat(others));
-  var box=document.getElementById('lsOpts'); box.innerHTML='';
   s.locked=false;
-  opts.forEach(function(o){
-    var b=document.createElement('button'); b.className='opt'; b.textContent=o[0];
-    b.onclick=function(e){ e.stopPropagation();
-      if(s.locked) return; s.locked=true;
-      var ok=o[0]===item[0];
-      b.classList.add(ok?'correct':'wrong');
-      sfx(ok?'correct':'wrong');
-      if(window.recordWordResult) window.recordWordResult(item[0], ok);
-      if(ok){ s.correct++; addXP(10); addLearned(item[0]); }
-      setTimeout(function(){
-        s.i++;
-        if(s.i>=8){
-          if(s.correct>=6) sfx('win');
-          var reward = completeGameSession('listen', {correct:s.correct, total:8, perfect:s.correct===8});
-          showResult(s.correct>=6?'🎧':'💪','Dinleme Bitti!', s.correct+' / 8 doğru', '+'+(s.correct*10)+' XP', reward);
-        } else { renderLs(); setTimeout(lsSpeak,400); }
-      },700);
-    };
-    box.appendChild(b);
-  });
+  renderOptionButtons('lsOpts', opts.map(function(o){
+    return { text:o[0], onClick:function(b){
+      handleOptionAnswer({
+        isLocked:function(){ return s.locked; },
+        setLocked:function(){ s.locked=true; },
+        btn:b, ok: o[0]===item[0],
+        recordWord: item[0],
+        xp: 10,
+        learnWord: item[0],
+        onResult:function(ok){ if(ok) s.correct++; },
+        delay: 700,
+        after:function(){
+          s.i++;
+          if(s.i>=8){
+            if(s.correct>=6) sfx('win');
+            var reward = completeGameSession('listen', {correct:s.correct, total:8, perfect:s.correct===8});
+            renderResultScreen({emoji: s.correct>=6?'🎧':'💪', title:'Dinleme Bitti!', detail: s.correct+' / 8 doğru', correct:s.correct, total:8, xpText:'+'+(s.correct*10)+' XP', reward:reward});
+          } else { renderLs(); setTimeout(lsSpeak,400); }
+        }
+      });
+    }};
+  }));
   setTimeout(lsSpeak,400);
 }
 function lsSpeak(){ if(lsState) speak(lsState.rounds[lsState.i][0]); }
@@ -1845,7 +1859,7 @@ function memFlip(idx){
         sfx('win');
         setTimeout(function(){
           var reward = completeGameSession('memory', {correct:6, total:6, perfect:s.moves===6});
-          showResult('🃏','Tüm Çiftleri Buldun!','6 çift · '+s.moves+' hamlede','+60 XP', reward);
+          renderResultScreen({emoji:'🃏', title:'Tüm Çiftleri Buldun!', detail:'6 çift · '+s.moves+' hamlede', correct:6, total:6, xpText:'+60 XP', reward:reward});
         },500);
       }
     } else {
@@ -1917,7 +1931,7 @@ function spType(L,bi){
         if(s.i>=5){
           if(s.correct>=4) sfx('win');
           var reward = completeGameSession('spelling', {correct:s.correct, total:5, perfect:s.correct===5});
-          showResult(s.correct>=4?'✍️':'💪','Yazım Arısı Bitti!', s.correct+' / 5 doğru yazım','+'+(s.correct*15)+' XP', reward);
+          renderResultScreen({emoji: s.correct>=4?'✍️':'💪', title:'Yazım Arısı Bitti!', detail: s.correct+' / 5 doğru yazım', correct:s.correct, total:5, xpText:'+'+(s.correct*15)+' XP', reward:reward});
         } else renderSp(true);
       },1200);
     } else {
@@ -1984,31 +1998,33 @@ function startFillgap(){
 function renderFg(){
   var s=fgState, item=s.rounds[s.i];
   document.getElementById('fgRound').textContent=(s.i+1)+'/8';
-  makeTappable(item.s, document.getElementById('fgSentence'));
-  document.getElementById('fgTr').textContent='🇹🇷 '+item.tr;
-  var box=document.getElementById('fgOpts'); box.innerHTML='';
-  s.locked=false;
-  shuffle(item.o).forEach(function(o){
-    var b=document.createElement('button'); b.className='opt';
-    b.innerHTML=o+'<small>'+(lookupWord(o)||'')+'</small>';
-    b.onclick=function(e){ e.stopPropagation();
-      if(s.locked) return; s.locked=true;
-      var ok=o===item.a;
-      b.classList.add(ok?'correct':'wrong');
-      sfx(ok?'correct':'wrong');
-      if(window.recordWordResult) window.recordWordResult(item.a, ok);
-      if(ok){ s.correct++; addXP(10); addLearned(item.a); }
-      setTimeout(function(){
-        s.i++;
-        if(s.i>=8){
-          if(s.correct>=6) sfx('win');
-          var reward = completeGameSession('fillgap', {correct:s.correct, total:8, perfect:s.correct===8});
-          showResult(s.correct>=6?'📝':'💪','Cümleler Bitti!', s.correct+' / 8 doğru','+'+(s.correct*10)+' XP', reward);
-        } else renderFg();
-      },800);
-    };
-    box.appendChild(b);
+  renderQuestionContent({
+    primaryId:'fgSentence', tappable:true, primaryText:item.s,
+    supportingId:'fgTr', supportingText:'🇹🇷 '+item.tr
   });
+  s.locked=false;
+  renderOptionButtons('fgOpts', shuffle(item.o).map(function(o){
+    return { html:o+'<small>'+(lookupWord(o)||'')+'</small>', onClick:function(b){
+      handleOptionAnswer({
+        isLocked:function(){ return s.locked; },
+        setLocked:function(){ s.locked=true; },
+        btn:b, ok: o===item.a,
+        recordWord: item.a,
+        xp: 10,
+        learnWord: item.a,
+        onResult:function(ok){ if(ok) s.correct++; },
+        delay: 800,
+        after:function(){
+          s.i++;
+          if(s.i>=8){
+            if(s.correct>=6) sfx('win');
+            var reward = completeGameSession('fillgap', {correct:s.correct, total:8, perfect:s.correct===8});
+            renderResultScreen({emoji: s.correct>=6?'📝':'💪', title:'Cümleler Bitti!', detail: s.correct+' / 8 doğru', correct:s.correct, total:8, xpText:'+'+(s.correct*10)+' XP', reward:reward});
+          } else renderFg();
+        }
+      });
+    }};
+  }));
 }
 
 /* ================= 8) HARİTA DEDEKTİFİ ================= */
@@ -2070,36 +2086,38 @@ function renderMd(newRound){
   var s=mdState, item=s.rounds[s.i];
   if(newRound) s.clue=0;
   document.getElementById('mdRound').textContent=(s.i+1)+'/5';
-  document.getElementById('mdClueNo').textContent=(s.clue+1)+'. İPUCU · CLUE '+(s.clue+1);
-  makeTappable(item.clues[s.clue], document.getElementById('mdClue'));
-  document.getElementById('mdClueTr').textContent='🇹🇷 '+item.cluesTr[s.clue];
+  renderQuestionContent({
+    hintId:'mdClueNo', hint:(s.clue+1)+'. İPUCU · CLUE '+(s.clue+1),
+    primaryId:'mdClue', tappable:true, primaryText:item.clues[s.clue],
+    supportingId:'mdClueTr', supportingText:'🇹🇷 '+item.cluesTr[s.clue]
+  });
   document.getElementById('mdXpInfo').textContent='Şu an doğru bilirsen: +'+(30-s.clue*10)+' XP';
   if(!newRound) return;
   var others=pick(MAPQ.filter(function(m){return m.c!==item.c;}),3);
   var opts=shuffle([item].concat(others));
-  var box=document.getElementById('mdOpts'); box.innerHTML='';
   s.locked=false;
-  opts.forEach(function(o){
-    var b=document.createElement('button'); b.className='opt';
-    b.innerHTML='<span class="flag">'+o.f+'</span>'+o.c+'<small>'+o.trn+'</small>';
-    b.onclick=function(e){ e.stopPropagation();
-      if(s.locked) return; s.locked=true;
-      var ok=o.c===item.c;
-      b.classList.add(ok?'correct':'wrong');
-      sfx(ok?'correct':'wrong');
-      if(window.recordWordResult) window.recordWordResult(item.c, ok);
-      if(ok){ var earn=30-s.clue*10; s.correct++; s.xpTotal+=earn; addXP(earn); addLearned(item.c); }
-      setTimeout(function(){
-        s.i++;
-        if(s.i>=5){
-          if(s.correct>=4) sfx('win');
-          var reward = completeGameSession('mapdet', {correct:s.correct, total:5, perfect:s.correct===5});
-          showResult(s.correct>=4?'🗺️':'💪','Dedektiflik Bitti!', s.correct+' / 5 ülke buldun','+'+s.xpTotal+' XP', reward);
-        } else renderMd(true);
-      },800);
-    };
-    box.appendChild(b);
-  });
+  renderOptionButtons('mdOpts', opts.map(function(o){
+    return { html:'<span class="flag">'+o.f+'</span>'+o.c+'<small>'+o.trn+'</small>', onClick:function(b){
+      handleOptionAnswer({
+        isLocked:function(){ return s.locked; },
+        setLocked:function(){ s.locked=true; },
+        btn:b, ok: o.c===item.c,
+        recordWord: item.c,
+        onResult:function(ok){
+          if(ok){ var earn=30-s.clue*10; s.correct++; s.xpTotal+=earn; addXP(earn); addLearned(item.c); }
+        },
+        delay: 800,
+        after:function(){
+          s.i++;
+          if(s.i>=5){
+            if(s.correct>=4) sfx('win');
+            var reward = completeGameSession('mapdet', {correct:s.correct, total:5, perfect:s.correct===5});
+            renderResultScreen({emoji: s.correct>=4?'🗺️':'💪', title:'Dedektiflik Bitti!', detail: s.correct+' / 5 ülke buldun', correct:s.correct, total:5, xpText:'+'+s.xpTotal+' XP', reward:reward});
+          } else renderMd(true);
+        }
+      });
+    }};
+  }));
 }
 function mdMoreClue(){
   var s=mdState;
@@ -2241,7 +2259,7 @@ function finishSnake(){
   var s=snState;
   if(s.correct>=6) sfx('win');
   var reward = completeGameSession('snake', {correct:s.correct, total:8, perfect:s.correct===8});
-  showResult(s.correct>=6?'🐍':'💪','Yılan Tamamlandı!', s.correct+' / 8 doğru · Zincir: '+s.used.join(' → '), '+'+(s.correct*10)+' XP', reward);
+  renderResultScreen({emoji: s.correct>=6?'🐍':'💪', title:'Yılan Tamamlandı!', detail: s.correct+' / 8 doğru · Zincir: '+s.used.join(' → '), correct:s.correct, total:8, xpText:'+'+(s.correct*10)+' XP', reward:reward});
 }
 
 /* ================= 10) ROKET YARIŞI ================= */
@@ -2269,38 +2287,44 @@ function updateRockets(){
 function renderRk(){
   var q=makeVocabQ();
   rkState.q=q;
-  makeTappable(q.en, document.getElementById('rkQ'));
-  document.getElementById('rkTr').textContent='🇹🇷 '+q.tr;
-  var box=document.getElementById('rkOpts'); box.innerHTML='';
-  rkState.locked=false;
-  shuffle(q.opts.map(function(o,i){return {o:o,i:i};})).forEach(function(p){
-    var b=document.createElement('button'); b.className='opt'; b.textContent=p.o.label;
-    b.onclick=function(e){ e.stopPropagation();
-      if(rkState.locked||rkState.over) return; rkState.locked=true;
-      var ok=p.i===q.a;
-      b.classList.add(ok?'correct':'wrong');
-      sfx(ok?'correct':'wrong');
-      if(window.recordWordResult && q.w) window.recordWordResult(q.w, ok);
-      if(ok){ rkState.correct++; rkState.me+=13; addXP(10); addLearned(q.w);
-        document.getElementById('rkScore').textContent='✅ '+rkState.correct;
-        updateRockets();
-        if(rkState.me>=100){ endRocket(true); return; }
-      } else {
-        rkState.wrong=(rkState.wrong||0)+1; // altın/rozet "hatasız" bonusu için izlenir
-      }
-      setTimeout(renderRk,500);
-    };
-    box.appendChild(b);
+  renderQuestionContent({
+    primaryId:'rkQ', tappable:true, primaryText:q.en,
+    supportingId:'rkTr', supportingText:'🇹🇷 '+q.tr
   });
+  rkState.locked=false;
+  renderOptionButtons('rkOpts', shuffle(q.opts.map(function(o,i){return {o:o,i:i};})).map(function(p){
+    return { text:p.o.label, onClick:function(b){
+      handleOptionAnswer({
+        isLocked:function(){ return rkState.locked||rkState.over; },
+        setLocked:function(){ rkState.locked=true; },
+        btn:b, ok: p.i===q.a,
+        recordWord: q.w || null,
+        onResult:function(ok){
+          if(ok){
+            rkState.correct++; rkState.me+=13; addXP(10); addLearned(q.w);
+            document.getElementById('rkScore').textContent='✅ '+rkState.correct;
+            updateRockets();
+            if(rkState.me>=100){ endRocket(true); return false; }
+          } else {
+            rkState.wrong=(rkState.wrong||0)+1; // altın/rozet "hatasız" bonusu için izlenir
+          }
+        },
+        delay: 500,
+        after: renderRk
+      });
+    }};
+  }));
 }
 function endRocket(won){
   rkState.over=true;
   stopAllTimers();
   if(won) sfx('win');
   var reward = completeGameSession('rocket', {correct:rkState.correct, total:rkState.correct, perfect: won && rkState.wrong===0, won:won});
-  showResult(won?'🚀':'🛸', won?'Uzaya İlk Sen Çıktın!':'Rakip roket önce vardı!',
-    rkState.correct+' doğru cevapla '+(won?'yarışı kazandın!':'iyi savaştın!'),
-    '+'+(rkState.correct*10)+' XP', reward);
+  renderResultScreen({
+    emoji: won?'🚀':'🛸', title: won?'Uzaya İlk Sen Çıktın!':'Rakip roket önce vardı!',
+    detail: rkState.correct+' doğru cevapla '+(won?'yarışı kazandın!':'iyi savaştın!'),
+    xpText:'+'+(rkState.correct*10)+' XP', reward:reward
+  });
 }
 
 /* ================= 11) ÇAPRAZ BULMACA ================= */
@@ -2502,7 +2526,7 @@ function cwType(L){
           s.pi++;
           if(s.pi>=s.puzzles.length){
             var reward = completeGameSession('crossword', {correct:s.correctWords, total:s.totalSlots, perfect:s.correctWords===s.totalSlots});
-            showResult('🧩','Tüm Bulmacalar Çözüldü!', s.correctWords+' kelime yerleştirdin','+'+(s.correctWords*15)+' XP', reward);
+            renderResultScreen({emoji:'🧩', title:'Tüm Bulmacalar Çözüldü!', detail: s.correctWords+' kelime yerleştirdin', correct:s.correctWords, total:s.totalSlots, xpText:'+'+(s.correctWords*15)+' XP', reward:reward});
           } else { s.bankCache={}; cwLoad(); }
         },1000);
       }
@@ -2618,30 +2642,31 @@ function renderStQ(){
     d.className='dot'+(idx<s.qi ? (s.results[idx]?' ok':' no') : idx===s.qi?' on':'');
     dots.appendChild(d);
   });
-  makeTappable(q.en, document.getElementById('stQEn'));
-  document.getElementById('stQTr').textContent='🇹🇷 '+q.tr;
-  var box=document.getElementById('stOpts'); box.innerHTML='';
-  s.locked=false;
-  shuffle(q.opts.map(function(o,i){return {o:o,i:i};})).forEach(function(p){
-    var b=document.createElement('button'); b.className='opt'; b.textContent=p.o;
-    b.onclick=function(e){ e.stopPropagation();
-      if(s.locked) return; s.locked=true;
-      var ok=p.i===q.a;
-      s.results[s.qi]=ok;
-      b.classList.add(ok?'correct':'wrong');
-      sfx(ok?'correct':'wrong');
-      if(ok){ s.correct++; addXP(15); }
-      setTimeout(function(){
-        s.qi++;
-        if(s.qi>=s.story.qs.length){
-          if(s.correct===3) sfx('win');
-          var reward = completeGameSession('story', {correct:s.correct, total:3, perfect:s.correct===3});
-          showResult(s.correct>=2?'📖':'💪','Hikaye Bitti!', s.correct+' / 3 doğru cevap','+'+(s.correct*15)+' XP', reward);
-        } else renderStQ();
-      },700);
-    };
-    box.appendChild(b);
+  renderQuestionContent({
+    primaryId:'stQEn', tappable:true, primaryText:q.en,
+    supportingId:'stQTr', supportingText:'🇹🇷 '+q.tr
   });
+  s.locked=false;
+  renderOptionButtons('stOpts', shuffle(q.opts.map(function(o,i){return {o:o,i:i};})).map(function(p){
+    return { text:p.o, onClick:function(b){
+      handleOptionAnswer({
+        isLocked:function(){ return s.locked; },
+        setLocked:function(){ s.locked=true; },
+        btn:b, ok: p.i===q.a,
+        xp: 15,
+        onResult:function(ok){ s.results[s.qi]=ok; if(ok) s.correct++; },
+        delay: 700,
+        after:function(){
+          s.qi++;
+          if(s.qi>=s.story.qs.length){
+            if(s.correct===3) sfx('win');
+            var reward = completeGameSession('story', {correct:s.correct, total:3, perfect:s.correct===3});
+            renderResultScreen({emoji: s.correct>=2?'📖':'💪', title:'Hikaye Bitti!', detail: s.correct+' / 3 doğru cevap', correct:s.correct, total:3, xpText:'+'+(s.correct*15)+' XP', reward:reward});
+          } else renderStQ();
+        }
+      });
+    }};
+  }));
 }
 
 /* ================= 13) KELİME BULMACASI (karışık harf) ================= */
@@ -2706,7 +2731,7 @@ function checkScramble(){
         if(scState.round>5){
           sfx('win');
           var reward = completeGameSession('scramble', {correct:scState.correct, total:5, perfect:scState.correct===5});
-          showResult('🪐','Bulmacalar Bitti!', scState.correct+' / 5 kelime çözdün','+'+(scState.correct*15)+' XP', reward);
+          renderResultScreen({emoji:'🪐', title:'Bulmacalar Bitti!', detail: scState.correct+' / 5 kelime çözdün', correct:scState.correct, total:5, xpText:'+'+(scState.correct*15)+' XP', reward:reward});
         } else scNext();
       },1300);
     } else {
@@ -2779,7 +2804,7 @@ function playKey(note){
         if(pnState.round>3){
           sfx('win');
           var reward = completeGameSession('piano', {correct:pnState.correct, total:3, perfect:pnState.correct===3});
-          showResult('🎹','Konser Bitti!', pnState.correct+' kelimeyi notalarla çaldın','+'+(pnState.correct*20)+' XP', reward);
+          renderResultScreen({emoji:'🎹', title:'Konser Bitti!', detail: pnState.correct+' kelimeyi notalarla çaldın', correct:pnState.correct, total:3, xpText:'+'+(pnState.correct*20)+' XP', reward:reward});
         } else pnNext();
       },delay);
     }
@@ -2824,52 +2849,47 @@ function renderRv(){
   var s = rvState, item = s.rounds[s.i];
   document.getElementById('rvScore').textContent = '✅ ' + s.correct;
   var format = RV_FORMATS[s.i % RV_FORMATS.length];
-  var box = document.getElementById('rvOpts');
-  box.innerHTML = '';
   s.locked = false;
   var correctAnswer, opts;
   if(format === 'en2tr'){
-    document.getElementById('rvHint').textContent = 'TÜRKÇESİNİ SEÇ';
-    document.getElementById('rvQ').textContent = item.en;
-    document.getElementById('rvTr').textContent = '';
+    renderQuestionContent({ hintId:'rvHint', hint:'TÜRKÇESİNİ SEÇ', primaryId:'rvQ', primaryText:item.en, supportingId:'rvTr', supportingText:'' });
     correctAnswer = item.tr;
     opts = rvBuildOptions(correctAnswer, 'tr', item);
   } else if(format === 'tr2en'){
-    document.getElementById('rvHint').textContent = 'İNGİLİZCESİNİ SEÇ';
-    document.getElementById('rvQ').textContent = item.tr;
-    document.getElementById('rvTr').textContent = '';
+    renderQuestionContent({ hintId:'rvHint', hint:'İNGİLİZCESİNİ SEÇ', primaryId:'rvQ', primaryText:item.tr, supportingId:'rvTr', supportingText:'' });
     correctAnswer = item.en;
     opts = rvBuildOptions(correctAnswer, 'en', item);
   } else {
-    document.getElementById('rvHint').textContent = 'CÜMLEYİ TAMAMLA';
     var blanked = (item.exEn||item.en).replace(new RegExp('\\b'+item.en+'\\b','i'), '___');
-    document.getElementById('rvQ').textContent = blanked;
-    document.getElementById('rvTr').textContent = item.exTr ? '🇹🇷 ' + item.exTr : '';
+    renderQuestionContent({ hintId:'rvHint', hint:'CÜMLEYİ TAMAMLA', primaryId:'rvQ', primaryText:blanked, supportingId:'rvTr', supportingText: item.exTr ? '🇹🇷 ' + item.exTr : '' });
     correctAnswer = item.en;
     opts = rvBuildOptions(correctAnswer, 'en', item);
   }
-  opts.forEach(function(o){
-    var b = document.createElement('button'); b.className='opt'; b.textContent = o;
-    b.onclick = function(e){ e.stopPropagation(); rvAnswer(b, o===correctAnswer, item); };
-    box.appendChild(b);
-  });
+  renderOptionButtons('rvOpts', opts.map(function(o){
+    return { text:o, onClick:function(b){ rvAnswer(b, o===correctAnswer, item); } };
+  }));
 }
 function rvAnswer(btn, ok, item){
   var s = rvState;
-  if(s.locked) return; s.locked = true;
-  btn.classList.add(ok?'correct':'wrong');
-  sfx(ok?'correct':'wrong');
-  if(window.recordWordResult) window.recordWordResult(item.en, ok);
-  if(ok){ s.correct++; addXP(10); addLearned(item.en); }
-  setTimeout(function(){
-    s.i++;
-    if(s.i >= s.rounds.length){
-      var passMark = Math.ceil(s.rounds.length*0.7);
-      if(s.correct >= passMark) sfx('win');
-      var reward = completeGameSession('review', {correct:s.correct, total:s.rounds.length, perfect:s.correct===s.rounds.length});
-      showResult(s.correct>=passMark?'🧠':'💪','Tekrar Tamamlandı!', s.correct+' / '+s.rounds.length+' doğru','+'+(s.correct*10)+' XP', reward);
-    } else renderRv();
-  }, 900);
+  handleOptionAnswer({
+    isLocked:function(){ return s.locked; },
+    setLocked:function(){ s.locked = true; },
+    btn:btn, ok:ok,
+    recordWord: item.en,
+    xp: 10,
+    learnWord: item.en,
+    onResult:function(ok){ if(ok) s.correct++; },
+    delay: 900,
+    after:function(){
+      s.i++;
+      if(s.i >= s.rounds.length){
+        var passMark = Math.ceil(s.rounds.length*0.7);
+        if(s.correct >= passMark) sfx('win');
+        var reward = completeGameSession('review', {correct:s.correct, total:s.rounds.length, perfect:s.correct===s.rounds.length});
+        renderResultScreen({emoji: s.correct>=passMark?'🧠':'💪', title:'Tekrar Tamamlandı!', detail: s.correct+' / '+s.rounds.length+' doğru', correct:s.correct, total:s.rounds.length, xpText:'+'+(s.correct*10)+' XP', reward:reward});
+      } else renderRv();
+    }
+  });
 }
 
 bootApp();
