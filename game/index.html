@@ -293,6 +293,17 @@
      geçişinin "üzerinde durduğu" hissini güçlendirir. Düğümün kendisi
      (ayrı bir HTML buton, z-index:1) her zaman bu hâlenin üstünde kalır. */
   .lm-road-halo{opacity:.85;}
+  /* ---- Dekor katmanı (Level Map v2 dekorasyonları) ----
+     .lm-stage içinde yol (z-index:0) ile düğümler (z-index:1) arasında
+     TEK amaçlı, salt görsel bir katman: sahneyi tamamen kaplar
+     (inset:0), pointer-events:none olduğu için düğüm tıklama/klavye
+     davranışını ASLA etkilemez, position:absolute olduğu için sahne
+     boyutunu veya normal doküman akışını etkilemez. Konum/boyut/flip
+     her görsel için satır-içi style ile JS'den uygulanır (bkz.
+     lmRenderDecorations) — düğüm wrap'lerinde zaten kullanılan aynı
+     desen (left/top %). */
+  .lm-decorations{position:absolute;inset:0;pointer-events:none;z-index:0;}
+  .lm-decor{position:absolute;display:block;height:auto;user-select:none;pointer-events:none;}
   /* transform: X ekseni -50% (wrap'in KENDİ genişliğine göre — düğüm
      wrap içinde ortalandığı için etiket daha geniş olsa bile düğüm
      merkezi doğru kalır), Y ekseni ise wrap'in TAMAMI (düğüm+etiket)
@@ -1871,6 +1882,77 @@ function lmBuildStones(svgNS, pathEl, totalLen, completedLen){
   }
   return {doneGroup:doneGroup, futureGroup:futureGroup};
 }
+
+/* --- Dekorasyon yerleşim planı (Level Map v2 dekorasyon katmanı) ---
+   Refinement Pass: PNG'lerin görünür-içerik alanı ölçüldü (kenarlarda
+   ~%3-20 saydam pay var, bkz. rapor) — bu yüzden çapa artık tuval
+   kenarına DEĞİL (ax/ay eskiden 0/-100 gibi uç değerlerdi, bu da asıl
+   konuyu overflow-x:hidden ile kırpıyordu), ÇOĞUNLUKLA MERKEZE yakın
+   (ax/ay ~ -35..-65) hafif bir "dışa" öndelemle konumlanıyor — böylece
+   ana obje (bina/tapınak/köprü) HER ZAMAN görünür kalır, yalnızca ince
+   saydam pay/yumuşak gölge kenarın dışına taşabilir. x/y = sahnenin
+   (viewBox ile aynı normalize % uzayı) içindeki ÇAPA noktası; w =
+   masaüstü genişliği (yükseklik, kaynak PNG'nin gerçek en-boy oranıyla
+   OTOMATİK hesaplanır — height:auto, asla gerilmez). tablet/mobile
+   alanları yalnızca GEREKTİĞİNDE geçersiz kılma taşır (x/y/w/ax/ay/
+   hidden'ın herhangi bir alt kümesi); yoksa masaüstü değeri miras
+   alınır (bkz. lmRenderDecorations + doğrulama raporu). */
+var LM_DECORATIONS = [
+  { file:'dec_building.png',      x:4,   y:7,    w:11,   ax:-32, ay:-58, flip:false,
+    mobile:{ x:8,   y:6,   w:16 } },
+  { file:'dec_windmill.png',      x:38,  y:6,    w:8,    ax:-50, ay:-85, flip:false,
+    mobile:{ hidden:true } },
+  { file:'dec_fountain.png',      x:62,  y:6,    w:8,    ax:-50, ay:-85, flip:true,
+    mobile:{ hidden:true } },
+  { file:'dec_bridge.png',        x:93,  y:23,   w:13,   ax:-32, ay:-50, flip:true,
+    mobile:{ x:91,  y:23,   w:15 } },
+  { file:'dec_treeland.png',      x:7,   y:42.5, w:13,   ax:-68, ay:-50, flip:false,
+    mobile:{ x:9,   y:42.5, w:15 } },
+  { file:'dec_desert_oasis.png',  x:93,  y:62.5, w:13,   ax:-32, ay:-50, flip:false,
+    mobile:{ x:91,  y:62.5, w:15 } },
+  { file:'dec_forest_shrine.png', x:7,   y:82,   w:13,   ax:-68, ay:-50, flip:true,
+    mobile:{ x:9,   y:82,   w:15 } },
+  { file:'dec_frozen_temple.png', x:88,  y:90,   w:13.5, ax:0,   ay:-40, flip:false,
+    mobile:{ x:90,  y:91,   w:13 } },
+  { file:'dec_waterfall.png',     x:89,  y:73,   w:9,    ax:-16, ay:-50, flip:false,
+    mobile:{ hidden:true } }
+];
+function lmBreakpoint(){
+  var w = window.innerWidth;
+  if(w>=1024) return 'desktop';
+  if(w>=700) return 'tablet';
+  return 'mobile';
+}
+/* Yalnızca görsel bir katman: pointer-events:none + position:absolute
+   olduğundan düğüm tıklama/klavye davranışını, sahne boyutunu veya
+   normal doküman akışını ASLA etkilemez (bkz. .lm-decorations CSS). */
+function lmRenderDecorations(stage){
+  var bp = lmBreakpoint();
+  var layer = document.createElement('div');
+  layer.className = 'lm-decorations';
+  layer.setAttribute('aria-hidden','true');
+  LM_DECORATIONS.forEach(function(d){
+    var over = (bp==='mobile' && d.mobile) ? d.mobile : (bp==='tablet' && d.tablet) ? d.tablet : null;
+    if(over && over.hidden) return;
+    var x = (over && over.x!=null) ? over.x : d.x;
+    var y = (over && over.y!=null) ? over.y : d.y;
+    var w = (over && over.w!=null) ? over.w : d.w;
+    var ax = (over && over.ax!=null) ? over.ax : d.ax;
+    var ay = (over && over.ay!=null) ? over.ay : d.ay;
+    var img = document.createElement('img');
+    img.className = 'lm-decor';
+    img.src = '../assets/images/ui/levelmap/'+d.file;
+    img.alt = '';
+    img.setAttribute('aria-hidden','true');
+    img.draggable = false;
+    img.style.left = x+'%';
+    img.style.top = y+'%';
+    img.style.width = w+'%';
+    img.style.transform = 'translate('+ax+'%,'+ay+'%)'+(d.flip?' scaleX(-1)':'');
+    layer.appendChild(img);
+  });
+  stage.appendChild(layer);
+}
 function renderLevelMap(){
   var m = lmCurrentMode;
   document.getElementById('lmTitle').textContent = m.e+' '+m.n;
@@ -1927,6 +2009,7 @@ function renderLevelMap(){
   svg.appendChild(roadShadow);
   svg.appendChild(foundation);
   stage.appendChild(svg);
+  lmRenderDecorations(stage); /* yol(z:0) ile düğümler(z:1) arasında, salt görsel katman */
   path.appendChild(stage); /* DOM'a ekle: getPointAtLength güvenle canlı elemanda çağrılsın */
 
   var positions = lmComputeNodePositions(foundation, measured.sweepInfo);
