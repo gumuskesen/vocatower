@@ -334,6 +334,58 @@
   .slot.locked{background:var(--amber);color:#fff;border:2px solid var(--amber);}
   .snake-controls{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
 
+  /* Sentence Builder — Second Safe Increment: word-bank + answer-area
+     layout only. Word tokens vary in length, so variable-width clay
+     buttons are used here instead of the fixed-width .letter/.slot tiles
+     above; visual language (border/shadow/radius) still matches .opt
+     for consistency. */
+  .sb-answer,.sb-bank{display:flex;flex-wrap:wrap;gap:10px;min-width:0;}
+  .sb-answer{justify-content:flex-start;align-content:flex-start;min-height:82px;background:var(--fg-bg-surface-sunken,#E6D5B8);border-radius:16px;padding:12px;margin:14px 0 4px;border:2px solid transparent;}
+  .sb-bank{justify-content:center;margin:6px 0 4px;}
+  .sb-answer-empty{font-size:13.5px;color:var(--ink-soft);font-weight:600;align-self:center;}
+  .sb-word{border:2.5px solid #E6D5B8;background:var(--card);border-radius:16px;min-height:46px;padding:11px 17px;font-size:15.5px;font-weight:700;line-height:1.3;cursor:pointer;font-family:inherit;color:var(--ink);box-shadow:0 3px 0 rgba(51,65,92,.06);transition:transform .1s,box-shadow .1s,opacity .15s ease;max-width:100%;overflow-wrap:break-word;}
+  .sb-word:hover{transform:translateY(-1px);}
+  .sb-word:active{transform:translateY(2px) scale(.98);box-shadow:0 1px 0 rgba(51,65,92,.06);}
+  .sb-word:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+  @media (min-width:700px){
+    #sentenceBuilder .game-body{display:block;}
+    #sentenceBuilder .qcard{width:100%;max-width:690px;margin:0 auto 20px;}
+    #sentenceBuilder .sb-answer{min-height:112px;padding:16px;}
+    #sentenceBuilder .sb-answer,#sentenceBuilder .sb-bank{gap:12px;}
+    #sentenceBuilder .sb-word{min-height:48px;padding:12px 19px;font-size:16px;}
+  }
+  /* Third Safe Increment: seçili banka kelimesi artık DOM'dan kaldırılmıyor
+     ya da visibility:hidden ile "atlanarak" gizlenmiyor — opacity ile
+     görünmez kılınıyor (yer kaplamaya devam eder, bkz. sbRenderBank yorumu)
+     ki yanlış cevapta kelime tam olarak aynı konuma YUMUŞAKÇA geri dönsün. */
+  .sb-word-taken{opacity:0;pointer-events:none;}
+  .sb-word-placed{background:#EDE9F8;border-color:var(--purple);}
+  @keyframes sbPlaceIn{0%{opacity:.45;transform:translateY(5px) scale(.97);}100%{opacity:1;transform:translateY(0) scale(1);}}
+  .sb-word-placed.sb-place-in{animation:sbPlaceIn .2s ease-out;}
+  @keyframes sbReturnIn{0%{opacity:.35;transform:translateY(-4px) scale(.98);}100%{opacity:1;transform:translateY(0) scale(1);}}
+  .sb-word.sb-return-in{animation:sbReturnIn .2s ease-out;}
+
+  /* ---- Third Safe Increment: doğrulama geri bildirimi (izole .sb-*) ---- */
+  @keyframes sbShake{
+    10%,90%{transform:translateX(-2px);} 20%,80%{transform:translateX(3px);}
+    30%,50%,70%{transform:translateX(-5px);} 40%,60%{transform:translateX(5px);}
+  }
+  .sb-answer.sb-is-wrong{animation:sbShake .3s ease-in-out;background:#FBEFEF;border-color:var(--red-soft,#E08585);}
+  .sb-answer.sb-is-correct{background:#EAF5EF;border-color:var(--green,#4E9670);}
+  @keyframes sbSettle{0%{transform:scale(1);} 45%{transform:scale(1.08);} 100%{transform:scale(1);}}
+  .sb-word-placed.sb-settle{animation:sbSettle .35s ease-out;}
+  .sb-combo{display:inline-block;background:var(--fg-accent-quaternary,var(--purple));color:#fff;font-size:12.5px;font-weight:800;border-radius:999px;padding:5px 12px;margin:2px 0 10px;}
+  @keyframes sbComboPop{0%{transform:scale(.7);opacity:0;} 60%{transform:scale(1.12);opacity:1;} 100%{transform:scale(1);opacity:1;}}
+  .sb-combo-pop{animation:sbComboPop .3s ease-out;}
+  @media (prefers-reduced-motion: reduce){
+    .sb-answer.sb-is-wrong{animation:none;}
+    .sb-word-placed.sb-settle{animation:none;}
+    .sb-word-placed.sb-place-in{animation:none;}
+    .sb-word.sb-return-in{animation:none;}
+    .sb-combo-pop{animation:none;}
+    .sb-word{transition:none;}
+  }
+
   .piano{display:flex;justify-content:center;gap:5px;margin:16px 0;}
   .pkey{width:44px;height:120px;border:none;border-radius:0 0 10px 10px;background:linear-gradient(180deg,#FDFDFD,#F0F0F0);box-shadow:0 3px 6px rgba(51,65,92,.15);cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;font-weight:700;font-size:15px;color:var(--ink-soft);font-family:inherit;}
   .pkey:active{background:#FBF3E4;transform:translateY(2px);}
@@ -891,6 +943,29 @@
     </div>
   </div>
 
+  <!-- ============ CÜMLE KURMA (Sentence Builder) — First Safe Increment: placeholder screen only ============ -->
+  <div id="sentenceBuilder" class="hidden">
+    <div class="game-head">
+      <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
+      <div class="game-head-text">
+        <div class="game-title">🏗️ Sentence Builder</div>
+        <div class="game-subtitle">Kelimelere dokunarak cümleyi sırayla kur</div>
+      </div>
+      <div class="score-pill" id="sbRound">1/3</div>
+    </div>
+    <div class="game-body">
+      <div class="qcard">
+        <div class="hint" id="sbLevelHint"></div>
+        <div class="q-tr" id="sbTr"></div>
+        <div class="sb-combo hidden" id="sbCombo" aria-hidden="true"></div>
+        <div class="sb-answer" id="sbAnswer"></div>
+        <div class="sb-bank" id="sbBank"></div>
+      </div>
+    </div>
+    <div id="sbLiveAssertive" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+    <div id="sbLivePolite" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  </div>
+
   <!-- ============ SONUÇ EKRANI v3 (tüm oyunlarda TEK paylaşılan bitiş ekranı) ============ -->
   <div id="resultScreen" class="hidden">
     <div class="result-wrap">
@@ -946,6 +1021,7 @@
 
 <script src="../assets/js/storage.js"></script>
 <script src="../assets/js/vocab.js"></script>
+<script src="../assets/js/sentences.js"></script>
 <script src="../assets/js/buildings.js"></script>
 <script src="../assets/js/history.js"></script>
 <script src="../assets/js/levelmaps.js"></script>
@@ -1106,7 +1182,7 @@ function renderAchievementsScreen(){
   box.innerHTML = html;
 }
 function show(id){
-  ['home','onboarding','achievements','buildingJourney','reviewWords','levelMap','quiz','scramble','piano','picmatch','memory','listen','spelling','fillgap','mapdet','snake','rocket','crossword','story','resultScreen']
+  ['home','onboarding','achievements','buildingJourney','reviewWords','levelMap','quiz','scramble','piano','picmatch','memory','listen','spelling','fillgap','mapdet','snake','rocket','crossword','story','sentenceBuilder','resultScreen']
     .forEach(function(s){document.getElementById(s).classList.add('hidden');});
   document.getElementById(id).classList.remove('hidden');
   hideBubble();
@@ -1287,6 +1363,12 @@ function sfx(kind){
   else if(kind==='wrong'){ beep(196,0,.28,'triangle',.18); }
   else if(kind==='win'){ [523,659,784,1047].forEach(function(f,i){beep(f,i*.16,.3,'sine',.2);}); }
   else if(kind==='tick'){ beep(1200,0,.05,'sine',.08); }
+  /* Sentence Builder Third Safe Increment: yumuşak, çocuk-dostu iki
+     parçalı "dı-dıııt" ipucu — mevcut 'wrong' (üçgen dalga, sert)
+     sesinden bilinçli olarak farklı: sine dalga, düşük ses seviyesi
+     (.14), kısa toplam süre (~0.25s), düşen perde. Yalnızca Sentence
+     Builder çağırır; diğer modların 'wrong' sesini DEĞİŞTİRMEZ. */
+  else if(kind==='gentle-wrong'){ beep(330,0,.09,'sine',.14); beep(260,.1,.16,'sine',.14); }
 }
 function speak(text){
   try{
@@ -1457,6 +1539,7 @@ var MODES = [
  {key:'scramble', cls:'p', e:'🪐', tag:'BULMACA', n:'Kelime Bulmacası', d:'Karışık harflerden kelime kur', fn:startScramble},
  {key:'piano', cls:'a', e:'🎹', tag:'NOTA OYUNU', n:'Nota Kelimeleri', d:'Piyanoyla kelime çal!', fn:startPiano},
  {key:'review', cls:'b', e:'🧠', tag:'TEKRAR', n:'Kelime Tekrarı', d:'Zorlandığın kelimeleri tekrar et', fn:startReview},
+ {key:'sentence_builder', cls:'g', e:'🏗️', tag:'CÜMLE KURMA', n:'Sentence Builder', d:'Kelimeleri sırayla dizerek cümle kur', fn:startSentenceBuilder},
 ];
 /* Mod anahtarı -> üretim ikon dosyası eşlemesi. Dosya adları anahtarlarla
    birebir örtüşmediği için (ör. 'fillgap' -> mode_fill_blank.png,
@@ -1477,7 +1560,13 @@ var MODE_ICONS = {
   story: 'mode_mini_stories.png',
   scramble: 'mode_word_puzzle.png',
   piano: 'mode_piano.png',
-  review: 'mode_review.png'
+  review: 'mode_review.png',
+  /* Sentence Builder'a özel onaylı bir ikon henüz üretilmedi — geçici
+     güvenli düşüş (fallback) olarak mevcut mode_word_puzzle.png
+     kullanılır (kelimeleri sıraya dizerek "inşa etme" temasına en yakın
+     mevcut ikon). Onaylı bir ikon üretildiğinde yalnızca bu satır
+     değişecek; hiçbir görsel varlık burada değiştirilmedi/üretilmedi. */
+  sentence_builder: 'mode_word_puzzle.png'
 };
 /* VTGameCard: single reusable game-mode card component. Every mode on
    the Home grid is built through this one function (see .cat rules in
@@ -1686,6 +1775,11 @@ var qState=null, timerInt=null, rkInt=null;
 function stopAllTimers(){
   if(timerInt){clearInterval(timerInt);timerInt=null;}
   if(rkInt){clearInterval(rkInt);rkInt=null;}
+  /* Sentence Builder Third Safe Increment: aynı merkezi "moddan çıkarken
+     zamanlayıcıları temizle" noktasına eklenir (bkz. yukarıdaki iki satır) —
+     gecikmeli geri bildirim/ilerleme callback'lerinin kapatılmış/yeniden
+     başlatılmış bir ekranı etkilemesini önler. */
+  sbClearTimers();
 }
 function buildQuizList(cat,count){
   var factPool = window.pickUnseen ? window.pickUnseen('quizfacts_'+cat, FACTS[cat], 3, function(f){return f.en;}) : pick(FACTS[cat], 3);
@@ -2961,6 +3055,362 @@ function rvAnswer(btn, ok, item){
         renderResultScreen({emoji: s.correct>=passMark?'🧠':'💪', title:'Tekrar Tamamlandı!', detail: s.correct+' / '+s.rounds.length+' doğru', correct:s.correct, total:s.rounds.length, xpText:'+'+(s.correct*10)+' XP', reward:reward});
       } else renderRv();
     }
+  });
+}
+
+/* ================= 16) CÜMLE KURMA (Sentence Builder) =================
+   THIRD SAFE INCREMENT: adds automatic validation, wrong/correct feedback,
+   sequential dev-question transitions (1/3 -> 2/3 -> 3/3), a cosmetic
+   combo counter, and shared production completion/reward integration. */
+var sbState = null;
+var SB_WRONG_INITIAL_DELAY = 260;
+var SB_WRONG_STEP_DELAY = 90;
+var SB_WRONG_FINAL_DELAY = 150;
+var SB_CORRECT_ADVANCE_DELAY = 700;
+/* Şansa bağlı ama SINIRLI bir yeniden karıştırma: sonuç doğru sırayla
+   birebir aynıysa (kısa cümlelerde olası) en fazla 10 kez tekrar karıştırılır,
+   sonsuz döngü riski yoktur — 10 denemeden sonra sonuç ne olursa olsun
+   kabul edilir. */
+function sbShuffleTokens(tokens){
+  var original = tokens.map(function(t){ return t.text; }).join('');
+  var attempt = tokens;
+  for(var i=0;i<10;i++){
+    attempt = shuffle(tokens);
+    if(tokens.length<=1) break;
+    if(attempt.map(function(t){ return t.text; }).join('') !== original) break;
+  }
+  return attempt;
+}
+function sbAnnounce(text, assertive){
+  var s = sbState;
+  var el = document.getElementById(assertive ? 'sbLiveAssertive' : 'sbLivePolite');
+  if(!s || !s.timers || !el) return;
+  el.textContent = '';
+  var t = setTimeout(function(){
+    if(sbState !== s) return;
+    el.textContent = text;
+  }, 10);
+  s.timers.push(t);
+}
+/* Aktif Sentence Builder oturumunun tüm bekleyen zamanlayıcılarını iptal
+   eder. stopAllTimers() (moddan çıkarken/başka bir mod başlarken merkezi
+   olarak çağrılır) içinden çağrılır ki gecikmeli geri bildirim/ilerleme
+   callback'leri kapatılmış ya da yeniden başlatılmış bir ekranı ASLA
+   etkilemesin. Her callback ayrıca kendi `sbState !== s` kimlik kontrolünü
+   de yapar — bu iki katman birlikte "stale timer" riskini ortadan kaldırır. */
+function sbClearTimers(){
+  if(sbState && sbState.timers){
+    sbState.timers.forEach(function(id){ clearTimeout(id); });
+    sbState.timers.length = 0;
+  }
+}
+function startSentenceBuilder(){
+  /* Aynı mod yeniden başlatılıyorsa önceki oturumun duyuru/geri bildirim
+     zamanlayıcılarını, sbState referansı değiştirilmeden önce temizle. */
+  sbClearTimers();
+  window._activeSession = {mode:'sentence_builder', done:false};
+  var level = window.getModeLevel ? window.getModeLevel('sentence_builder') : 1;
+  var cap = window.LEVEL_CAP || 30;
+  if(typeof level !== 'number' || level < 1 || level > cap) level = 1;
+  var levelSentences = window.SB_LEVEL_SENTENCES && window.SB_LEVEL_SENTENCES[level];
+  if(!Array.isArray(levelSentences)){
+    level = 1;
+    levelSentences = window.SB_LEVEL_SENTENCES && window.SB_LEVEL_SENTENCES[1];
+  }
+  var sessionSentences = shuffle((levelSentences || []).slice());
+  /* Yeni bir referans: eski zamanlayıcı callback'leri `sbState !== s`
+     kontrolüyle kendini artık geçersiz sayar (bkz. sbClearTimers notu). */
+  sbState = {
+    level: level, cap: cap,
+    sessionSentences: sessionSentences,
+    sentence: null, tokens: [], shuffled: [], selected: [],
+    initialized: true,
+    questionIndex: 0,   /* 0,1,2 -> seçili seviyenin sessionSentences sırası */
+    combo: 0,           /* kozmetik; XP/Gold/başarım/ilerlemeyi ETKİLEMEZ */
+    isResolving: false,
+    feedbackState: 'idle', /* 'idle' | 'correct' | 'wrong' */
+    placementTokenId: null,
+    returnTokenId: null,
+    timers: []
+  };
+  show('sentenceBuilder');
+  sbInitQuestion(0);
+}
+/* Belirli bir gelişim-cümlesi indeksini yükler: yeni token kimlikleri +
+   yeni sabit karıştırma oluşturur, seçim/kilit/geri-bildirim durumunu
+   sıfırlar. combo VE questionIndex burada SIFIRLANMAZ (onlar oturum
+   genelinde kalıcıdır) — yalnızca soruya özgü alanlar yeniden kurulur. */
+function sbInitQuestion(index){
+  var s = sbState;
+  var sentence = s.sessionSentences[index] || null;
+  var tokens = sentence ? sentence.orderedWords.map(function(text, idx){
+    return { tokenId:'sb-t'+idx, text:text, originalIndex:idx };
+  }) : [];
+  s.questionIndex = index;
+  s.sentence = sentence;
+  s.tokens = tokens;                     /* orijinal sırada, DEĞİŞTİRİLMEZ */
+  s.shuffled = sbShuffleTokens(tokens);   /* sabit görüntülenme sırası — YENİDEN karıştırılmaz */
+  s.selected = [];
+  s.isResolving = false;
+  s.feedbackState = 'idle';
+  document.getElementById('sbAnswer').classList.remove('sb-is-wrong','sb-is-correct');
+  renderSentenceBuilder();
+}
+function renderSentenceBuilder(){
+  var s = sbState;
+  if(!s || !s.sentence){
+    renderQuestionContent({ hintId:'sbLevelHint', hint:'SEVİYE '+(s?s.level:1)+' / '+(s?s.cap:30) });
+    document.getElementById('sbTr').textContent = '';
+    document.getElementById('sbAnswer').innerHTML = '';
+    document.getElementById('sbBank').innerHTML = '';
+    return;
+  }
+  var total = s.sessionSentences.length;
+  document.getElementById('sbRound').textContent = (s.questionIndex+1)+'/'+total;
+  /* Görsel düzeltme: bayrak emojisi bazı ortamlarda harf harf "TR" olarak
+     çiziliyordu — çevirinin önünde HİÇBİR önek gösterilmez, yalnızca
+     çevirinin kendisi. */
+  renderQuestionContent({
+    hintId:'sbLevelHint', hint:'SEVİYE '+s.level+' / '+s.cap,
+    supportingId:'sbTr', supportingText:s.sentence.turkish
+  });
+  sbRenderCombo();
+  sbRenderAnswer();
+  sbRenderBank();
+}
+function sbRenderCombo(){
+  var s = sbState, el = document.getElementById('sbCombo');
+  if(s.combo >= 2){
+    el.textContent = 'Seri x'+s.combo;
+    el.classList.remove('hidden');
+    el.classList.remove('sb-combo-pop');
+    void el.offsetWidth; /* reflow'u yeniden tetikle ki animasyon her artışta yeniden oynasın */
+    el.classList.add('sb-combo-pop');
+  } else {
+    el.classList.add('hidden');
+    el.textContent = '';
+  }
+}
+function sbRenderBank(){
+  var s = sbState;
+  var box = document.getElementById('sbBank');
+  box.innerHTML = '';
+  /* Görsel düzeltme: banka tokenlerinin TAMAMI seçiliyken (doğrulama
+     sırasında ya da doğru geri bildirim penceresinde) N adet görünmez-ama-
+     yer-kaplayan hayalet buton bırakmak büyük, tuhaf bir boş alan
+     yaratıyordu. Bunun yerine banka bu TEK anda tamamen boşaltılır —
+     konum-koruma modeli KALDIRILMIYOR, yalnızca "banka %100 dolu"
+     durumunda geçici olarak atlanıyor. Yanlış cevap geri dönüşünde ilk
+     kelime seçili listeden çıkar çıkmaz (aşağıdaki normal render'a
+     otomatik döner. */
+  if(s.tokens.length > 0 && s.selected.length === s.tokens.length) return;
+  var selectedSet = {};
+  s.selected.forEach(function(id){ selectedSet[id]=true; });
+  /* s.shuffled sırası HİÇBİR ZAMAN yeniden düzenlenmez — bir kelime
+     seçildiğinde kendi butonu gizlenir/devre dışı kalır ama aynı konumda
+     DOM'da kalır, böylece diğer tüm kelimelerin konumu sabit kalır ve
+     kelime geri döndüğünde tam olarak aynı yere gelir. */
+  s.shuffled.forEach(function(tok){
+    var b = document.createElement('button');
+    b.type = 'button';
+    var isSelected = !!selectedSet[tok.tokenId];
+    var locked = isSelected || s.isResolving;
+    var isReturning = !isSelected && s.returnTokenId === tok.tokenId;
+    b.className = 'sb-word' + (isSelected ? ' sb-word-taken' : '') + (isReturning ? ' sb-return-in' : '');
+    b.textContent = tok.text;
+    if(locked){
+      b.disabled = true;
+      b.tabIndex = -1;
+      if(isSelected) b.setAttribute('aria-hidden','true');
+    }
+    if(!isSelected){
+      b.setAttribute('aria-label','Kelime ekle: '+tok.text);
+      if(!s.isResolving) b.onclick = function(){ sbSelectToken(tok.tokenId); };
+    }
+    box.appendChild(b);
+  });
+  s.returnTokenId = null;
+}
+function sbRenderAnswer(){
+  var s = sbState;
+  var box = document.getElementById('sbAnswer');
+  box.innerHTML = '';
+  if(s.selected.length === 0){
+    var empty = document.createElement('div');
+    empty.className = 'sb-answer-empty';
+    empty.textContent = 'Cümleni burada oluştur';
+    box.appendChild(empty);
+    return;
+  }
+  var byId = {};
+  s.tokens.forEach(function(t){ byId[t.tokenId]=t; });
+  s.selected.forEach(function(tokenId){
+    var tok = byId[tokenId];
+    var b = document.createElement('button');
+    b.type = 'button';
+    var isNewPlacement = s.placementTokenId === tokenId;
+    b.className = 'sb-word sb-word-placed' + (s.feedbackState==='correct' ? ' sb-settle' : '') + (isNewPlacement ? ' sb-place-in' : '');
+    b.textContent = tok.text;
+    if(s.isResolving){
+      b.disabled = true;
+      b.tabIndex = -1;
+    } else {
+      b.setAttribute('aria-label','Kelimeyi kaldır: '+tok.text);
+      b.onclick = function(){ sbDeselectToken(tokenId); };
+    }
+    box.appendChild(b);
+  });
+  s.placementTokenId = null;
+}
+/* Seçim: tokenId dokunma sırasına eklenir; kelime bankasındaki DİĞER
+   tüm kelimelerin konumu ve sırası hiçbir şekilde değişmez. Tüm tokenlar
+   seçildiğinde otomatik doğrulama tetiklenir (bkz. sbValidate) — Check
+   butonu YOK. */
+function sbSelectToken(tokenId){
+  var s = sbState;
+  if(!s || s.isResolving) return;
+  if(s.selected.indexOf(tokenId) >= 0) return;
+  s.selected.push(tokenId);
+  s.placementTokenId = tokenId;
+  sbRenderAnswer();
+  sbRenderBank();
+  if(s.selected.length === s.tokens.length) sbValidate();
+}
+/* Geri döndürme: yalnızca bu tokenId seçili listeden çıkarılır — diğer
+   seçili kelimelerin ARALARINDAKİ sıra korunur, kelime bankasındaki
+   orijinal konumuna (s.shuffled sırasına göre) geri döner. */
+function sbDeselectToken(tokenId){
+  var s = sbState;
+  if(!s || s.isResolving) return;
+  var idx = s.selected.indexOf(tokenId);
+  if(idx < 0) return;
+  s.selected.splice(idx, 1);
+  sbRenderAnswer();
+  sbRenderBank();
+}
+/* Token kimliği render/hareket için korunur; doğrulama ise oyuncunun
+   gerçekten gördüğü kelime dizisini orderedWords ile karşılaştırır.
+   Böylece aynı metne sahip iki bağımsız token gizli kimlik sırası ters
+   seçildi diye görsel olarak doğru bir cümle reddedilmez. */
+function sbIsCorrect(s){
+  var ordered = s.sentence && s.sentence.orderedWords;
+  if(!ordered || s.selected.length !== ordered.length) return false;
+  var byId = {};
+  s.tokens.forEach(function(t){ byId[t.tokenId]=t; });
+  for(var i=0;i<s.selected.length;i++){
+    var tok = byId[s.selected[i]];
+    if(!tok || tok.text !== ordered[i]) return false;
+  }
+  return true;
+}
+function sbValidate(){
+  var s = sbState;
+  s.isResolving = true; /* isResolving bayrağı: tekrar doğrulamayı/tıklamaları engeller */
+  sbRenderBank();
+  sbRenderAnswer();
+  if(sbIsCorrect(s)){
+    s.feedbackState = 'correct';
+    sbHandleCorrect();
+  } else {
+    s.feedbackState = 'wrong';
+    sbHandleWrong();
+  }
+}
+/* ---- YANLIŞ CEVAP: shake+ses HEMEN başlar, kelimeler TEK TEK (ters
+   seçim sırasıyla — en son yerleştirilen ÖNCE döner, bkz. rapor) orijinal
+   konumlarına döner, sonunda kilit açılır. sbState.shuffled ASLA yeniden
+   oluşturulmaz/karıştırılmaz — oyuncu resetten sonra AYNI banka sırasını
+   görür. Hedef toplam süre ~600-1100ms (bkz. SB_WRONG_* sabitleri). */
+function sbHandleWrong(){
+  var s = sbState;
+  s.combo = 0;
+  sbRenderCombo();
+  sfx('gentle-wrong');
+  document.getElementById('sbAnswer').classList.add('sb-is-wrong');
+  sbAnnounce('Cümle sırası doğru değil. Tekrar dene.', true);
+
+  var order = s.selected.slice().reverse();
+  var t1 = setTimeout(function(){
+    if(sbState !== s) return;
+    sbReturnNextWrongToken(s, order, 0);
+  }, SB_WRONG_INITIAL_DELAY);
+  s.timers.push(t1);
+}
+function sbReturnNextWrongToken(s, order, i){
+  if(sbState !== s) return; /* moddan çıkılmış/yeniden başlatılmış — devam etme */
+  if(i >= order.length){
+    var tf = setTimeout(function(){
+      if(sbState !== s) return;
+      document.getElementById('sbAnswer').classList.remove('sb-is-wrong');
+      s.isResolving = false;
+      sbAnnounce('Kelimeler geri döndü. Tekrar deneyebilirsin.', false);
+      sbRenderBank();
+      sbRenderAnswer();
+    }, SB_WRONG_FINAL_DELAY);
+    s.timers.push(tf);
+    return;
+  }
+  var tokenId = order[i];
+  var idx = s.selected.indexOf(tokenId);
+  if(idx >= 0) s.selected.splice(idx, 1);
+  s.returnTokenId = tokenId;
+  sbRenderAnswer();
+  sbRenderBank();
+  var tn = setTimeout(function(){ sbReturnNextWrongToken(s, order, i+1); }, SB_WRONG_STEP_DELAY);
+  s.timers.push(tn);
+}
+/* ---- DOĞRU CEVAP: mevcut 'correct' sesi, yumuşak yeşil durum, her
+   yerleştirilmiş kelimede kısa bir "yerine oturma" (settle) animasyonu,
+   kozmetik combo +1 (yalnızca combo>=2 iken gösterilir) ve mevcut
+   addXP() yolu üzerinden cümle başına tek seferlik 10 XP. */
+function sbHandleCorrect(){
+  var s = sbState;
+  s.combo += 1;
+  addXP(10);
+  document.getElementById('sbAnswer').classList.add('sb-is-correct');
+  sfx('correct');
+  sbAnnounce('Doğru cümle.', false);
+  sbRenderAnswer(); /* feedbackState==='correct' -> yerleştirilmiş kelimelere .sb-settle eklenir */
+  sbRenderCombo();
+
+  var t = setTimeout(function(){
+    if(sbState !== s) return;
+    sbAdvanceQuestion();
+  }, SB_CORRECT_ADVANCE_DELAY);
+  s.timers.push(t);
+}
+function sbAdvanceQuestion(){
+  var s = sbState;
+  document.getElementById('sbAnswer').classList.remove('sb-is-correct');
+  var total = s.sessionSentences.length;
+  var nextIndex = s.questionIndex + 1;
+  if(nextIndex >= total){
+    sbCompleteSession(s);
+    return;
+  }
+  sbInitQuestion(nextIndex);
+}
+function sbCompleteSession(s){
+  var session = window._activeSession;
+  if(sbState !== s || !session || session.mode !== 'sentence_builder' || session.done) return;
+  var total = s.sessionSentences.length;
+  if(total === 0) return;
+  var correct = total;
+  var earnedXp = total * 10;
+  sbClearTimers();
+  var reward = completeGameSession('sentence_builder', {
+    correct: correct,
+    total: total,
+    perfect: true
+  });
+  renderResultScreen({
+    emoji:'🏗️',
+    title:'Cümle Kurma Tamamlandı!',
+    detail:correct+' / '+total+' doğru cümle',
+    correct:correct,
+    total:total,
+    xpText:'+'+earnedXp+' XP',
+    reward:reward
   });
 }
 
