@@ -231,76 +231,17 @@
   .cat .progress-track{height:9px;border-radius:999px;background:var(--fg-bg-surface-sunken,#E6D5B8);overflow:hidden;}
   .cat .progress-fill{height:100%;border-radius:999px;background:var(--fg-accent-tertiary,var(--green));transition:width .5s ease;}
 
-  /* ---------- SEVİYE HARİTASI (gerçek eğrisel SVG güzergah) ----------
-     v3: satır/flex bağlayıcı mimarisi tamamen kaldırıldı. Tek bir SVG
-     path (viewBox 1200x760 mantık uzayı) güzergahın TEK geometrik
-     kaynağıdır; 30 düğüm konumu bu path'ten getPointAtLength() ile
-     örneklenir (bkz. renderLevelMap() içindeki lmComputeNodePositions).
-     .lm-stage hem SVG'yi hem de mutlak konumlu düğümleri barındırır;
-     ikisi de AYNI normalize (viewBox) koordinat sistemini paylaştığı
-     için, sahnenin en-boy oranı kırılım noktasına göre değişse bile
-     (mobilde daha uzun, masaüstünde geniş peyzaj) düğümler her zaman
-     yolun üstünde kalır — ayrı bir mobil/masaüstü güzergah ŞEKLİ
-     tanımlanmaz, sadece sahnenin kendi en-boy oranı değişir. */
+  /* ---------- SEVİYE HARİTASI (painted checkpoint architecture) ----------
+     The 1536x1024 background is the only visible road. The stage preserves
+     that exact intrinsic ratio, and nodes share its normalized coordinates. */
   .lm-summary{text-align:center;margin-bottom:18px;}
   .lm-summary .lm-pct{font-size:30px;font-weight:800;color:var(--fg-accent-secondary,var(--blue));}
   .lm-summary .lm-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
-  .lm-stage{position:relative;width:100%;max-width:1180px;margin:0 auto;overflow:visible;
-    aspect-ratio:1/2.05; --lm-node:44px;
-  }
-  @media (min-width:700px){ .lm-stage{aspect-ratio:1/1.05; --lm-node:60px;} }
-  @media (min-width:1024px){ .lm-stage{aspect-ratio:1200/760; --lm-node:74px;} }
-  .lm-road-svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block;}
-  /* ---- Gerçek bireysel kil-taş döşeme (Task 2C) ----
-     Task 2B'nin uzun dash tabanlı "taşları" kapsül/hap gibi
-     görünüyordu. Bunun yerine artık GERÇEK, ayrı SVG taş grupları
-     üretiliyor: her taş getPointAtLength() ile örneklenen bir merkez
-     noktasına atan2() teğet açısıyla döndürülmüş, kompakt (uzunluk >
-     kalınlık, hafif yuvarlak köşeli) bir dikdörtgen grubu (gölge+taban+
-     yüz+parlaklık) — bkz. renderLevelMap() içindeki lmBuildStones().
-     .lm-road-foundation, aynı fullD'yi kullanan ince/düşük-kontrastlı
-     TEK bir sürekli şerittir — sadece taşlar arasında mikroskobik boşluk
-     kalmasın diye altta durur; taşlardan belirgin biçimde dar ve
-     soluktur, ray/şerit gibi OKUNMAZ. */
-  .lm-road-shadow{fill:none;stroke:rgba(58,42,24,.14);stroke-width:40;stroke-linecap:round;stroke-linejoin:round;transform:translate(0,5px);}
-  .lm-road-foundation{fill:none;stroke:#B9976D;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;opacity:.55;}
-  /* Taş katmanları (bkz. lmBuildStones): her taş grubu KENDİ yerel
-     çerçevesinde (0,0 merkez, +x = yol yönü) çizilir, sonra
-     transform="translate(cx,cy) rotate(açı)" ile dünya konumuna/açısına
-     yerleştirilir — böylece her alt şeklin (gölge/taban/yüz/parlaklık)
-     geometrisi basit sabit sayılardır, döndürme matematiği TEK yerde
-     (grup transform'unda) yapılır. */
-  .lm-stone-shadow{fill:rgba(70,52,30,.18);}
-  /* Road Polish Pass: gelecek taşların taban+yüz tonu ~%10 koyulaştırıldı
-     (paylaşılan --fg-bg-surface-sunken değişkeni DEĞİL — o başka
-     yerlerde de kullanıldığından sabit, taşa özel koyu bir ton
-     kullanılır). Tamamlanan taşların renkleri (.lm-stone-done ... aşağı)
-     bilinçli olarak DOKUNULMADAN bırakıldı. */
-  .lm-stone-base{fill:#9C7A50;}
-  .lm-stone-face{fill:#CFC0A6;}
-  .lm-stone-alt .lm-stone-face{fill:#D3C3A4;}
-  /* Üst parlaklık: taşın YALNIZCA üst-orta kısmını kaplayan küçük,
-     yerel bir yama — tam genişlikte sürekli bir "hap" DEĞİL, bu yüzden
-     art arda gelen taşlarda birleşip çizgiye dönüşmez. */
-  .lm-stone-hl{fill:rgba(255,250,236,.55);}
-  .lm-stones-future{filter:drop-shadow(0 1px 1px rgba(90,65,35,.12));}
-  .lm-stone-done .lm-stone-base{fill:#9B6E2E;}
-  .lm-stone-done .lm-stone-face{fill:var(--fg-accent-gold,#F4C542);}
-  .lm-stone-done.lm-stone-alt .lm-stone-face{fill:#F7CE66;}
-  .lm-stone-done .lm-stone-hl{fill:rgba(255,246,210,.7);}
-  .lm-stones-done{filter:drop-shadow(0 0 4px rgba(244,197,66,.4));}
-  /* Mevcut düğümün altında sıcak, yumuşak bir hâle — tamamlanan/gelecek
-     geçişinin "üzerinde durduğu" hissini güçlendirir. Düğümün kendisi
-     (ayrı bir HTML buton, z-index:1) her zaman bu hâlenin üstünde kalır. */
-  .lm-road-halo{opacity:.85;}
-  /* transform: X ekseni -50% (wrap'in KENDİ genişliğine göre — düğüm
-     wrap içinde ortalandığı için etiket daha geniş olsa bile düğüm
-     merkezi doğru kalır), Y ekseni ise wrap'in TAMAMI (düğüm+etiket)
-     değil, YALNIZCA --lm-node'un yarısı kadar kaydırılır — aksi halde
-     etiketin yüksekliği de hesaba katılıp düğüm merkezi yol çizgisinin
-     üstünde kalırdı (ilk sürümde ölçülüp yakalanan gerçek bir hizalama
-     hatası, bkz. rapor). */
-  .lm-node-wrap{position:absolute;transform:translate(-50%, calc(var(--lm-node) / -2));display:flex;flex-direction:column;align-items:center;z-index:1;}
+  .lm-stage{position:relative;width:100%;max-width:1180px;margin:0 auto;overflow:visible;aspect-ratio:3/2;--lm-node:28px;}
+  @media (min-width:700px){.lm-stage{--lm-node:42px;}}
+  @media (min-width:1024px){.lm-stage{--lm-node:54px;}}
+  .lm-world-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;user-select:none;z-index:0;}
+  .lm-node-wrap{position:absolute;width:var(--lm-node);height:var(--lm-node);transform:translate(-50%,-50%);z-index:1;}
   /* background-size:135% tek bir paylaşılan yakınlaştırma: üretim rozet
      PNG'lerinin (tamamlandı/mevcut/kilitli/normal) tuval içinde gereksiz
      boş halka bıraktığı ölçüldü; 135% zoom bunu ~%90-100'e çıkarıp ince
@@ -311,12 +252,10 @@
   .lm-node.done{background-image:url('../assets/images/ui/levelmap/level_node_completed.png');}
   .lm-node.current{background-image:url('../assets/images/ui/levelmap/level_node_current.png');animation:lmPulse 1.6s ease-in-out infinite;}
   @keyframes lmPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(179,161,199,.4);}50%{transform:scale(1.1);box-shadow:0 0 0 12px rgba(179,161,199,0);}}
-  /* font-size/padding, en yoğun düğüm-arası mesafenin görüldüğü mobil
-     kırılım noktasında (44px düğüm, ~6 düğüm/sweep) bitişik etiketlerin
-     çakışmadığı en dar ölçü olacak şekilde ölçülüp ayarlandı (bkz.
-     rapor — bu görevin kapsamı geometri/ölçek, son tipografi cilası
-     değil). */
-  .lm-node-label{font-size:calc(var(--lm-node)*0.2);color:var(--ink-soft);margin-top:4px;font-weight:700;text-align:center;position:relative;z-index:1;white-space:nowrap;background:rgba(250,244,232,.82);border-radius:6px;padding:0 2px;}
+  .lm-node-tooltip{position:absolute;left:50%;bottom:calc(100% + 5px);transform:translateX(-50%) translateY(2px);z-index:3;pointer-events:none;visibility:hidden;opacity:0;white-space:nowrap;background:rgba(51,65,92,.94);color:#fff;border-radius:6px;padding:3px 6px;font-size:10px;line-height:1.2;font-weight:700;text-align:center;box-shadow:var(--fg-shadow-sm,0 2px 6px rgba(0,0,0,.08));transition:opacity .12s ease,transform .12s ease;}
+  @media (hover:hover){.lm-node-wrap:hover .lm-node-tooltip{visibility:visible;opacity:1;transform:translateX(-50%) translateY(0);}}
+  .lm-node:focus-visible + .lm-node-tooltip{visibility:visible;opacity:1;transform:translateX(-50%) translateY(0);}
+  @media (prefers-reduced-motion:reduce){.lm-node-tooltip{transition:none;}}
   /* .lm-character: mevcut düğümün yanında oyuncunun seçtiği avatarı
      gösterir (window.renderAvatarImage ile aynı yardımcı, Ana Sayfa
      profil başlığıyla aynı kaynak/geri dönüş davranışı). img kendi
@@ -1575,302 +1514,30 @@ function renderModes(){
 var lmCurrentMode=null;
 function openLevelMap(modeEntry){
   lmCurrentMode = modeEntry;
-  /* show() önce çağrılır: node konumları getPointAtLength() ile canlı
-     bir <path>'ten okunur; SVG geometri sorguları düzene bağlı olmasa da
-     (bkz. lmComputeNodePositions notu) güvenlik için ekran görünür
-     olduktan sonra render edilir. */
   show('levelMap');
   renderLevelMap();
 }
 
-/* --- Güzergah geometrisi: TEK kaynak-of-truth ---
-   viewBox 1200x760 mantık uzayında 5 yatay "sweep" (şerit) + aralarında
-   4 geniş U-dönüşü, TEK sürekli SVG path olarak inşa edilir (aşağıdaki
-   lmFullPathD). Düğüm konumları da AYNI path'ten getPointAtLength() ile
-   örneklenir — elle yazılmış 30 x/y çifti YOK. Sahnenin kendi en-boy
-   oranı kırılım noktasına göre değişse de (mobilde daha uzun sahne, bkz.
-   .lm-stage CSS), bu geometri SABİT kalır; sadece CSS aspect-ratio +
-   SVG'nin preserveAspectRatio="none" özelliği sahneyi esnetir — düğüm
-   yüzdeleri (left/top %) aynı esnemeyi otomatik takip eder, çünkü ikisi
-   de aynı normalize (viewBox) koordinat sistemini paylaşır. */
-var LM_VB_W = 1200, LM_VB_H = 760;
-var LM_LANE_Y = [100, 250, 400, 550, 700];
-var LM_LEFT_X = 120, LM_RIGHT_X = 1080;
-var LM_TURN_BULGE = 95;
-var LM_SWEEP_BOW = 18;
-var LM_NODES_PER_SWEEP = 6; /* 5 şerit * 6 = 30 */
-
-/* Segmentleri sırayla üretir: 5 şerit + aralarında 4 viraj = 9 segment.
-   Her segment kendi 'd' alt-yolunu (kendi M ile başlayan) döndürür ki
-   yay uzunluğu ayrı ayrı, gerçek bezier eğrisinden ölçülebilsin (elle
-   öklid tahmini DEĞİL) — bkz. lmMeasureSegments. */
-function lmBuildRouteSegments(){
-  var segs = [];
-  for(var i=0;i<LM_LANE_Y.length;i++){
-    var y = LM_LANE_Y[i];
-    var leftToRight = i%2===0;
-    var x0 = leftToRight ? LM_LEFT_X : LM_RIGHT_X;
-    var x1 = leftToRight ? LM_RIGHT_X : LM_LEFT_X;
-    var bow = (leftToRight ? 1 : -1) * LM_SWEEP_BOW;
-    var cx1 = x0 + (x1-x0)/3, cx2 = x0 + (x1-x0)*2/3;
-    segs.push({
-      type:'sweep',
-      d:'M '+x0+' '+y+' C '+cx1+' '+(y+bow)+', '+cx2+' '+(y+bow)+', '+x1+' '+y+' '
-    });
-    if(i<LM_LANE_Y.length-1){
-      var yNext = LM_LANE_Y[i+1];
-      var atRight = leftToRight;
-      var tx = atRight ? LM_RIGHT_X : LM_LEFT_X;
-      var bulge = atRight ? LM_TURN_BULGE : -LM_TURN_BULGE;
-      segs.push({
-        type:'turn',
-        d:'M '+tx+' '+y+' C '+(tx+bulge)+' '+y+', '+(tx+bulge)+' '+yNext+', '+tx+' '+yNext+' '
-      });
-    }
-  }
-  return segs;
-}
-/* Ardışık segmentler birbirinin bitiş noktasında başladığından, her
-   segmentin kendi 'M x y' önekini atıp geri kalanını eklemek TEK,
-   sürekli bir path 'd' dizesi üretir (tek bir M, ardından C komutları
-   dizisi) — ayrık path parçaları değil. */
-function lmFullPathD(segs){
-  var d = segs[0].d;
-  for(var i=1;i<segs.length;i++){
-    d += segs[i].d.replace(/^M\s+[-\d.]+\s+[-\d.]+\s+/, '');
-  }
-  return d;
-}
-/* Her segmentin gerçek yay uzunluğunu (geçici <path> elemanları
-   üzerinde getTotalLength() ile) ölçer. SVGGeometryElement.getTotalLength
-   saf geometrik bir hesaptır (d özniteliğinden türetilir), DOM'a
-   eklenmiş/görünür olmaya bağlı değildir. */
-function lmMeasureSegments(segs){
-  var svgNS = 'http://www.w3.org/2000/svg';
-  var cum = 0;
-  var sweepInfo = [];
-  segs.forEach(function(s){
-    var p = document.createElementNS(svgNS,'path');
-    p.setAttribute('d', s.d);
-    var len = p.getTotalLength();
-    if(s.type==='sweep') sweepInfo.push({startLen:cum, length:len});
-    cum += len;
-  });
-  return {sweepInfo:sweepInfo, totalLen:cum};
-}
-/* 30 düğüm konumu: her sweep'in KENDİ ölçülen uzunluğu içinde 6 eşit
-   aralıklı nokta, dilim ORTALARINA yerleştirilir (0.5/6, 1.5/6, ...) —
-   kenarlara değil, ki hiçbir düğüm virajın içine düşmesin ("fewer nodes
-   around turns" isteği otomatik sağlanır, elle ayrı ayarlama gerekmez).
-   fullPathEl CANLI/DOM'a eklenmiş olmalı (bkz. renderLevelMap sırası). */
-function lmComputeNodePositions(fullPathEl, sweepInfo){
-  var positions = [];
-  sweepInfo.forEach(function(sw){
-    for(var k=0;k<LM_NODES_PER_SWEEP;k++){
-      var frac = (k+0.5)/LM_NODES_PER_SWEEP;
-      var len = sw.startLen + frac*sw.length;
-      var pt = fullPathEl.getPointAtLength(len);
-      positions.push({x:pt.x, y:pt.y, len:len});
-    }
-  });
-  return positions;
-}
-
-/* --- Bireysel taş üretimi (Task 2C, Road Polish Pass ile ayarlandı) ---
-   Kapsül/hap görünümlü uzun dash'ler YERİNE, GERÇEK ayrı SVG taş
-   grupları üretilir. Her taş için: (1) getPointAtLength() ile merkez
-   noktası örneklenir, (2) öncesi/sonrasında iki komşu nokta örneklenir,
-   (3) atan2() ile yerel teğet açısı hesaplanır, (4) merkeze döndürülmüş
-   kompakt (uzunluk>kalınlık, hafif yuvarlak köşeli) bir dikdörtgen
-   grubu yerleştirilir, (5) gölge+taban+yüz+parlaklık tek bir taş
-   birimi olarak çizilir. "Rastgeleleştirme" isteği Math.random() İLE
-   DEĞİL, deterministik bir sözde-rastgele hash (lmStoneNoise) ile
-   uygulanır — her render'da AYNI sonucu üretir (ekran görüntüleri/
-   testler kararlı kalır), ama görsel olarak organik/rastgele görünür.
-   Bu, epiğin başından beri korunan "Math.random YOK, deterministik"
-   kısıtıyla tutarlıdır; kesin rastgelelik isteniyorsa ayrıca belirtin
-   (bkz. rapor). */
-function lmStoneNoise(seed){
-  var x = Math.sin(seed*12.9898)*43758.5453;
-  return (x-Math.floor(x))*2-1; /* [-1,1), tekrarlanabilir */
-}
-var LM_STONE_COUNT = 90;
-/* Road Polish Pass: derz boşluğu ~%45 azaltıldı (LEN_RATIO 0.88→0.948),
-   taş biraz daha uzun/ince (THICK 28→24), köşe yarıçapı "kesme taş"
-   hissi için daha da küçültüldü (CORNER_R 4.5→3). */
-var LM_STONE_LEN_RATIO = 0.948;
-var LM_STONE_THICK = 24;
-var LM_STONE_CORNER_R = 3;
-var LM_STONE_TANGENT_EPS = 5;
-/* Komşu iki taşın merkez-merkeze mesafesi (spacing) sabittir; ±%12
-   uzunluk varyasyonu, iki komşu taş AYNI ANDA en uca (+%12) denk
-   gelirse teorik olarak örtüşmeye yol açabilir (analitik olarak
-   doğrulandı — bkz. rapor). Bunu KESİN olarak önlemek için iki geçişli
-   bir strateji kullanılır: (1) tüm 90 taşın "istenen" uzunluğu önce
-   hesaplanır, (2) ardışık her çift LM_STONE_MIN_GAP'i asla ihlal
-   etmeyecek şekilde (gerekirse) simetrik olarak küçültülür — soldan
-   sağa TEK geçiş, çünkü bir çifti küçültmek bir SONRAKİ çiftin
-   toplamını yalnızca AZALTIR, asla artırmaz (matematiksel olarak
-   güvenli/yakınsak). Sonuç: çoğu taş tam istenen varyasyonu korur,
-   yalnızca birkaç "sıcak nokta" çifti hafifçe kısılır — istatistiksel
-   ~%45 azalma hedefi korunurken örtüşme SIFIRLANIR. */
-var LM_STONE_MIN_GAP = 1.6;
-/* Bir dikdörtgenin (cx,cy merkez, açı derece, uzunluk, kalınlık) dünya
-   uzayındaki 4 köşesini döndürür. */
-function lmRectCorners(cx, cy, angleDeg, len, thick){
-  var rad = angleDeg*Math.PI/180, cos = Math.cos(rad), sin = Math.sin(rad);
-  var hl = len/2, ht = thick/2;
-  var local = [[-hl,-ht],[hl,-ht],[hl,ht],[-hl,ht]];
-  return local.map(function(pt){
-    return { x: cx+pt[0]*cos-pt[1]*sin, y: cy+pt[0]*sin+pt[1]*cos };
-  });
-}
-/* İki dışbükey dörtgen için ayrık eksen teoremi (SAT) — kesin çakışma
-   testi. Basit merkez-mesafe/1D kısaltma, güzergah eğrisi ve komşu
-   taşların FARKLI açılarda döndürülmüş olması yüzünden yetersiz kaldı
-   (görsel doğrulamada gerçek çakışma yakalandı — bkz. rapor); SAT bu
-   eğriliği/döndürmeyi doğru hesaba katan tek güvenilir yöntemdir. */
-function lmSatOverlap(cornersA, cornersB){
-  var polys = [cornersA, cornersB];
-  for(var p=0;p<2;p++){
-    var poly = polys[p];
-    for(var i=0;i<poly.length;i++){
-      var p1=poly[i], p2=poly[(i+1)%poly.length];
-      var ex=p2.x-p1.x, ey=p2.y-p1.y, elen=Math.sqrt(ex*ex+ey*ey);
-      var ax=-ey/elen, ay=ex/elen;
-      var minA=Infinity,maxA=-Infinity,minB=Infinity,maxB=-Infinity;
-      cornersA.forEach(function(c){ var d=c.x*ax+c.y*ay; if(d<minA)minA=d; if(d>maxA)maxA=d; });
-      cornersB.forEach(function(c){ var d=c.x*ax+c.y*ay; if(d<minB)minB=d; if(d>maxB)maxB=d; });
-      if(maxA<minB || maxB<minA) return false;
-    }
-  }
-  return true;
-}
-function lmBuildStones(svgNS, pathEl, totalLen, completedLen){
-  var doneGroup = document.createElementNS(svgNS,'g');
-  doneGroup.setAttribute('class','lm-stones-done');
-  var futureGroup = document.createElementNS(svgNS,'g');
-  futureGroup.setAttribute('class','lm-stones-future');
-  var spacing = totalLen / LM_STONE_COUNT;
-  var baseLen = spacing * LM_STONE_LEN_RATIO;
-
-  /* 1. geçiş: konum/açı (yol geometrisinden, sabit) + istenen boyut
-     (deterministik gürültüden) her taş için önceden hesaplanır. */
-  var stones = [];
-  for(var i=0;i<LM_STONE_COUNT;i++){
-    var centerLen = i*spacing + spacing/2;
-    var p = pathEl.getPointAtLength(centerLen);
-    var lb = Math.max(0, centerLen - LM_STONE_TANGENT_EPS);
-    var la = Math.min(totalLen, centerLen + LM_STONE_TANGENT_EPS);
-    var pb = pathEl.getPointAtLength(lb);
-    var pa = pathEl.getPointAtLength(la);
-    var angleDeg = Math.atan2(pa.y-pb.y, pa.x-pb.x) * 180/Math.PI;
-    var rotAdj = lmStoneNoise(i*7.13+91.3)*1;
-    stones.push({
-      centerLen: centerLen, x:p.x, y:p.y, angle: angleDeg+rotAdj,
-      len: baseLen * (1 + lmStoneNoise(i*7.13+1.7)*0.12),
-      thick: LM_STONE_THICK * (1 + lmStoneNoise(i*7.13+42.9)*0.06),
-      alt: i%2===0,
-      isDone: centerLen <= completedLen
-    });
-  }
-  /* 2. geçiş: 1D "merkez-mesafe" kısaltma — komşu çiftlerin YAY UZUNLUĞU
-     boyunca toplam yarı-uzunluğu LM_STONE_MIN_GAP'i ihlal ediyorsa
-     simetrik küçültülür (soldan sağa tek geçiş — bir çifti küçültmek
-     bir SONRAKİ çiftin toplamını yalnızca azaltır, asla artırmaz). Bu
-     çoğu durumda yeterlidir ama eğrilik/döndürme etkisini hesaba
-     katmaz. */
-  for(var i=0;i<LM_STONE_COUNT-1;i++){
-    var maxCombined = spacing - LM_STONE_MIN_GAP;
-    var combined = stones[i].len/2 + stones[i+1].len/2;
-    if(combined > maxCombined){
-      var scale = maxCombined/combined;
-      stones[i].len *= scale; stones[i+1].len *= scale;
-    }
-  }
-  /* 3. geçiş: GERÇEK geometrik güvenlik ağı — her komşu çift gerçek
-     köşeleriyle (konum+açı+boyut) SAT ile test edilir; hâlâ çakışıyorsa
-     (eğrilik/farklı açı yüzünden 2. geçiş yetersiz kaldıysa) her ikisi
-     de kademeli olarak (%4) küçültülür, çakışma bitene kadar tekrarlanır
-     (üst sınır 25 iterasyon — pratikte birkaçı yeter). Bu, "no
-     overlapping stones" gereksinimini sadece varsayımla değil, DOĞRUDAN
-     ölçerek garanti eder. */
-  for(var i=0;i<LM_STONE_COUNT-1;i++){
-    var guard = 0;
-    while(guard<25){
-      var ca = lmRectCorners(stones[i].x, stones[i].y, stones[i].angle, stones[i].len, stones[i].thick);
-      var cb = lmRectCorners(stones[i+1].x, stones[i+1].y, stones[i+1].angle, stones[i+1].len, stones[i+1].thick);
-      if(!lmSatOverlap(ca, cb)) break;
-      stones[i].len *= 0.96; stones[i+1].len *= 0.96;
-      stones[i].thick *= 0.98; stones[i+1].thick *= 0.98;
-      guard++;
-    }
-  }
-
-  for(var i=0;i<LM_STONE_COUNT;i++){
-    var s = stones[i];
-    var alt = s.alt;
-    var len = s.len;
-    var thick = s.thick;
-    var cr = LM_STONE_CORNER_R * (thick/LM_STONE_THICK);
-    var isDone = s.isDone;
-
-    var stone = document.createElementNS(svgNS,'g');
-    stone.setAttribute('class','lm-stone'+(isDone?' lm-stone-done':'')+(alt?' lm-stone-alt':''));
-    stone.setAttribute('transform','translate('+s.x.toFixed(2)+' '+s.y.toFixed(2)+') rotate('+s.angle.toFixed(2)+')');
-
-    /* Her alt şekil taşın KENDİ yerel çerçevesinde (0,0 merkez) sabit
-       sayılarla tanımlanır; döndürme/konum matematiği yalnızca grubun
-       transform'unda yapılır. */
-    var shadow = document.createElementNS(svgNS,'rect');
-    shadow.setAttribute('class','lm-stone-shadow');
-    shadow.setAttribute('x',(-len/2-1.5).toFixed(2));
-    shadow.setAttribute('y',(-thick/2-1.5).toFixed(2));
-    shadow.setAttribute('width',(len+3).toFixed(2));
-    shadow.setAttribute('height',(thick+3).toFixed(2));
-    shadow.setAttribute('rx',(cr+1.5).toFixed(2));
-
-    var base = document.createElementNS(svgNS,'rect');
-    base.setAttribute('class','lm-stone-base');
-    base.setAttribute('x',(-len/2).toFixed(2));
-    base.setAttribute('y',(-thick/2).toFixed(2));
-    base.setAttribute('width',len.toFixed(2));
-    base.setAttribute('height',thick.toFixed(2));
-    base.setAttribute('rx',cr.toFixed(2));
-
-    /* Yüz, tabandan biraz içeri çekilir (üstte/yanlarda 2 birim, altta
-       6 birim) — bu asimetrik pay, tabanın alt kenarda biraz daha
-       koyu/kalın bir "fiziksel kalınlık" şeridi olarak görünmesini
-       sağlar ("darker lower edge" isteğiyle örtüşür). */
-    var faceH = thick-8;
-    var face = document.createElementNS(svgNS,'rect');
-    face.setAttribute('class','lm-stone-face');
-    face.setAttribute('x',(-len/2+2).toFixed(2));
-    face.setAttribute('y',(-thick/2+2).toFixed(2));
-    face.setAttribute('width',(len-4).toFixed(2));
-    face.setAttribute('height',faceH.toFixed(2));
-    face.setAttribute('rx',(cr*0.85).toFixed(2));
-
-    /* Parlaklık: taşın yalnızca üst-orta bölümünü kaplayan küçük,
-       yerel bir yama (yüz genişliğinin ~%62'si, kalınlığının ~%26'sı)
-       — tam taş boyunda sürekli bir "hap" değil, komşu taşlarla asla
-       birleşip çizgi oluşturmaz. */
-    var hl = document.createElementNS(svgNS,'rect');
-    hl.setAttribute('class','lm-stone-hl');
-    hl.setAttribute('x',(-len*0.31).toFixed(2));
-    hl.setAttribute('y',(-thick/2+4).toFixed(2));
-    hl.setAttribute('width',(len*0.62).toFixed(2));
-    hl.setAttribute('height',(thick*0.26).toFixed(2));
-    hl.setAttribute('rx',(cr*0.6).toFixed(2));
-
-    stone.appendChild(shadow);
-    stone.appendChild(base);
-    stone.appendChild(face);
-    stone.appendChild(hl);
-    (isDone ? doneGroup : futureGroup).appendChild(stone);
-  }
-  return {doneGroup:doneGroup, futureGroup:futureGroup};
-}
+/* Painted checkpoint centers from levelmap_world_v3_checkpoints.png.
+   Coordinates are normalized against the source image's 1536x1024 pixels
+   and shared unchanged by every viewport and game mode. */
+var LM_CHECKPOINTS = [
+  {x:0.311198,y:0.702148}, {x:0.225911,y:0.711914},
+  {x:0.178385,y:0.650391}, {x:0.134115,y:0.591797},
+  {x:0.203776,y:0.526367}, {x:0.162760,y:0.447266},
+  {x:0.108073,y:0.373047}, {x:0.187500,y:0.291992},
+  {x:0.254557,y:0.138672}, {x:0.315755,y:0.149414},
+  {x:0.345052,y:0.211914}, {x:0.410156,y:0.308594},
+  {x:0.477865,y:0.316406}, {x:0.518229,y:0.264648},
+  {x:0.600260,y:0.233398}, {x:0.675130,y:0.243164},
+  {x:0.739583,y:0.259766}, {x:0.797526,y:0.297852},
+  {x:0.844401,y:0.352539}, {x:0.884115,y:0.412109},
+  {x:0.853516,y:0.464844}, {x:0.858724,y:0.552734},
+  {x:0.826823,y:0.606445}, {x:0.759115,y:0.588867},
+  {x:0.703776,y:0.608398}, {x:0.638021,y:0.637695},
+  {x:0.594401,y:0.682617}, {x:0.574870,y:0.759766},
+  {x:0.582682,y:0.831055}, {x:0.561849,y:0.923828}
+];
 function renderLevelMap(){
   var m = lmCurrentMode;
   document.getElementById('lmTitle').textContent = m.e+' '+m.n;
@@ -1883,73 +1550,22 @@ function renderLevelMap(){
   document.getElementById('lmSub').textContent = 'Seviye '+mm.level+' / '+cap;
   var path = document.getElementById('lmPath'); path.innerHTML='';
 
-  var svgNS = 'http://www.w3.org/2000/svg';
   var stage = document.createElement('div'); stage.className='lm-stage';
+  var worldBg = document.createElement('img');
+  worldBg.className = 'lm-world-bg';
+  worldBg.src = '../assets/images/ui/levelmap/levelmap_world_v3_checkpoints.png';
+  worldBg.alt = '';
+  worldBg.setAttribute('aria-hidden', 'true');
+  stage.appendChild(worldBg);
+  path.appendChild(stage);
 
-  var segs = lmBuildRouteSegments();
-  var fullD = lmFullPathD(segs);
-  var measured = lmMeasureSegments(segs);
-
-  var svg = document.createElementNS(svgNS,'svg');
-  svg.setAttribute('class','lm-road-svg');
-  svg.setAttribute('viewBox','0 0 '+LM_VB_W+' '+LM_VB_H);
-  svg.setAttribute('preserveAspectRatio','none');
-  svg.setAttribute('aria-hidden','true');
-  svg.setAttribute('focusable','false');
-  function makeRoadPath(cls){
-    var p = document.createElementNS(svgNS,'path');
-    p.setAttribute('class',cls);
-    p.setAttribute('d', fullD);
-    return p;
-  }
-  /* .lm-road-foundation: hem GÖRSEL (ince/düşük kontrast, taşlar arası
-     mikroskobik boşluk kalmasın diye alttaki dolgu) HEM DE GEOMETRİK
-     referans (getTotalLength/getPointAtLength bu canlı elemandan
-     okunur — Task 1'den beri kullanılan aynı teknik) olarak ikili görev
-     yapar. Task 2/2B'nin çok-katmanlı dash yığını (kenar/yüz/parlaklık ×
-     gelecek/tamamlanan + <mask>) TAMAMEN kaldırıldı — durum ataması
-     artık taş başına doğrudan uzunluk karşılaştırmasıyla yapılıyor
-     (bkz. lmBuildStones), ayrı bir maskeye gerek kalmadı. */
-  var roadShadow = makeRoadPath('lm-road-shadow');
-  var foundation = makeRoadPath('lm-road-foundation');
-
-  var defs = document.createElementNS(svgNS,'defs');
-  var halo = document.createElementNS(svgNS,'circle');
-  halo.setAttribute('class','lm-road-halo');
-  var haloGrad = document.createElementNS(svgNS,'radialGradient');
-  var haloGradId = 'lmHaloGrad';
-  haloGrad.setAttribute('id', haloGradId);
-  haloGrad.innerHTML = '<stop offset="0%" stop-color="#F4C542" stop-opacity="0.55"/><stop offset="100%" stop-color="#F4C542" stop-opacity="0"/>';
-  halo.setAttribute('fill','url(#'+haloGradId+')');
-  defs.appendChild(haloGrad);
-
-  svg.appendChild(defs);
-  svg.appendChild(roadShadow);
-  svg.appendChild(foundation);
-  stage.appendChild(svg);
-  path.appendChild(stage); /* DOM'a ekle: getPointAtLength güvenle canlı elemanda çağrılsın */
-
-  var positions = lmComputeNodePositions(foundation, measured.sweepInfo);
-
-  /* İlerleme hesaplaması (completedLen) Task 1'den beri değişmedi —
-     yalnızca bunun taşlara nasıl uygulandığı değişti (bkz. lmBuildStones:
-     her taşın MERKEZ uzunluğu completedLen ile karşılaştırılır). */
-  var completedLen = positions[mm.level-1].len;
-  var stones = lmBuildStones(svgNS, foundation, measured.totalLen, completedLen);
-  svg.appendChild(stones.futureGroup);
-  svg.appendChild(stones.doneGroup);
-  svg.appendChild(halo);
-
-  var curPos = positions[mm.level-1];
-  halo.setAttribute('cx', curPos.x);
-  halo.setAttribute('cy', curPos.y);
-  halo.setAttribute('r', 46);
+  var positions = LM_CHECKPOINTS;
 
   for(var L=1; L<=cap; L++){
     var pos = positions[L-1];
     var wrap = document.createElement('div'); wrap.className='lm-node-wrap';
-    wrap.style.left = (pos.x/LM_VB_W*100)+'%';
-    wrap.style.top = (pos.y/LM_VB_H*100)+'%';
+    wrap.style.left = (pos.x*100)+'%';
+    wrap.style.top = (pos.y*100)+'%';
     var node = document.createElement('button'); node.type='button';
     var state = mm.completed.indexOf(L)>=0 ? 'done' : (L===mm.level ? 'current' : (L<mm.level ? 'done' : 'locked'));
     node.className = 'lm-node '+state;
@@ -1961,8 +1577,11 @@ function renderLevelMap(){
     if(state==='current') node.setAttribute('aria-current', 'step');
     node.onclick = (function(entry){ return function(){ entry.fn(); }; })(m);
     wrap.appendChild(node);
-    var label = document.createElement('div'); label.className='lm-node-label'; label.textContent='Seviye '+L;
-    wrap.appendChild(label);
+    var tooltip = document.createElement('div');
+    tooltip.className = 'lm-node-tooltip';
+    tooltip.setAttribute('aria-hidden', 'true');
+    tooltip.textContent = 'Seviye '+L+' · '+(state==='done'?'Tamamlandı':state==='current'?'Mevcut':'Kilitli');
+    wrap.appendChild(tooltip);
     if(L===mm.level && window.renderAvatarImage){
       var charaShadow = document.createElement('div');
       charaShadow.className = 'lm-character-shadow';
