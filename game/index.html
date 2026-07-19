@@ -292,12 +292,37 @@
   .timer{background:var(--card);border-radius:14px;padding:8px 14px;font-weight:700;box-shadow:var(--shadow);font-size:14px;min-width:60px;text-align:center;flex-shrink:0;}
   .timer.low{color:var(--red-soft);}
   .score-pill{background:var(--card);border-radius:14px;padding:8px 14px;font-weight:700;box-shadow:var(--shadow);font-size:14px;flex-shrink:0;align-self:center;}
+  .quiz-timed-status{display:none;flex-direction:column;align-items:center;margin:-2px 0 18px;}
+  #quiz.timed-mode .quiz-timed-status{display:flex;}
+  #quiz.timed-mode .timer{font-size:30px;line-height:1;min-width:92px;padding:12px 18px;}
+  .quiz-correct-progress{position:relative;width:min(400px,calc(100% - 32px));margin-top:12px;padding:12px 18px 11px;border:2px solid rgba(91,184,138,.28);border-radius:22px;background:linear-gradient(145deg,var(--card),#F2F8F3);box-shadow:var(--shadow);text-align:center;}
+  .quiz-correct-label{color:var(--ink-soft);font-size:10.5px;font-weight:900;letter-spacing:1.3px;line-height:1;}
+  .quiz-correct-count{color:var(--green);font-size:52px;font-weight:900;line-height:.95;margin:3px 0 4px;text-shadow:0 2px 0 rgba(255,255,255,.8);}
+  .quiz-correct-status{min-height:17px;color:var(--ink);font-size:12.5px;font-weight:800;line-height:1.3;}
+  .quiz-milestones{display:flex;justify-content:center;gap:24px;margin-top:9px;}
+  .quiz-milestone{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#E6D5B8;color:var(--ink-soft);border:2px solid rgba(160,137,102,.22);font-size:10px;font-weight:900;box-shadow:inset 0 1px 2px rgba(51,65,92,.08);transition:transform .2s ease,background .2s ease,color .2s ease,box-shadow .2s ease;}
+  .quiz-milestone.complete{background:var(--green);color:#fff;border-color:rgba(255,255,255,.55);box-shadow:0 3px 8px rgba(91,184,138,.3);}
+  @keyframes quizCorrectPop{0%{transform:scale(1);}50%{transform:scale(1.12);}100%{transform:scale(1);}}
+  @keyframes quizScoreRing{0%,100%{box-shadow:var(--shadow),0 0 0 0 rgba(91,184,138,0);}50%{box-shadow:var(--shadow),0 0 0 7px rgba(91,184,138,.14);}}
+  @keyframes quizMilestonePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.16);}}
+  .quiz-correct-count.pop{animation:quizCorrectPop .26s ease-out;}
+  .quiz-correct-progress.score-updated{animation:quizScoreRing .42s ease-out;}
+  .quiz-correct-progress.milestone-pulse{animation:quizCorrectPop .48s ease-out;}
+  .quiz-milestone.reached{animation:quizMilestonePulse .48s ease-out;}
+  @media (max-width:480px){
+    .quiz-correct-progress{padding:10px 14px 9px;border-radius:20px;}
+    .quiz-correct-count{font-size:44px;}
+    .quiz-milestones{margin-top:7px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .quiz-milestone{transition:none;}
+    .quiz-correct-count.pop,.quiz-correct-progress.score-updated,.quiz-correct-progress.milestone-pulse,.quiz-milestone.reached{animation:none;}
+  }
 
   .qcard{background:var(--card);border-radius:var(--fg-radius-xl,var(--radius));box-shadow:var(--shadow);padding:34px 24px;margin-bottom:20px;text-align:center;}
   .qcard .hint{margin:0 0 10px;font-size:11.5px;color:var(--ink-soft);letter-spacing:.5px;font-weight:700;}
   .q-en{margin:0;font-size:24px;line-height:1.35;font-weight:800;letter-spacing:-.2px;}
   .q-tr{margin:16px 0 0;font-size:14.5px;color:var(--ink-soft);line-height:1.5;}
-  .tap-tip{margin:14px 0 0;font-size:11px;color:#A08966;}
   .w{cursor:pointer;border-bottom:1.5px dotted #B9C9DC;border-radius:4px;padding:0 1px;}
   .w:active,.w.hl{background:#FFF3D9;border-bottom-color:var(--amber);}
   .w:focus-visible{outline:2px solid var(--blue);outline-offset:1px;}
@@ -657,7 +682,19 @@
         <div class="game-subtitle" id="quizHint"></div>
       </div>
       <div class="score-pill hidden" id="quizScore">✅ 0</div>
+    </div>
+    <div class="quiz-timed-status">
       <div class="timer hidden" id="quizTimer">60</div>
+      <div class="quiz-correct-progress" id="quizCorrectProgress" role="status" aria-live="off" aria-label="0 doğru cevap. Hadi başlayalım!">
+        <div class="quiz-correct-label">DOĞRU</div>
+        <div class="quiz-correct-count" id="quizCorrectCount">0</div>
+        <div class="quiz-correct-status" id="quizCorrectStatus">Hadi başlayalım!</div>
+        <div class="quiz-milestones" aria-hidden="true">
+          <span class="quiz-milestone" data-target="5">5</span>
+          <span class="quiz-milestone" data-target="10">10</span>
+          <span class="quiz-milestone" data-target="20">20</span>
+        </div>
+      </div>
     </div>
     <div class="game-body">
       <div>
@@ -665,7 +702,6 @@
         <div class="qcard">
           <div class="q-en" id="quizQEn"></div>
           <div class="q-tr" id="quizQTr"></div>
-          <div class="tap-tip" id="quizTapTip">👆 İngilizce kelimelere dokun → Türkçesini gör</div>
         </div>
       </div>
       <div class="opts" id="quizOpts"></div>
@@ -817,7 +853,6 @@
       <div class="qcard">
         <div class="q-en" id="fgSentence"></div>
         <div class="q-tr" id="fgTr"></div>
-        <div class="tap-tip">👆 Kelimelere dokun → Türkçesini gör</div>
       </div>
       <div class="opts two-col" id="fgOpts"></div>
     </div>
@@ -1542,7 +1577,7 @@ function renderResultScreen(cfg){
 /* ================= ANA EKRAN OYUN LİSTESİ ================= */
 var MODES = [
  {key:'quiz_buildings', cls:'b', e:'🏙️', tag:'BİLGİ YARIŞMASI', n:'Gökdelen Bilgini', d:'Bina bilgileri + kelimeler', fn:function(){startQuiz('buildings');}},
- {key:'quiz_countries', cls:'g', e:'🌍', tag:'ZAMANA KARŞI', n:'Ülke Avcısı', d:'60 saniyede kaç soru?', fn:function(){startQuiz('countries');}},
+ {key:'quiz_countries', cls:'g', e:'🌍', tag:'ZAMANA KARŞI', n:'Kelime Yarışı', d:'60 saniyede kaç soru?', fn:function(){startQuiz('countries');}},
  {key:'picmatch', cls:'p', e:'🖼️', tag:'RESİM', n:'Resim Eşleştirme', d:'Resmi doğru kelimeyle eşleştir', fn:startPicmatch},
  {key:'listen', cls:'a', e:'🎧', tag:'DİNLEME', n:'Dinle ve Bul', d:'Telaffuzu duy, kelimeyi seç', fn:startListen},
  {key:'memory', cls:'g', e:'🃏', tag:'HAFIZA', n:'Hafıza Kartları', d:'İngilizce-Türkçe çiftleri bul', fn:startMemory},
@@ -1814,26 +1849,74 @@ function buildQuizList(cat,count){
   while(list.length<count) list.push(makeVocabQ());
   return shuffle(list);
 }
+function renderTimedQuizProgress(animate){
+  var s=qState;
+  if(!s || s.cat!=='countries') return;
+  var correct=s.correct;
+  var progress=document.getElementById('quizCorrectProgress');
+  var count=document.getElementById('quizCorrectCount');
+  var status=document.getElementById('quizCorrectStatus');
+  var statusText = correct<=2 ? 'Hadi başlayalım!' :
+    correct<=5 ? 'Harika gidiyorsun!' :
+    correct<=9 ? 'Hedefe çok yakınsın!' :
+    correct===10 ? 'Hedef tamamlandı!' :
+    correct<=14 ? 'Süper seri!' :
+    correct<=19 ? 'Muhteşem!' : 'İnanılmaz hız!';
+  count.textContent=correct;
+  status.textContent=statusText;
+  progress.setAttribute('aria-label', correct+' doğru cevap. '+statusText);
+  count.classList.remove('pop');
+  progress.classList.remove('score-updated','milestone-pulse');
+  var markers=progress.querySelectorAll('.quiz-milestone');
+  markers.forEach(function(marker){
+    var target=Number(marker.getAttribute('data-target'));
+    marker.classList.toggle('complete', correct>=target);
+    marker.classList.remove('reached');
+  });
+  if(animate){
+    void count.offsetWidth;
+    count.classList.add('pop');
+    progress.classList.add('score-updated');
+    markers.forEach(function(marker){
+      if(correct===Number(marker.getAttribute('data-target'))){
+        marker.classList.add('reached');
+        progress.classList.remove('score-updated');
+        progress.classList.add('milestone-pulse');
+      }
+    });
+  }
+}
 function startQuiz(cat){
   clearQuizAdvanceTimeout();
+  if(timerInt){ clearInterval(timerInt); timerInt=null; }
   window._activeSession = {mode:'quiz', done:false};
   var timed = cat==='countries';
   qState={list:buildQuizList(cat,timed?30:8), i:0, correct:0, answered:0, timed:timed, time:60, locked:false, results:[], cat:cat};
-  document.getElementById('quizTitle').textContent = cat==='buildings' ? '🏙️ Gökdelen Bilgini' : '🌍 Ülke Avcısı';
+  document.getElementById('quizTitle').textContent = cat==='buildings' ? '🏙️ Gökdelen Bilgini' : '🌍 Kelime Yarışı';
+  document.getElementById('quiz').classList.toggle('timed-mode', timed);
   document.getElementById('quizTimer').classList.toggle('hidden', !timed);
   document.getElementById('quizScore').classList.toggle('hidden', !timed);
   document.getElementById('quizDots').classList.toggle('hidden', timed);
-  document.getElementById('quizTapTip').classList.toggle('hidden', cat==='buildings');
   show('quiz');
   if(timed){
     var tEl=document.getElementById('quizTimer');
     tEl.textContent=60; tEl.classList.remove('low');
     document.getElementById('quizScore').textContent='✅ 0';
-    timerInt=setInterval(function(){
-      qState.time--; tEl.textContent=qState.time;
-      if(qState.time<=10) tEl.classList.add('low');
-      if(qState.time<=0) finishQuiz();
+    renderTimedQuizProgress(false);
+    var timedState=qState, timedSession=window._activeSession;
+    var countryTimer=setInterval(function(){
+      if(qState!==timedState || window._activeSession!==timedSession ||
+         !timedSession || timedSession.mode!=='quiz' || timedSession.done ||
+         timedState.cat!=='countries'){
+        clearInterval(countryTimer);
+        if(timerInt===countryTimer) timerInt=null;
+        return;
+      }
+      timedState.time--; tEl.textContent=timedState.time;
+      if(timedState.time<=10) tEl.classList.add('low');
+      if(timedState.time<=0) finishQuiz(timedState, timedSession);
     },1000);
+    timerInt=countryTimer;
   }
   renderQ();
 }
@@ -1850,8 +1933,9 @@ function renderQ(){
   renderQuestionContent({
     hintId:'quizHint', hint:item.hint,
     primaryId:'quizQEn', tappable:true, primaryText:item.en,
-    supportingId:'quizQTr', supportingText:'🇹🇷 '+item.tr
+    supportingId:'quizQTr', supportingText:s.cat==='countries'?'':'🇹🇷 '+item.tr
   });
+  document.getElementById('quizQTr').classList.toggle('hidden', s.cat==='countries');
   s.locked=false;
   if(s.cat!=='buildings'){
     renderOptionButtons('quizOpts', shuffle(item.opts.map(function(o,i){return {o:o,i:i};})).map(function(p){
@@ -1869,25 +1953,39 @@ function renderQ(){
   correctButton=document.getElementById('quizOpts').children[correctPosition] || null;
 }
 function qAnswer(btn, ok, item, correctButton){
-  if(!qState || qState.cat!=='buildings'){
-    handleOptionAnswer({
-      isLocked:function(){ return qState.locked; },
-      setLocked:function(){ qState.locked=true; },
+  if(!qState) return;
+  if(qState.cat==='countries'){
+    var countryState=qState;
+    var countrySession=window._activeSession;
+    if(countryState.locked) return;
+    clearQuizAdvanceTimeout();
+    var countryTimeout=handleOptionAnswer({
+      isLocked:function(){ return countryState.locked; },
+      setLocked:function(){ countryState.locked=true; },
       btn:btn, ok:ok,
       recordWord: item.w || null,
       xp: 10,
       learnWord: item.w || null,
       onResult:function(ok){
-        qState.results[qState.i]=ok; qState.answered++;
-        if(ok){ qState.correct++; if(qState.timed) document.getElementById('quizScore').textContent='✅ '+qState.correct; }
+        countryState.results[countryState.i]=ok; countryState.answered++;
+        if(ok){
+          countryState.correct++;
+          document.getElementById('quizScore').textContent='✅ '+countryState.correct;
+          renderTimedQuizProgress(true);
+        }
       },
       delay: 700,
       after:function(){
-        qState.i++;
-        if(qState.i>=qState.list.length) finishQuiz();
+        quizAdvanceTimeout=null;
+        if(qState!==countryState || window._activeSession!==countrySession ||
+           !countrySession || countrySession.mode!=='quiz' || countrySession.done ||
+           countryState.cat!=='countries') return;
+        countryState.i++;
+        if(countryState.i>=countryState.list.length) finishQuiz(countryState, countrySession);
         else renderQ();
       }
     });
+    quizAdvanceTimeout=countryTimeout || null;
     return;
   }
   var answeredState=qState;
@@ -1925,7 +2023,7 @@ function qAnswer(btn, ok, item, correctButton){
 function finishQuiz(expectedState, expectedSession){
   var s=qState;
   if(!s) return;
-  if(s.cat==='buildings'){
+  if(s.cat==='buildings' || s.cat==='countries'){
     var session=window._activeSession;
     if((expectedState && s!==expectedState) ||
        (expectedSession && session!==expectedSession) ||
@@ -1935,7 +2033,13 @@ function finishQuiz(expectedState, expectedSession){
   var total = s.timed ? s.answered : s.list.length;
   var good = s.correct >= total*0.7 && s.correct>0;
   if(good) sfx('win');
-  var reward = completeGameSession('quiz', {correct:s.correct, total:total, perfect: !s.timed && total>0 && s.correct===total, levelKey:'quiz_'+s.cat});
+  var reward = completeGameSession('quiz', {
+    correct:s.correct,
+    total:total,
+    perfect: !s.timed && total>0 && s.correct===total,
+    levelKey:'quiz_'+s.cat,
+    levelPassEligible: s.cat!=='countries' || total>=10
+  });
   if(s.cat === 'buildings'){
     renderResultScreen({
       badgeImg:'../assets/images/icons/mode_quiz_buildings.png',
@@ -1946,7 +2050,7 @@ function finishQuiz(expectedState, expectedSession){
     });
   } else {
     renderResultScreen({
-      emoji: good?'🏆':'💪', title: good?'Harikasın!':'İyi deneme!',
+      emoji: good?'🏆':'💪', title:'Kelime Yarışı Tamamlandı!',
       detail: s.correct+' / '+total+' doğru'+(s.timed?' · Zamana karşı!':''),
       correct:s.correct, total:total,
       xpText:'+'+(s.correct*10)+' XP · Kulen '+s.correct+' kat yükseldi!', reward:reward
