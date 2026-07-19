@@ -1272,7 +1272,8 @@ var mascotState = {
   sessionRef:null,
   modal:false,
   actionText:'',
-  actionHandler:null
+  actionHandler:null,
+  inertElement:null
 };
 function clearMascotAutoHide(){
   if(mascotState.autoHideTimeout){
@@ -1355,8 +1356,8 @@ function endMascotSession(){
   mascotState.modal=false;
   mascotState.actionText='';
   mascotState.actionHandler=null;
-  var quiz=document.getElementById('quiz');
-  if(quiz) quiz.inert=false;
+  if(mascotState.inertElement) mascotState.inertElement.inert=false;
+  mascotState.inertElement=null;
   renderMascot();
 }
 function show(id){
@@ -2062,13 +2063,49 @@ function startCountryQuizTimer(expectedState,expectedSession){
   },1000);
   timerInt=countryTimer;
 }
+function showBlockingMascotIntro(expectedState,expectedSession,config){
+  if(!expectedState || !expectedSession || window._activeSession!==expectedSession ||
+     expectedSession.mode!==config.mode || expectedSession.done || !config.isCurrent()) return;
+  var container=document.getElementById(config.containerId);
+  if(!container) return;
+  expectedState.introOpen=true;
+  container.inert=true;
+  mascotState.inertElement=container;
+  showMascot({
+    sessionRef:expectedSession,
+    image:'../assets/images/ui/mascots/pip/pip_idle.webp',
+    imageAlt:'Pip',
+    text:config.text,
+    position:'right',
+    modal:true,
+    actionText:'Başla',
+    onAction:function(){
+      if(window._activeSession!==expectedSession || expectedSession.mode!==config.mode ||
+         expectedSession.done || !config.isCurrent() || !expectedState.introOpen) return;
+      expectedState.introOpen=false;
+      container.inert=false;
+      if(mascotState.inertElement===container) mascotState.inertElement=null;
+      hideMascot();
+      if(typeof config.onStart==='function') config.onStart(expectedState,expectedSession);
+    }
+  });
+}
+function showQuizMascotIntro(expectedState,expectedSession,config){
+  showBlockingMascotIntro(expectedState,expectedSession,{
+    mode:'quiz',
+    containerId:'quiz',
+    text:config.text,
+    onStart:config.onStart,
+    isCurrent:function(){ return qState===expectedState && expectedState.cat===config.cat; }
+  });
+}
 function startQuiz(cat){
   clearQuizAdvanceTimeout();
   if(timerInt){ clearInterval(timerInt); timerInt=null; }
   window._activeSession = {mode:'quiz', done:false};
   var quizSession=window._activeSession;
   var timed = cat==='countries';
-  qState={list:buildQuizList(cat,timed?30:8), i:0, correct:0, answered:0, timed:timed, time:60, locked:false, results:[], cat:cat, mascotHalfwayShown:false, introOpen:timed, timerStarted:false};
+  qState={list:buildQuizList(cat,timed?30:8), i:0, correct:0, answered:0, timed:timed, time:60, locked:false, results:[], cat:cat, mascotHalfwayShown:false, mascotBuildingEncouragementShown:false, introOpen:false, timerStarted:false};
   document.getElementById('quizTitle').textContent = cat==='buildings' ? '🏙️ Gökdelen Bilgini' : '🌍 Kelime Yarışı';
   document.getElementById('quiz').classList.toggle('timed-mode', timed);
   document.getElementById('quizTimer').classList.toggle('hidden', !timed);
@@ -2082,27 +2119,16 @@ function startQuiz(cat){
     renderTimedQuizProgress(false);
   }
   renderQ();
-  if(cat==='countries' && window._activeSession===quizSession &&
-     quizSession.mode==='quiz' && !quizSession.done && qState && qState.cat==='countries'){
-    var introState=qState;
-    document.getElementById('quiz').inert=true;
-    showMascot({
-      sessionRef:quizSession,
-      image:'../assets/images/ui/mascots/pip/pip_idle.webp',
-      imageAlt:'Pip',
+  if(cat==='countries'){
+    showQuizMascotIntro(qState,quizSession,{
+      cat:'countries',
       text:'Hazır mısın? Hızlı düşün, sakin kal!',
-      position:'right',
-      modal:true,
-      actionText:'Başla',
-      onAction:function(){
-        if(qState!==introState || window._activeSession!==quizSession ||
-           !quizSession || quizSession.mode!=='quiz' || quizSession.done ||
-           introState.cat!=='countries' || !introState.introOpen) return;
-        introState.introOpen=false;
-        document.getElementById('quiz').inert=false;
-        hideMascot();
-        startCountryQuizTimer(introState,quizSession);
-      }
+      onStart:startCountryQuizTimer
+    });
+  } else if(cat==='buildings'){
+    showQuizMascotIntro(qState,quizSession,{
+      cat:'buildings',
+      text:'Hazır mısın? Gökdelenleri birlikte keşfedelim!'
     });
   }
 }
@@ -2140,7 +2166,7 @@ function renderQ(){
 }
 function qAnswer(btn, ok, item, correctButton){
   if(!qState) return;
-  if(qState.cat==='countries' && qState.introOpen) return;
+  if(qState.introOpen) return;
   if(qState.cat==='countries'){
     var countryState=qState;
     var countrySession=window._activeSession;
@@ -2202,7 +2228,22 @@ function qAnswer(btn, ok, item, correctButton){
          answeredState.cat!=='buildings') return;
       answeredState.i++;
       if(answeredState.i>=answeredState.list.length) finishQuiz(answeredState, answeredSession);
-      else renderQ();
+      else {
+        renderQ();
+        if(answeredState.i===4 && !answeredState.mascotBuildingEncouragementShown &&
+           qState===answeredState && window._activeSession===answeredSession &&
+           !answeredSession.done && answeredState.cat==='buildings'){
+          answeredState.mascotBuildingEncouragementShown=true;
+          showMascot({
+            sessionRef:answeredSession,
+            image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
+            imageAlt:'Pip',
+            text:'Harika gidiyorsun! Zirveye az kaldı!',
+            position:'right',
+            autoHideMs:4000
+          });
+        }
+      }
     }
   });
   quizAdvanceTimeout=pendingTimeout || null;
@@ -2235,6 +2276,17 @@ function finishQuiz(expectedState, expectedSession){
       correct:s.correct, total:total,
       xpText:'+'+(s.correct*10)+' XP', reward:reward
     });
+    if(qState===s && window._activeSession===session &&
+       session && session.mode==='quiz' && session.done){
+      showMascot({
+        sessionRef:session,
+        image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
+        imageAlt:'Pip',
+        text:'Muhteşem! Gökdelenleri başarıyla tamamladın!',
+        position:'right',
+        autoHideMs:5000
+      });
+    }
   } else {
     renderResultScreen({
       emoji: good?'🏆':'💪', title:'Kelime Yarışı Tamamlandı!',
@@ -2273,9 +2325,17 @@ var EMOJI_WORDS = [
 var pmState=null;
 function startPicmatch(){
   window._activeSession = {mode:'picmatch', done:false};
+  var picmatchSession=window._activeSession;
   var rounds = window.pickUnseen ? window.pickUnseen('picmatch', EMOJI_WORDS, 8, function(w){return w[0];}) : pick(EMOJI_WORDS,8);
-  pmState={rounds:rounds, i:0, correct:0, locked:false};
+  pmState={rounds:rounds, i:0, correct:0, locked:false, introOpen:false, mascotEncouragementShown:false};
+  var picmatchState=pmState;
   show('picmatch'); renderPm();
+  showBlockingMascotIntro(picmatchState,picmatchSession,{
+    mode:'picmatch',
+    containerId:'picmatch',
+    text:'Hazır mısın? Resimleri kelimelerle eşleştirelim!',
+    isCurrent:function(){ return pmState===picmatchState; }
+  });
 }
 function renderPm(){
   var s=pmState, item=s.rounds[s.i];
@@ -2286,6 +2346,9 @@ function renderPm(){
   s.locked=false;
   renderOptionButtons('pmOpts', opts.map(function(o){
     return { html:o[0]+'<small>'+(DICT[o[0]]||'')+'</small>', onClick:function(b){
+      if(pmState!==s || s.introOpen) return;
+      var picmatchSession=window._activeSession;
+      if(!picmatchSession || picmatchSession.mode!=='picmatch' || picmatchSession.done) return;
       handleOptionAnswer({
         isLocked:function(){ return s.locked; },
         setLocked:function(){ s.locked=true; },
@@ -2296,12 +2359,38 @@ function renderPm(){
         onResult:function(ok){ if(ok) s.correct++; },
         delay: 700,
         after:function(){
+          if(pmState!==s || window._activeSession!==picmatchSession ||
+             !picmatchSession || picmatchSession.mode!=='picmatch' || picmatchSession.done) return;
           s.i++;
           if(s.i>=8){
             if(s.correct>=6) sfx('win');
             var reward = completeGameSession('picmatch', {correct:s.correct, total:8, perfect:s.correct===8});
             renderResultScreen({emoji: s.correct>=6?'🖼️':'💪', title:'Resim Eşleştirme Bitti!', detail: s.correct+' / 8 doğru', correct:s.correct, total:8, xpText:'+'+(s.correct*10)+' XP', reward:reward});
-          } else renderPm();
+            if(pmState===s && window._activeSession===picmatchSession && picmatchSession.done){
+              showMascot({
+                sessionRef:picmatchSession,
+                image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
+                imageAlt:'Pip',
+                text:'Harika! Tüm resimleri doğru eşleştirdin!',
+                position:'right',
+                autoHideMs:5000
+              });
+            }
+          } else {
+            renderPm();
+            if(s.i===4 && !s.mascotEncouragementShown &&
+               pmState===s && window._activeSession===picmatchSession && !picmatchSession.done){
+              s.mascotEncouragementShown=true;
+              showMascot({
+                sessionRef:picmatchSession,
+                image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
+                imageAlt:'Pip',
+                text:'Süpersin! Eşleştirmelere devam!',
+                position:'right',
+                autoHideMs:4000
+              });
+            }
+          }
         }
       });
     }};
@@ -2312,12 +2401,19 @@ function renderPm(){
 var lsState=null;
 function startListen(){
   window._activeSession = {mode:'listen', done:false};
+  var listenSession=window._activeSession;
   var pool = WORDS.filter(function(w){return w[0].length>=3&&w[0].length<=8&&/^[a-z]+$/.test(w[0]);});
   var rounds = window.pickUnseen ? window.pickUnseen('listen', pool, 8, function(w){return w[0];}) : pick(pool,8);
-  lsState={rounds:rounds, i:0, correct:0, locked:false};
-  show('listen'); renderLs();
+  lsState={rounds:rounds, i:0, correct:0, locked:false, introOpen:false, speechEnabled:false, mascotEncouragementShown:false};
+  var listenState=lsState;
+  show('listen'); renderLs(false);
+  showBlockingMascotIntro(listenState,listenSession,{
+    mode:'listen', containerId:'listen', text:'Dinlemeye ve doğru kelimeyi bulmaya hazır mısın?',
+    isCurrent:function(){ return lsState===listenState; },
+    onStart:function(){ listenState.speechEnabled=true; lsSpeak(listenState,listenSession); }
+  });
 }
-function renderLs(){
+function renderLs(scheduleSpeech){
   var s=lsState, item=s.rounds[s.i];
   document.getElementById('lsRound').textContent=(s.i+1)+'/8';
   document.getElementById('lsHintText').textContent='';
@@ -2327,6 +2423,9 @@ function renderLs(){
   s.locked=false;
   renderOptionButtons('lsOpts', opts.map(function(o){
     return { text:o[0], onClick:function(b){
+      if(lsState!==s || s.introOpen) return;
+      var listenSession=window._activeSession;
+      if(!listenSession || listenSession.mode!=='listen' || listenSession.done) return;
       handleOptionAnswer({
         isLocked:function(){ return s.locked; },
         setLocked:function(){ s.locked=true; },
@@ -2337,21 +2436,38 @@ function renderLs(){
         onResult:function(ok){ if(ok) s.correct++; },
         delay: 700,
         after:function(){
+          if(lsState!==s || window._activeSession!==listenSession || listenSession.done) return;
           s.i++;
           if(s.i>=8){
             if(s.correct>=6) sfx('win');
             var reward = completeGameSession('listen', {correct:s.correct, total:8, perfect:s.correct===8});
             renderResultScreen({emoji: s.correct>=6?'🎧':'💪', title:'Dinleme Bitti!', detail: s.correct+' / 8 doğru', correct:s.correct, total:8, xpText:'+'+(s.correct*10)+' XP', reward:reward});
-          } else { renderLs(); setTimeout(lsSpeak,400); }
+            if(lsState===s && window._activeSession===listenSession && listenSession.done){
+              showMascot({sessionRef:listenSession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Mükemmel! Dinleme görevini tamamladın!',position:'right',autoHideMs:5000});
+            }
+          } else {
+            renderLs(true);
+            if(s.i===4 && !s.mascotEncouragementShown){
+              s.mascotEncouragementShown=true;
+              showMascot({sessionRef:listenSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Harika dinliyorsun! Devam et!',position:'right',autoHideMs:4000});
+            }
+          }
         }
       });
     }};
   }));
-  setTimeout(lsSpeak,400);
+  if(scheduleSpeech && s.speechEnabled){
+    var listenSession=window._activeSession;
+    setTimeout(function(){ lsSpeak(s,listenSession); },400);
+  }
 }
-function lsSpeak(){ if(lsState) speak(lsState.rounds[lsState.i][0]); }
+function lsSpeak(expectedState,expectedSession){
+  var s=expectedState||lsState, session=expectedSession||window._activeSession;
+  if(!s || lsState!==s || !session || window._activeSession!==session || session.mode!=='listen' || session.done || s.introOpen) return;
+  speak(s.rounds[s.i][0]);
+}
 function lsHint(){
-  if(!lsState) return;
+  if(!lsState || lsState.introOpen || !window._activeSession || window._activeSession.mode!=='listen' || window._activeSession.done) return;
   document.getElementById('lsHintText').textContent='🇹🇷 '+lsState.rounds[lsState.i][1];
 }
 
@@ -2359,6 +2475,7 @@ function lsHint(){
 var memState=null;
 function startMemory(){
   window._activeSession = {mode:'memory', done:false};
+  var memorySession=window._activeSession;
   var memPool = EMOJI_WORDS.filter(function(w){return (DICT[w[0]]||'').length<=14;});
   var pairs = window.pickUnseen ? window.pickUnseen('memory', memPool, 6, function(w){return w[0];}) : pick(memPool,6);
   var cards=[];
@@ -2366,8 +2483,13 @@ function startMemory(){
     cards.push({pid:i, en:p[0], face:'en', emoji:p[1], text:p[0]});
     cards.push({pid:i, en:p[0], face:'tr', text:DICT[p[0]]||p[0]});
   });
-  memState={cards:shuffle(cards), open:[], done:new Set(), moves:0, lock:false};
+  memState={cards:shuffle(cards), open:[], done:new Set(), moves:0, lock:false, introOpen:false, mascotEncouragementShown:false};
+  var memoryState=memState;
   show('memory'); renderMem();
+  showBlockingMascotIntro(memoryState,memorySession,{
+    mode:'memory', containerId:'memory', text:'Hafızanı test etmeye hazır mısın?',
+    isCurrent:function(){ return memState===memoryState; }
+  });
 }
 function renderMem(){
   var s=memState;
@@ -2390,7 +2512,9 @@ function renderMem(){
 }
 function memFlip(idx){
   var s=memState;
-  if(s.lock || s.done.has(idx) || s.open.indexOf(idx)>=0) return;
+  if(!s || s.introOpen || s.lock || s.done.has(idx) || s.open.indexOf(idx)>=0) return;
+  var memorySession=window._activeSession;
+  if(!memorySession || memorySession.mode!=='memory' || memorySession.done) return;
   s.open.push(idx);
   sfx('tick');
   if(s.open.length===2){
@@ -2401,16 +2525,28 @@ function memFlip(idx){
       s.done.add(s.open[0]); s.done.add(s.open[1]);
       s.open=[]; s.lock=false;
       renderMem();
+      if(s.done.size===6 && !s.mascotEncouragementShown && memState===s &&
+         window._activeSession===memorySession && !memorySession.done){
+        s.mascotEncouragementShown=true;
+        showMascot({sessionRef:memorySession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Harika hatırlıyorsun! Üç çift daha!',position:'right',autoHideMs:4000});
+      }
       if(s.done.size===s.cards.length){
         sfx('win');
         setTimeout(function(){
+          if(memState!==s || window._activeSession!==memorySession || memorySession.done) return;
           var reward = completeGameSession('memory', {correct:6, total:6, perfect:s.moves===6});
           renderResultScreen({emoji:'🃏', title:'Tüm Çiftleri Buldun!', detail:'6 çift · '+s.moves+' hamlede', correct:6, total:6, xpText:'+60 XP', reward:reward});
+          if(memState===s && window._activeSession===memorySession && memorySession.done){
+            showMascot({sessionRef:memorySession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Mükemmel! Tüm kartları eşleştirdin!',position:'right',autoHideMs:5000});
+          }
         },500);
       }
     } else {
       renderMem();
-      setTimeout(function(){ sfx('wrong'); s.open=[]; s.lock=false; renderMem(); },800);
+      setTimeout(function(){
+        if(memState!==s || window._activeSession!==memorySession || memorySession.done) return;
+        sfx('wrong'); s.open=[]; s.lock=false; renderMem();
+      },800);
       return;
     }
   }
@@ -2421,10 +2557,17 @@ function memFlip(idx){
 var spState=null;
 function startSpelling(){
   window._activeSession = {mode:'spelling', done:false};
+  var spellingSession=window._activeSession;
   var cand=WORDS.filter(function(w){return w[0].length>=3&&w[0].length<=7&&/^[a-z]+$/.test(w[0]);});
   var rounds = window.pickUnseen ? window.pickUnseen('spelling', cand, 5, function(w){return w[0];}) : pick(cand,5);
-  spState={rounds:rounds, i:0, correct:0, typed:[]};
+  spState={rounds:rounds, i:0, correct:0, typed:[], introOpen:false, speechEnabled:false, mascotEncouragementShown:false};
+  var spellingState=spState;
   show('spelling'); renderSp(true);
+  showBlockingMascotIntro(spellingState,spellingSession,{
+    mode:'spelling', containerId:'spelling', text:'Dinlemeye ve doğru yazmaya hazır mısın?',
+    isCurrent:function(){ return spState===spellingState; },
+    onStart:function(){ spellingState.speechEnabled=true; spSpeak(spellingState,spellingSession); }
+  });
 }
 function renderSp(newRound){
   var s=spState, item=s.rounds[s.i];
@@ -2441,7 +2584,10 @@ function renderSp(newRound){
     s.bank=shuffle(letters.concat(decoys));
     document.getElementById('spFeedback').textContent='';
     document.getElementById('spFeedback').className='feedback';
-    setTimeout(spSpeak,400);
+    if(s.speechEnabled){
+      var spellingSession=window._activeSession;
+      setTimeout(function(){ spSpeak(s,spellingSession); },400);
+    }
   }
   var slots=document.getElementById('spSlots'); slots.innerHTML='';
   item[0].split('').forEach(function(_,i){
@@ -2460,7 +2606,8 @@ function renderSp(newRound){
 }
 function spType(L,bi){
   var s=spState, item=s.rounds[s.i];
-  if(s.typed.length>=item[0].length) return;
+  var session=window._activeSession;
+  if(s.introOpen || !session || session.mode!=='spelling' || session.done || s.typed.length>=item[0].length) return;
   s.typed.push(L);
   s.usedIdx=s.usedIdx||[]; s.usedIdx.push(bi);
   sfx('tick');
@@ -2472,20 +2619,34 @@ function spType(L,bi){
       fb.className='feedback ok';
       if(window.recordWordResult) window.recordWordResult(item[0], true);
       sfx('correct'); addXP(15); addLearned(item[0]); s.correct++;
+      var spellingSession=window._activeSession;
       setTimeout(function(){
+        if(spState!==s || window._activeSession!==spellingSession || !spellingSession || spellingSession.mode!=='spelling' || spellingSession.done) return;
         s.i++; s.usedIdx=[];
         if(s.i>=5){
           if(s.correct>=4) sfx('win');
           var reward = completeGameSession('spelling', {correct:s.correct, total:5, perfect:s.correct===5});
           renderResultScreen({emoji: s.correct>=4?'✍️':'💪', title:'Yazım Arısı Bitti!', detail: s.correct+' / 5 doğru yazım', correct:s.correct, total:5, xpText:'+'+(s.correct*15)+' XP', reward:reward});
-        } else renderSp(true);
+          if(spState===s && window._activeSession===spellingSession && spellingSession.done){
+            showMascot({sessionRef:spellingSession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Harika! Yazım görevini tamamladın!',position:'right',autoHideMs:5000});
+          }
+        } else {
+          renderSp(true);
+          if(s.i===3 && !s.mascotEncouragementShown){
+            s.mascotEncouragementShown=true;
+            showMascot({sessionRef:spellingSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Çok iyi yazıyorsun! Devam et!',position:'right',autoHideMs:4000});
+          }
+        }
       },1200);
     } else {
       fb.textContent='Olmadı! Tekrar dinle ve dene 🔄';
       fb.className='feedback no';
       if(window.recordWordResult) window.recordWordResult(item[0], false);
       sfx('wrong');
-      setTimeout(function(){ s.typed=[]; s.usedIdx=[]; renderSp(false);
+      var spellingSession=window._activeSession;
+      setTimeout(function(){
+        if(spState!==s || window._activeSession!==spellingSession || !spellingSession || spellingSession.mode!=='spelling' || spellingSession.done) return;
+        s.typed=[]; s.usedIdx=[]; renderSp(false);
         document.getElementById('spFeedback').textContent=''; },900);
     }
   }
@@ -2493,9 +2654,14 @@ function spType(L,bi){
 }
 function spBackspace(){
   var s=spState;
-  if(s.typed.length>0){ s.typed.pop(); s.usedIdx.pop(); renderSp(false); }
+  var session=window._activeSession;
+  if(s && !s.introOpen && session && session.mode==='spelling' && !session.done && s.typed.length>0){ s.typed.pop(); s.usedIdx.pop(); renderSp(false); }
 }
-function spSpeak(){ if(spState) speak(spState.rounds[spState.i][0]); }
+function spSpeak(expectedState,expectedSession){
+  var s=expectedState||spState, session=expectedSession||window._activeSession;
+  if(!s || spState!==s || !session || window._activeSession!==session || session.mode!=='spelling' || session.done || s.introOpen) return;
+  speak(s.rounds[s.i][0]);
+}
 
 /* ================= 7) BOŞLUK DOLDURMA ================= */
 var FILL = [
@@ -2537,9 +2703,17 @@ var FILL = [
 var fgState=null;
 function startFillgap(){
   window._activeSession = {mode:'fillgap', done:false};
+  var fillgapSession=window._activeSession;
   var rounds = window.pickUnseen ? window.pickUnseen('fillgap', FILL, 8, function(f){return f.s;}) : pick(FILL,8);
-  fgState={rounds:rounds, i:0, correct:0, locked:false};
+  fgState={rounds:rounds, i:0, correct:0, locked:false, introOpen:false, mascotEncouragementShown:false};
+  var fillgapState=fgState;
   show('fillgap'); renderFg();
+  showBlockingMascotIntro(fillgapState,fillgapSession,{
+    mode:'fillgap',
+    containerId:'fillgap',
+    text:'Hazır mısın? Eksik kelimeleri birlikte bulalım!',
+    isCurrent:function(){ return fgState===fillgapState; }
+  });
 }
 function renderFg(){
   var s=fgState, item=s.rounds[s.i];
@@ -2551,6 +2725,9 @@ function renderFg(){
   s.locked=false;
   renderOptionButtons('fgOpts', shuffle(item.o).map(function(o){
     return { html:o+'<small>'+(lookupWord(o)||'')+'</small>', onClick:function(b){
+      if(fgState!==s || s.introOpen) return;
+      var fillgapSession=window._activeSession;
+      if(!fillgapSession || fillgapSession.mode!=='fillgap' || fillgapSession.done) return;
       handleOptionAnswer({
         isLocked:function(){ return s.locked; },
         setLocked:function(){ s.locked=true; },
@@ -2561,12 +2738,38 @@ function renderFg(){
         onResult:function(ok){ if(ok) s.correct++; },
         delay: 800,
         after:function(){
+          if(fgState!==s || window._activeSession!==fillgapSession ||
+             !fillgapSession || fillgapSession.mode!=='fillgap' || fillgapSession.done) return;
           s.i++;
           if(s.i>=8){
             if(s.correct>=6) sfx('win');
             var reward = completeGameSession('fillgap', {correct:s.correct, total:8, perfect:s.correct===8});
             renderResultScreen({emoji: s.correct>=6?'📝':'💪', title:'Cümleler Bitti!', detail: s.correct+' / 8 doğru', correct:s.correct, total:8, xpText:'+'+(s.correct*10)+' XP', reward:reward});
-          } else renderFg();
+            if(fgState===s && window._activeSession===fillgapSession && fillgapSession.done){
+              showMascot({
+                sessionRef:fillgapSession,
+                image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
+                imageAlt:'Pip',
+                text:'Harika! Tüm boşlukları tamamladın!',
+                position:'right',
+                autoHideMs:5000
+              });
+            }
+          } else {
+            renderFg();
+            if(s.i===4 && !s.mascotEncouragementShown &&
+               fgState===s && window._activeSession===fillgapSession && !fillgapSession.done){
+              s.mascotEncouragementShown=true;
+              showMascot({
+                sessionRef:fillgapSession,
+                image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
+                imageAlt:'Pip',
+                text:'Çok iyi gidiyorsun! Devam et!',
+                position:'right',
+                autoHideMs:4000
+              });
+            }
+          }
         }
       });
     }};
@@ -2624,9 +2827,17 @@ var MAPQ = [
 var mdState=null;
 function startMapdet(){
   window._activeSession = {mode:'mapdet', done:false};
+  var mapdetSession=window._activeSession;
   var rounds = window.pickUnseen ? window.pickUnseen('mapdet', MAPQ, 5, function(m){return m.c;}) : pick(MAPQ,5);
-  mdState={rounds:rounds, i:0, clue:0, correct:0, xpTotal:0, locked:false};
+  mdState={rounds:rounds, i:0, clue:0, correct:0, xpTotal:0, locked:false, introOpen:false, mascotEncouragementShown:false};
+  var mapdetState=mdState;
   show('mapdet'); renderMd(true);
+  showBlockingMascotIntro(mapdetState,mapdetSession,{
+    mode:'mapdet',
+    containerId:'mapdet',
+    text:'Hazır mısın? Ülkeleri haritada bulalım!',
+    isCurrent:function(){ return mdState===mapdetState; }
+  });
 }
 function renderMd(newRound){
   var s=mdState, item=s.rounds[s.i];
@@ -2644,6 +2855,9 @@ function renderMd(newRound){
   s.locked=false;
   renderOptionButtons('mdOpts', opts.map(function(o){
     return { html:'<span class="flag">'+o.f+'</span>'+o.c+'<small>'+o.trn+'</small>', onClick:function(b){
+      if(mdState!==s || s.introOpen) return;
+      var mapdetSession=window._activeSession;
+      if(!mapdetSession || mapdetSession.mode!=='mapdet' || mapdetSession.done) return;
       handleOptionAnswer({
         isLocked:function(){ return s.locked; },
         setLocked:function(){ s.locked=true; },
@@ -2654,12 +2868,38 @@ function renderMd(newRound){
         },
         delay: 800,
         after:function(){
+          if(mdState!==s || window._activeSession!==mapdetSession ||
+             !mapdetSession || mapdetSession.mode!=='mapdet' || mapdetSession.done) return;
           s.i++;
           if(s.i>=5){
             if(s.correct>=4) sfx('win');
             var reward = completeGameSession('mapdet', {correct:s.correct, total:5, perfect:s.correct===5});
             renderResultScreen({emoji: s.correct>=4?'🗺️':'💪', title:'Dedektiflik Bitti!', detail: s.correct+' / 5 ülke buldun', correct:s.correct, total:5, xpText:'+'+s.xpTotal+' XP', reward:reward});
-          } else renderMd(true);
+            if(mdState===s && window._activeSession===mapdetSession && mapdetSession.done){
+              showMascot({
+                sessionRef:mapdetSession,
+                image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
+                imageAlt:'Pip',
+                text:'Muhteşem! Harita görevini tamamladın!',
+                position:'right',
+                autoHideMs:5000
+              });
+            }
+          } else {
+            renderMd(true);
+            if(s.i===3 && !s.mascotEncouragementShown &&
+               mdState===s && window._activeSession===mapdetSession && !mapdetSession.done){
+              s.mascotEncouragementShown=true;
+              showMascot({
+                sessionRef:mapdetSession,
+                image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
+                imageAlt:'Pip',
+                text:'Süpersin! Harita seni bekliyor!',
+                position:'right',
+                autoHideMs:4000
+              });
+            }
+          }
         }
       });
     }};
@@ -2682,10 +2922,16 @@ function snakeCandidates(letter, used){
 var snState=null;
 function startSnake(){
   window._activeSession = {mode:'snake', done:false};
+  var snakeSession=window._activeSession;
   var start;
   do{ start=rand(WORDS); } while(!/^[a-z]+$/.test(start[0]) || snakeCandidates(start[0].slice(-1),[start[0]]).length<1);
-  snState={cur:start, used:[start[0]], i:0, correct:0, typed:[], locked:false, checking:false};
+  snState={cur:start, used:[start[0]], i:0, correct:0, typed:[], locked:false, checking:false, introOpen:false, mascotEncouragementShown:false};
+  var snakeState=snState;
   show('snake'); snPickTarget(); renderSn(true);
+  showBlockingMascotIntro(snakeState,snakeSession,{
+    mode:'snake', containerId:'snake', text:'Kelime Yılanı görevine hazır mısın?',
+    isCurrent:function(){ return snState===snakeState; }
+  });
 }
 function snPickTarget(){
   var s=snState;
@@ -2702,7 +2948,7 @@ function snPickTarget(){
 function renderSn(newRound){
   var s=snState;
   document.getElementById('snRound').textContent=(s.i+1)+'/8';
-  if(!s.target){ finishSnake(); return; }
+  if(!s.target){ finishSnake(s,window._activeSession); return; }
   if(newRound){
     s.typed=[s.target[0][0].toUpperCase()];
     s.usedIdx=[];
@@ -2744,7 +2990,8 @@ function snRenderSlots(){
 }
 function snType(L,bi){
   var s=snState;
-  if(s.locked || s.typed.length>=s.target[0].length) return;
+  var session=window._activeSession;
+  if(s.introOpen || !session || session.mode!=='snake' || session.done || s.locked || s.typed.length>=s.target[0].length) return;
   s.typed.push(L);
   s.usedIdx.push(bi);
   sfx('tick');
@@ -2753,7 +3000,8 @@ function snType(L,bi){
 }
 function snUndo(){
   var s=snState;
-  if(s.locked || s.typed.length<=1) return;
+  var session=window._activeSession;
+  if(s.introOpen || !session || session.mode!=='snake' || session.done || s.locked || s.typed.length<=1) return;
   s.typed.pop();
   var lastIdx=s.usedIdx.pop();
   document.getElementById('snLetters').children[lastIdx].disabled=false;
@@ -2761,7 +3009,8 @@ function snUndo(){
 }
 function snClear(){
   var s=snState;
-  if(s.locked) return;
+  var session=window._activeSession;
+  if(s.introOpen || !session || session.mode!=='snake' || session.done || s.locked) return;
   s.typed=[s.target[0][0].toUpperCase()];
   s.usedIdx.forEach(function(bi){ document.getElementById('snLetters').children[bi].disabled=false; });
   s.usedIdx=[];
@@ -2769,7 +3018,9 @@ function snClear(){
 }
 function snSubmit(){
   var s=snState;
-  if(s.locked || s.typed.length<s.target[0].length) return;
+  var snakeSession=window._activeSession;
+  if(!s || s.introOpen || s.locked || s.typed.length<s.target[0].length ||
+     !snakeSession || snakeSession.mode!=='snake' || snakeSession.done) return;
   s.locked=true;
   var guess=s.typed.join('').toLowerCase();
   var fb=document.getElementById('snFeedback');
@@ -2782,47 +3033,90 @@ function snSubmit(){
     s.used.push(s.target[0]);
     s.cur=s.target;
     setTimeout(function(){
+      if(snState!==s || window._activeSession!==snakeSession || snakeSession.done) return;
       s.i++;
-      if(s.i>=8){ finishSnake(); return; }
+      if(s.i>=8){ finishSnake(s,snakeSession); return; }
       snPickTarget();
-      if(!s.target){ finishSnake(); return; }
+      if(!s.target){ finishSnake(s,snakeSession); return; }
       renderSn(true);
+      if(s.i===4 && !s.mascotEncouragementShown){
+        s.mascotEncouragementShown=true;
+        showMascot({sessionRef:snakeSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Süpersin! Yılanı büyütmeye devam!',position:'right',autoHideMs:4000});
+      }
     },1000);
   } else {
     fb.textContent='Olmadı! Doğrusu: '+s.target[0].toUpperCase()+' 🔄';
     fb.className='feedback no';
     sfx('wrong');
     setTimeout(function(){
+      if(snState!==s || window._activeSession!==snakeSession || snakeSession.done) return;
       s.i++;
-      if(s.i>=8){ finishSnake(); return; }
+      if(s.i>=8){ finishSnake(s,snakeSession); return; }
       snPickTarget();
-      if(!s.target){ finishSnake(); return; }
+      if(!s.target){ finishSnake(s,snakeSession); return; }
       renderSn(true);
+      if(s.i===4 && !s.mascotEncouragementShown){
+        s.mascotEncouragementShown=true;
+        showMascot({sessionRef:snakeSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Süpersin! Yılanı büyütmeye devam!',position:'right',autoHideMs:4000});
+      }
     },1400);
   }
 }
-function finishSnake(){
-  var s=snState;
+function finishSnake(expectedState,expectedSession){
+  var s=snState, session=window._activeSession;
+  if((expectedState && s!==expectedState) || (expectedSession && session!==expectedSession) ||
+     !s || !session || session.mode!=='snake' || session.done) return;
   if(s.correct>=6) sfx('win');
   var reward = completeGameSession('snake', {correct:s.correct, total:8, perfect:s.correct===8});
   renderResultScreen({emoji: s.correct>=6?'🐍':'💪', title:'Yılan Tamamlandı!', detail: s.correct+' / 8 doğru · Zincir: '+s.used.join(' → '), correct:s.correct, total:8, xpText:'+'+(s.correct*10)+' XP', reward:reward});
+  if(snState===s && window._activeSession===session && session.done){
+    showMascot({sessionRef:session,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Muhteşem! Kelime Yılanı tamamlandı!',position:'right',autoHideMs:5000});
+  }
 }
 
 /* ================= 10) ROKET YARIŞI ================= */
 var rkState=null;
 function startRocket(){
+  if(rkInt){ clearInterval(rkInt); rkInt=null; }
   window._activeSession = {mode:'rocket', done:false};
-  rkState={me:0, foe:0, correct:0, wrong:0, locked:false, over:false};
+  var rocketSession=window._activeSession;
+  rkState={me:0, foe:0, correct:0, wrong:0, locked:false, over:false, introOpen:false, timerStarted:false, mascotEncouragementShown:false};
+  var rocketState=rkState;
   show('rocket');
   document.getElementById('rkScore').textContent='✅ 0';
   updateRockets();
-  rkInt=setInterval(function(){
-    if(rkState.over) return;
-    rkState.foe+=0.55;
-    updateRockets();
-    if(rkState.foe>=100) endRocket(false);
-  },250);
   renderRk();
+  showBlockingMascotIntro(rocketState,rocketSession,{
+    mode:'rocket', containerId:'rocket', text:'Roket yarışına hazır mısın?',
+    isCurrent:function(){ return rkState===rocketState; },
+    onStart:startRocketRace
+  });
+}
+function startRocketRace(expectedState,expectedSession){
+  if(rkState!==expectedState || window._activeSession!==expectedSession ||
+     !expectedSession || expectedSession.mode!=='rocket' || expectedSession.done ||
+     expectedState.over || expectedState.timerStarted || rkInt) return;
+  expectedState.timerStarted=true;
+  var raceInterval=setInterval(function(){
+    if(rkState!==expectedState || window._activeSession!==expectedSession ||
+       expectedSession.done || expectedState.over){
+      clearInterval(raceInterval);
+      if(rkInt===raceInterval) rkInt=null;
+      return;
+    }
+    expectedState.foe+=0.55;
+    updateRockets();
+    showRocketEncouragement(expectedState,expectedSession);
+    if(expectedState.foe>=100) endRocket(false,expectedState,expectedSession);
+  },250);
+  rkInt=raceInterval;
+}
+function showRocketEncouragement(expectedState,expectedSession){
+  if(rkState!==expectedState || window._activeSession!==expectedSession ||
+     expectedSession.done || expectedState.over || expectedState.mascotEncouragementShown ||
+     (expectedState.me<50 && expectedState.foe<50)) return;
+  expectedState.mascotEncouragementShown=true;
+  showMascot({sessionRef:expectedSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Yarış çok yakın! Hızını koru!',position:'right',autoHideMs:4000});
 }
 function updateRockets(){
   var lane=document.querySelector('.lane');
@@ -2831,46 +3125,60 @@ function updateRockets(){
   document.getElementById('rkFoe').style.bottom=(Math.min(100,rkState.foe)/100*h)+'px';
 }
 function renderRk(){
+  var s=rkState;
   var q=makeVocabQ();
-  rkState.q=q;
+  s.q=q;
   renderQuestionContent({
     primaryId:'rkQ', tappable:true, primaryText:q.en,
     supportingId:'rkTr', supportingText:'🇹🇷 '+q.tr
   });
-  rkState.locked=false;
+  s.locked=false;
   renderOptionButtons('rkOpts', shuffle(q.opts.map(function(o,i){return {o:o,i:i};})).map(function(p){
     return { text:p.o.label, onClick:function(b){
+      var rocketSession=window._activeSession;
+      if(rkState!==s || s.introOpen || !rocketSession || rocketSession.mode!=='rocket' || rocketSession.done || s.over) return;
       handleOptionAnswer({
-        isLocked:function(){ return rkState.locked||rkState.over; },
-        setLocked:function(){ rkState.locked=true; },
+        isLocked:function(){ return s.locked||s.over; },
+        setLocked:function(){ s.locked=true; },
         btn:b, ok: p.i===q.a,
         recordWord: q.w || null,
         onResult:function(ok){
+          if(rkState!==s || window._activeSession!==rocketSession || rocketSession.done || s.over) return false;
           if(ok){
-            rkState.correct++; rkState.me+=13; addXP(10); addLearned(q.w);
-            document.getElementById('rkScore').textContent='✅ '+rkState.correct;
+            s.correct++; s.me+=13; addXP(10); addLearned(q.w);
+            document.getElementById('rkScore').textContent='✅ '+s.correct;
             updateRockets();
-            if(rkState.me>=100){ endRocket(true); return false; }
+            showRocketEncouragement(s,rocketSession);
+            if(s.me>=100){ endRocket(true,s,rocketSession); return false; }
           } else {
-            rkState.wrong=(rkState.wrong||0)+1; // altın/rozet "hatasız" bonusu için izlenir
+            s.wrong=(s.wrong||0)+1; // altın/rozet "hatasız" bonusu için izlenir
           }
         },
         delay: 500,
-        after: renderRk
+        after:function(){
+          if(rkState!==s || window._activeSession!==rocketSession || rocketSession.done || s.over) return;
+          renderRk();
+        }
       });
     }};
   }));
 }
-function endRocket(won){
-  rkState.over=true;
+function endRocket(won,expectedState,expectedSession){
+  var s=rkState, session=window._activeSession;
+  if((expectedState && s!==expectedState) || (expectedSession && session!==expectedSession) ||
+     !s || !session || session.mode!=='rocket' || session.done || s.over) return;
+  s.over=true;
   stopAllTimers();
   if(won) sfx('win');
-  var reward = completeGameSession('rocket', {correct:rkState.correct, total:rkState.correct, perfect: won && rkState.wrong===0, won:won});
+  var reward = completeGameSession('rocket', {correct:s.correct, total:s.correct, perfect: won && s.wrong===0, won:won});
   renderResultScreen({
     emoji: won?'🚀':'🛸', title: won?'Uzaya İlk Sen Çıktın!':'Rakip roket önce vardı!',
-    detail: rkState.correct+' doğru cevapla '+(won?'yarışı kazandın!':'iyi savaştın!'),
-    xpText:'+'+(rkState.correct*10)+' XP', reward:reward
+    detail: s.correct+' doğru cevapla '+(won?'yarışı kazandın!':'iyi savaştın!'),
+    xpText:'+'+(s.correct*10)+' XP', reward:reward
   });
+  if(rkState===s && window._activeSession===session && session.done){
+    showMascot({sessionRef:session,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:won?'Muhteşem! Roket yarışını kazandın!':'Harika mücadele! Bir sonraki yarış senin!',position:'right',autoHideMs:5000});
+  }
 }
 
 /* ================= 11) ÇAPRAZ BULMACA ================= */
@@ -2960,11 +3268,17 @@ function buildCrosswordSession(count){
 }
 function startCrossword(){
   window._activeSession = {mode:'crossword', done:false};
+  var crosswordSession=window._activeSession;
   var puzzles = buildCrosswordSession(3);
   var totalSlots = puzzles.reduce(function(sum,p){return sum+p.slots.length;},0);
-  cwState={pi:0, done:[], active:-1, fill:{}, correctWords:0, puzzles:puzzles, totalSlots:totalSlots};
+  cwState={pi:0, done:[], active:-1, fill:{}, correctWords:0, puzzles:puzzles, totalSlots:totalSlots, introOpen:false, mascotEncouragementShown:false};
+  var crosswordState=cwState;
   cwLoad();
   show('crossword');
+  showBlockingMascotIntro(crosswordState,crosswordSession,{
+    mode:'crossword', containerId:'crossword', text:'Çapraz bulmacayı çözmeye hazır mısın?',
+    isCurrent:function(){ return cwState===crosswordState; }
+  });
 }
 function cwLoad(){
   var s=cwState, puz=s.puzzles[s.pi];
@@ -2993,7 +3307,8 @@ function renderCw(){
     b.className='cw-clue'+(s.done.indexOf(si)>=0?' done':si===s.active?' sel':'');
     b.textContent=(sl.dir==='A'?'➡️ ':'⬇️ ')+sl.tr+' ('+sl.word.length+')';
     b.onclick=function(e){ e.stopPropagation();
-      if(s.done.indexOf(si)>=0) return;
+      var session=window._activeSession;
+      if(cwState!==s || s.introOpen || !session || session.mode!=='crossword' || session.done || s.done.indexOf(si)>=0) return;
       s.active=si; sfx('tick'); renderCw(); };
     clues.appendChild(b);
   });
@@ -3036,7 +3351,8 @@ function renderCw(){
 }
 function cwType(L){
   var s=cwState, puz=s.puzzles[s.pi];
-  if(s.active<0) return;
+  var crosswordSession=window._activeSession;
+  if(s.introOpen || !crosswordSession || crosswordSession.mode!=='crossword' || crosswordSession.done || s.active<0) return;
   var sl=puz.slots[s.active];
   var lockedCells={};
   s.done.forEach(function(si){
@@ -3066,13 +3382,22 @@ function cwType(L){
       s.correctWords++;
       fb.textContent='🎉 '+sl.word+' doğru! +15 XP';
       fb.className='feedback ok';
+      if(s.correctWords>=Math.ceil(s.totalSlots/2) && !s.mascotEncouragementShown &&
+         cwState===s && window._activeSession===crosswordSession && !crosswordSession.done){
+        s.mascotEncouragementShown=true;
+        showMascot({sessionRef:crosswordSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Süpersin! Bulmacanın yarısını çözdün!',position:'right',autoHideMs:4000});
+      }
       if(s.done.length===puz.slots.length){
         sfx('win');
         setTimeout(function(){
+          if(cwState!==s || window._activeSession!==crosswordSession || crosswordSession.done) return;
           s.pi++;
           if(s.pi>=s.puzzles.length){
             var reward = completeGameSession('crossword', {correct:s.correctWords, total:s.totalSlots, perfect:s.correctWords===s.totalSlots});
             renderResultScreen({emoji:'🧩', title:'Tüm Bulmacalar Çözüldü!', detail: s.correctWords+' kelime yerleştirdin', correct:s.correctWords, total:s.totalSlots, xpText:'+'+(s.correctWords*15)+' XP', reward:reward});
+            if(cwState===s && window._activeSession===crosswordSession && crosswordSession.done){
+              showMascot({sessionRef:crosswordSession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Harika! Çapraz bulmacayı tamamladın!',position:'right',autoHideMs:5000});
+            }
           } else { s.bankCache={}; cwLoad(); }
         },1000);
       }
@@ -3080,14 +3405,19 @@ function cwType(L){
       sfx('wrong');
       fb.textContent='Olmadı, tekrar dene! 🔄';
       fb.className='feedback no';
-      setTimeout(function(){ cwClearSlot(); fb.textContent=''; },800);
+      setTimeout(function(){
+        if(cwState!==s || window._activeSession!==crosswordSession || crosswordSession.done) return;
+        cwClearSlot(s,crosswordSession); fb.textContent='';
+      },800);
     }
   }
   renderCw();
 }
-function cwClearSlot(){
+function cwClearSlot(expectedState,expectedSession){
   var s=cwState, puz=s.puzzles[s.pi];
-  if(s.active<0) return;
+  var session=window._activeSession;
+  if((expectedState && s!==expectedState) || (expectedSession && session!==expectedSession) ||
+     !session || session.mode!=='crossword' || session.done || s.introOpen || s.active<0) return;
   cwCells(puz.slots[s.active]).forEach(function(rc){ delete s.fill[cwKey(rc[0],rc[1])]; });
   renderCw();
 }
@@ -3158,10 +3488,12 @@ var STORIES = [
 var stState=null, stIndex=0;
 function startStory(){
   window._activeSession = {mode:'story', done:false};
+  var storySession=window._activeSession;
   var nextStory = window.pickUnseen
     ? window.pickUnseen('story', STORIES, 1, function(st){return st.title;})[0]
     : STORIES[stIndex%STORIES.length];
-  stState={story:nextStory||STORIES[0], qi:0, correct:0, locked:false, results:[]};
+  stState={story:nextStory||STORIES[0], qi:0, correct:0, locked:false, results:[], introOpen:false, mascotEncouragementShown:false};
+  var storyState=stState;
   stIndex++;
   document.getElementById('stTitle').textContent=stState.story.title;
   makeTappable(stState.story.text, document.getElementById('stText'));
@@ -3171,14 +3503,34 @@ function startStory(){
   document.getElementById('stQuizPart').classList.add('hidden');
   document.getElementById('stSubtitle').textContent = 'Hikayeyi oku · kelimelere dokunarak çevir';
   show('story');
+  showBlockingMascotIntro(storyState,storySession,{
+    mode:'story',
+    containerId:'story',
+    text:'Yeni bir hikâyeye hazır mısın?',
+    isCurrent:function(){ return stState===storyState; }
+  });
 }
 function stToggleTr(){ document.getElementById('stTr').classList.toggle('hidden'); }
 function stSpeakStory(){ speak(stState.story.text); }
 function stStartQuestions(){
+  var s=stState;
+  var storySession=window._activeSession;
+  if(!s || s.introOpen || !storySession || storySession.mode!=='story' || storySession.done) return;
   document.getElementById('stReadPart').classList.add('hidden');
   document.getElementById('stQuizPart').classList.remove('hidden');
   document.getElementById('stSubtitle').textContent = 'Hikaye sorusu';
   renderStQ();
+  if(!s.mascotEncouragementShown && stState===s && window._activeSession===storySession){
+    s.mascotEncouragementShown=true;
+    showMascot({
+      sessionRef:storySession,
+      image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
+      imageAlt:'Pip',
+      text:'Hikâyeyi çok iyi takip ettin! Şimdi sorular zamanı!',
+      position:'right',
+      autoHideMs:4000
+    });
+  }
 }
 function renderStQ(){
   var s=stState, q=s.story.qs[s.qi];
@@ -3195,6 +3547,9 @@ function renderStQ(){
   s.locked=false;
   renderOptionButtons('stOpts', shuffle(q.opts.map(function(o,i){return {o:o,i:i};})).map(function(p){
     return { text:p.o, onClick:function(b){
+      if(stState!==s || s.introOpen) return;
+      var storySession=window._activeSession;
+      if(!storySession || storySession.mode!=='story' || storySession.done) return;
       handleOptionAnswer({
         isLocked:function(){ return s.locked; },
         setLocked:function(){ s.locked=true; },
@@ -3203,11 +3558,23 @@ function renderStQ(){
         onResult:function(ok){ s.results[s.qi]=ok; if(ok) s.correct++; },
         delay: 700,
         after:function(){
+          if(stState!==s || window._activeSession!==storySession ||
+             !storySession || storySession.mode!=='story' || storySession.done) return;
           s.qi++;
           if(s.qi>=s.story.qs.length){
             if(s.correct===3) sfx('win');
             var reward = completeGameSession('story', {correct:s.correct, total:3, perfect:s.correct===3});
             renderResultScreen({emoji: s.correct>=2?'📖':'💪', title:'Hikaye Bitti!', detail: s.correct+' / 3 doğru cevap', correct:s.correct, total:3, xpText:'+'+(s.correct*15)+' XP', reward:reward});
+            if(stState===s && window._activeSession===storySession && storySession.done){
+              showMascot({
+                sessionRef:storySession,
+                image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
+                imageAlt:'Pip',
+                text:'Harika! Hikâyeyi başarıyla tamamladın!',
+                position:'right',
+                autoHideMs:5000
+              });
+            }
           } else renderStQ();
         }
       });
@@ -3233,9 +3600,15 @@ function pickScrambleWord(){
 }
 function startScramble(){
   window._activeSession = {mode:'scramble', done:false};
-  scState={round:1, correct:0};
+  var scrambleSession=window._activeSession;
+  scState={round:1, correct:0, introOpen:false, mascotEncouragementShown:false};
+  var scrambleState=scState;
   scNext();
   show('scramble');
+  showBlockingMascotIntro(scrambleState,scrambleSession,{
+    mode:'scramble', containerId:'scramble', text:'Karışık harfleri çözmeye hazır mısın?',
+    isCurrent:function(){ return scState===scrambleState; }
+  });
 }
 function scNext(){
   var p=pickScrambleWord();
@@ -3258,39 +3631,57 @@ function renderScramble(){
   scState.letters.forEach(function(ch,i){
     var b=document.createElement('button'); b.className='letter'; b.textContent=ch;
     b.disabled=scState.picked.indexOf(i)>=0;
-    b.onclick=function(e){ e.stopPropagation(); scState.picked.push(i); checkScramble(); };
+    b.onclick=function(e){
+      e.stopPropagation();
+      var session=window._activeSession;
+      if(scState.introOpen || !session || session.mode!=='scramble' || session.done) return;
+      scState.picked.push(i); checkScramble();
+    };
     box.appendChild(b);
   });
 }
 function checkScramble(){
+  var s=scState, scrambleSession=window._activeSession;
+  if(!s || s.introOpen || !scrambleSession || scrambleSession.mode!=='scramble' || scrambleSession.done) return;
   renderScramble();
-  if(scState.picked.length===scState.word.length){
-    var guess=scState.picked.map(function(i){return scState.letters[i];}).join('');
+  if(s.picked.length===s.word.length){
+    var guess=s.picked.map(function(i){return s.letters[i];}).join('');
     var fb=document.getElementById('scFeedback');
-    if(guess===scState.word){
-      fb.textContent='🎉 Doğru! '+scState.word+' · +15 XP';
+    if(guess===s.word){
+      fb.textContent='🎉 Doğru! '+s.word+' · +15 XP';
       fb.className='feedback ok';
-      if(window.recordWordResult) window.recordWordResult(scState.en, true);
-      sfx('correct'); addXP(15); addLearned(scState.en); scState.correct++;
+      if(window.recordWordResult) window.recordWordResult(s.en, true);
+      sfx('correct'); addXP(15); addLearned(s.en); s.correct++;
       setTimeout(function(){
-        scState.round++;
-        if(scState.round>5){
+        if(scState!==s || window._activeSession!==scrambleSession || scrambleSession.done) return;
+        s.round++;
+        if(s.round>5){
           sfx('win');
-          var reward = completeGameSession('scramble', {correct:scState.correct, total:5, perfect:scState.correct===5});
-          renderResultScreen({emoji:'🪐', title:'Bulmacalar Bitti!', detail: scState.correct+' / 5 kelime çözdün', correct:scState.correct, total:5, xpText:'+'+(scState.correct*15)+' XP', reward:reward});
-        } else scNext();
+          var reward = completeGameSession('scramble', {correct:s.correct, total:5, perfect:s.correct===5});
+          renderResultScreen({emoji:'🪐', title:'Bulmacalar Bitti!', detail: s.correct+' / 5 kelime çözdün', correct:s.correct, total:5, xpText:'+'+(s.correct*15)+' XP', reward:reward});
+          if(scState===s && window._activeSession===scrambleSession && scrambleSession.done){
+            showMascot({sessionRef:scrambleSession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Mükemmel! Tüm kelimeleri çözdün!',position:'right',autoHideMs:5000});
+          }
+        } else {
+          scNext();
+          if(s.round===4 && !s.mascotEncouragementShown){
+            s.mascotEncouragementShown=true;
+            showMascot({sessionRef:scrambleSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Harika gidiyorsun! Kelimeyi bulmaya devam!',position:'right',autoHideMs:4000});
+          }
+        }
       },1300);
     } else {
       fb.textContent='Olmadı, tekrar dene! 🔄';
       fb.className='feedback no';
-      if(window.recordWordResult) window.recordWordResult(scState.en, false);
+      if(window.recordWordResult) window.recordWordResult(s.en, false);
       sfx('wrong');
-      setTimeout(scReset,900);
+      setTimeout(function(){ scReset(s,scrambleSession); },900);
     }
   }
 }
-function scReset(){
-  scState.picked=[];
+function scReset(expectedState,expectedSession){
+  if(scState!==expectedState || window._activeSession!==expectedSession || !expectedSession || expectedSession.mode!=='scramble' || expectedSession.done) return;
+  expectedState.picked=[];
   var fb=document.getElementById('scFeedback');
   fb.textContent=''; fb.className='feedback';
   renderScramble();
@@ -3307,9 +3698,15 @@ var pnState=null;
 function playTone(note){ beep(FREQ[note],0,.5,'sine',.25); }
 function startPiano(){
   window._activeSession = {mode:'piano', done:false};
-  pnState={round:1, correct:0};
+  var pianoSession=window._activeSession;
+  pnState={round:1, correct:0, introOpen:false, mascotEncouragementShown:false};
+  var pianoState=pnState;
   pnNext();
   show('piano');
+  showBlockingMascotIntro(pianoState,pianoSession,{
+    mode:'piano', containerId:'piano', text:'Nota Kelimeleri görevine hazır mısın?',
+    isCurrent:function(){ return pnState===pianoState; }
+  });
 }
 function pnNext(){
   var p = window.pickUnseen ? window.pickUnseen('piano', NOTE_WORDS, 1, function(x){return x.w;})[0] : rand(NOTE_WORDS);
@@ -3330,37 +3727,52 @@ function renderPnSlots(){
   });
 }
 function playKey(note){
+  var s=pnState, pianoSession=window._activeSession;
+  if(!s || !s.word || s.introOpen || !pianoSession || pianoSession.mode!=='piano' || pianoSession.done) return;
   playTone(note);
-  if(!pnState||!pnState.word) return;
   var fb=document.getElementById('pnFeedback');
-  if(note===pnState.word[pnState.pos]){
-    pnState.pos++;
+  if(note===s.word[s.pos]){
+    s.pos++;
     renderPnSlots();
     fb.textContent=''; fb.className='feedback';
-    if(pnState.pos===pnState.word.length){
-      fb.textContent='🎵 Süper! "'+pnState.word+'" kelimesini çaldın! +20 XP';
+    if(s.pos===s.word.length){
+      fb.textContent='🎵 Süper! "'+s.word+'" kelimesini çaldın! +20 XP';
       fb.className='feedback ok';
-      if(window.recordWordResult) window.recordWordResult(pnState.word, true);
-      addXP(20); addLearned(pnState.word); pnState.correct++;
-      var wordNotes=pnState.word.split('');
-      wordNotes.forEach(function(n,i){ setTimeout(function(){playTone(n);},500+i*350); });
+      if(window.recordWordResult) window.recordWordResult(s.word, true);
+      addXP(20); addLearned(s.word); s.correct++;
+      var wordNotes=s.word.split('');
+      wordNotes.forEach(function(n,i){ setTimeout(function(){
+        if(pnState===s && window._activeSession===pianoSession && !pianoSession.done) playTone(n);
+      },500+i*350); });
       var delay=500+wordNotes.length*350+900;
       setTimeout(function(){
-        pnState.round++;
-        if(pnState.round>3){
+        if(pnState!==s || window._activeSession!==pianoSession || pianoSession.done) return;
+        s.round++;
+        if(s.round>3){
           sfx('win');
-          var reward = completeGameSession('piano', {correct:pnState.correct, total:3, perfect:pnState.correct===3});
-          renderResultScreen({emoji:'🎹', title:'Konser Bitti!', detail: pnState.correct+' kelimeyi notalarla çaldın', correct:pnState.correct, total:3, xpText:'+'+(pnState.correct*20)+' XP', reward:reward});
-        } else pnNext();
+          var reward = completeGameSession('piano', {correct:s.correct, total:3, perfect:s.correct===3});
+          renderResultScreen({emoji:'🎹', title:'Konser Bitti!', detail: s.correct+' kelimeyi notalarla çaldın', correct:s.correct, total:3, xpText:'+'+(s.correct*20)+' XP', reward:reward});
+          if(pnState===s && window._activeSession===pianoSession && pianoSession.done){
+            showMascot({sessionRef:pianoSession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Muhteşem! Tüm nota kelimelerini tamamladın!',position:'right',autoHideMs:5000});
+          }
+        } else {
+          pnNext();
+          if(s.round===3 && !s.mascotEncouragementShown){
+            s.mascotEncouragementShown=true;
+            showMascot({sessionRef:pianoSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Harika çalıyorsun! Son kelimeye geçelim!',position:'right',autoHideMs:4000});
+          }
+        }
       },delay);
     }
   } else {
-    fb.textContent='Yanlış nota! Sıradaki harf: '+pnState.word[pnState.pos];
+    fb.textContent='Yanlış nota! Sıradaki harf: '+s.word[s.pos];
     fb.className='feedback no';
     sfx('wrong');
   }
 }
 function pnReset(){
+  var session=window._activeSession;
+  if(!pnState || pnState.introOpen || !session || session.mode!=='piano' || session.done) return;
   pnState.pos=0;
   var fb=document.getElementById('pnFeedback');
   fb.textContent=''; fb.className='feedback';
@@ -3372,6 +3784,7 @@ var rvState = null;
 var RV_FORMATS = ['en2tr','tr2en','fillgap'];
 function startReview(){
   window._activeSession = {mode:'review', done:false};
+  var reviewSession=window._activeSession;
   var vocabByEn = window.VOCAB_BY_EN || {};
   var words = window.getReviewWords ? window.getReviewWords(vocabByEn, 10) : [];
   show('reviewWords');
@@ -3383,8 +3796,15 @@ function startReview(){
   }
   document.getElementById('rvPlay').classList.remove('hidden');
   document.getElementById('rvEmptyState').classList.add('hidden');
-  rvState = {rounds: words, i:0, correct:0, locked:false};
+  rvState = {rounds: words, i:0, correct:0, locked:false, introOpen:false, mascotEncouragementShown:false};
+  var reviewState=rvState;
   renderRv();
+  showBlockingMascotIntro(reviewState,reviewSession,{
+    mode:'review',
+    containerId:'reviewWords',
+    text:'Hatırlamaya hazır mısın? Zor kelimeleri birlikte yenelim!',
+    isCurrent:function(){ return rvState===reviewState; }
+  });
 }
 function rvBuildOptions(correctAnswer, field, item){
   var pool = window.VOCAB || [];
@@ -3417,6 +3837,9 @@ function renderRv(){
 }
 function rvAnswer(btn, ok, item){
   var s = rvState;
+  if(!s || s.introOpen) return;
+  var reviewSession=window._activeSession;
+  if(!reviewSession || reviewSession.mode!=='review' || reviewSession.done) return;
   handleOptionAnswer({
     isLocked:function(){ return s.locked; },
     setLocked:function(){ s.locked = true; },
@@ -3427,13 +3850,39 @@ function rvAnswer(btn, ok, item){
     onResult:function(ok){ if(ok) s.correct++; },
     delay: 900,
     after:function(){
+      if(rvState!==s || window._activeSession!==reviewSession ||
+         !reviewSession || reviewSession.mode!=='review' || reviewSession.done) return;
       s.i++;
       if(s.i >= s.rounds.length){
         var passMark = Math.ceil(s.rounds.length*0.7);
         if(s.correct >= passMark) sfx('win');
         var reward = completeGameSession('review', {correct:s.correct, total:s.rounds.length, perfect:s.correct===s.rounds.length});
         renderResultScreen({emoji: s.correct>=passMark?'🧠':'💪', title:'Tekrar Tamamlandı!', detail: s.correct+' / '+s.rounds.length+' doğru', correct:s.correct, total:s.rounds.length, xpText:'+'+(s.correct*10)+' XP', reward:reward});
-      } else renderRv();
+        if(rvState===s && window._activeSession===reviewSession && reviewSession.done){
+          showMascot({
+            sessionRef:reviewSession,
+            image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
+            imageAlt:'Pip',
+            text:'Muhteşem! Kelimelerini güçlendirdin!',
+            position:'right',
+            autoHideMs:5000
+          });
+        }
+      } else {
+        renderRv();
+        if(s.i===Math.ceil(s.rounds.length/2) && !s.mascotEncouragementShown &&
+           rvState===s && window._activeSession===reviewSession && !reviewSession.done){
+          s.mascotEncouragementShown=true;
+          showMascot({
+            sessionRef:reviewSession,
+            image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
+            imageAlt:'Pip',
+            text:'Harika hatırlıyorsun! Devam et!',
+            position:'right',
+            autoHideMs:4000
+          });
+        }
+      }
     }
   });
 }
@@ -3489,6 +3938,7 @@ function startSentenceBuilder(){
      zamanlayıcılarını, sbState referansı değiştirilmeden önce temizle. */
   sbClearTimers();
   window._activeSession = {mode:'sentence_builder', done:false};
+  var sentenceBuilderSession=window._activeSession;
   var level = window.getModeLevel ? window.getModeLevel('sentence_builder') : 1;
   var cap = window.LEVEL_CAP || 30;
   if(typeof level !== 'number' || level < 1 || level > cap) level = 1;
@@ -3511,10 +3961,19 @@ function startSentenceBuilder(){
     feedbackState: 'idle', /* 'idle' | 'correct' | 'wrong' */
     placementTokenId: null,
     returnTokenId: null,
+    introOpen: false,
+    mascotEncouragementShown: false,
     timers: []
   };
+  var sentenceBuilderState=sbState;
   show('sentenceBuilder');
   sbInitQuestion(0);
+  showBlockingMascotIntro(sentenceBuilderState,sentenceBuilderSession,{
+    mode:'sentence_builder',
+    containerId:'sentenceBuilder',
+    text:'Cümle kurmaya hazır mısın?',
+    isCurrent:function(){ return sbState===sentenceBuilderState; }
+  });
 }
 /* Belirli bir gelişim-cümlesi indeksini yükler: yeni token kimlikleri +
    yeni sabit karıştırma oluşturur, seçim/kilit/geri-bildirim durumunu
@@ -3648,7 +4107,7 @@ function sbRenderAnswer(){
    butonu YOK. */
 function sbSelectToken(tokenId){
   var s = sbState;
-  if(!s || s.isResolving) return;
+  if(!s || s.isResolving || s.introOpen) return;
   if(s.selected.indexOf(tokenId) >= 0) return;
   s.selected.push(tokenId);
   s.placementTokenId = tokenId;
@@ -3661,7 +4120,7 @@ function sbSelectToken(tokenId){
    orijinal konumuna (s.shuffled sırasına göre) geri döner. */
 function sbDeselectToken(tokenId){
   var s = sbState;
-  if(!s || s.isResolving) return;
+  if(!s || s.isResolving || s.introOpen) return;
   var idx = s.selected.indexOf(tokenId);
   if(idx < 0) return;
   s.selected.splice(idx, 1);
@@ -3761,6 +4220,8 @@ function sbHandleCorrect(){
 }
 function sbAdvanceQuestion(){
   var s = sbState;
+  var session = window._activeSession;
+  if(!s || !session || session.mode!=='sentence_builder' || session.done) return;
   document.getElementById('sbAnswer').classList.remove('sb-is-correct');
   var total = s.sessionSentences.length;
   var nextIndex = s.questionIndex + 1;
@@ -3769,6 +4230,18 @@ function sbAdvanceQuestion(){
     return;
   }
   sbInitQuestion(nextIndex);
+  if(nextIndex===Math.ceil(total/2) && !s.mascotEncouragementShown &&
+     sbState===s && window._activeSession===session && !session.done){
+    s.mascotEncouragementShown=true;
+    showMascot({
+      sessionRef:session,
+      image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
+      imageAlt:'Pip',
+      text:'Süpersin! Cümlelerin giderek güçleniyor!',
+      position:'right',
+      autoHideMs:4000
+    });
+  }
 }
 function sbCompleteSession(s){
   var session = window._activeSession;
@@ -3793,6 +4266,16 @@ function sbCompleteSession(s){
     xpText:'+'+earnedXp+' XP',
     reward:reward
   });
+  if(sbState===s && window._activeSession===session && session.done){
+    showMascot({
+      sessionRef:session,
+      image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
+      imageAlt:'Pip',
+      text:'Mükemmel! Cümleleri başarıyla tamamladın!',
+      position:'right',
+      autoHideMs:5000
+    });
+  }
 }
 
 bootApp();
