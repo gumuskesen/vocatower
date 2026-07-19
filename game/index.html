@@ -665,11 +665,12 @@
         <div class="qcard">
           <div class="q-en" id="quizQEn"></div>
           <div class="q-tr" id="quizQTr"></div>
-          <div class="tap-tip">👆 İngilizce kelimelere dokun → Türkçesini gör</div>
+          <div class="tap-tip" id="quizTapTip">👆 İngilizce kelimelere dokun → Türkçesini gör</div>
         </div>
       </div>
       <div class="opts" id="quizOpts"></div>
     </div>
+    <div id="quizBuildingsLive" class="sr-only" aria-live="polite" aria-atomic="true"></div>
   </div>
 
   <!-- ============ KELİME BULMACASI ============ -->
@@ -1326,7 +1327,7 @@ function handleOptionAnswer(cfg){
   }
   var skip = cfg.onResult ? (cfg.onResult(cfg.ok)===false) : false;
   if(skip) return;
-  setTimeout(cfg.after, cfg.delay);
+  return setTimeout(cfg.after, cfg.delay);
 }
 /* Shared question-panel content renderer (Question Panel audit,
    refactor #3). Several modes independently repeated: set an optional
@@ -1771,10 +1772,17 @@ function makeVocabQ(){
     opts: four.map(function(w){return {label:w[0]};}), a:0, w:en };
 }
 
-var qState=null, timerInt=null, rkInt=null;
+var qState=null, timerInt=null, rkInt=null, quizAdvanceTimeout=null;
+function clearQuizAdvanceTimeout(){
+  if(quizAdvanceTimeout){
+    clearTimeout(quizAdvanceTimeout);
+    quizAdvanceTimeout=null;
+  }
+}
 function stopAllTimers(){
   if(timerInt){clearInterval(timerInt);timerInt=null;}
   if(rkInt){clearInterval(rkInt);rkInt=null;}
+  clearQuizAdvanceTimeout();
   /* Sentence Builder Third Safe Increment: aynı merkezi "moddan çıkarken
      zamanlayıcıları temizle" noktasına eklenir (bkz. yukarıdaki iki satır) —
      gecikmeli geri bildirim/ilerleme callback'lerinin kapatılmış/yeniden
@@ -1791,6 +1799,7 @@ function buildQuizList(cat,count){
   return shuffle(list);
 }
 function startQuiz(cat){
+  clearQuizAdvanceTimeout();
   window._activeSession = {mode:'quiz', done:false};
   var timed = cat==='countries';
   qState={list:buildQuizList(cat,timed?30:8), i:0, correct:0, answered:0, timed:timed, time:60, locked:false, results:[], cat:cat};
@@ -1798,6 +1807,7 @@ function startQuiz(cat){
   document.getElementById('quizTimer').classList.toggle('hidden', !timed);
   document.getElementById('quizScore').classList.toggle('hidden', !timed);
   document.getElementById('quizDots').classList.toggle('hidden', timed);
+  document.getElementById('quizTapTip').classList.toggle('hidden', cat==='buildings');
   show('quiz');
   if(timed){
     var tEl=document.getElementById('quizTimer');
@@ -1827,33 +1837,85 @@ function renderQ(){
     supportingId:'quizQTr', supportingText:'🇹🇷 '+item.tr
   });
   s.locked=false;
-  renderOptionButtons('quizOpts', shuffle(item.opts.map(function(o,i){return {o:o,i:i};})).map(function(p){
-    return { html:p.o.label, onClick:function(b){ qAnswer(b, p.i===item.a, item); } };
+  if(s.cat!=='buildings'){
+    renderOptionButtons('quizOpts', shuffle(item.opts.map(function(o,i){return {o:o,i:i};})).map(function(p){
+      return { html:p.o.label, onClick:function(b){ qAnswer(b, p.i===item.a, item); } };
+    }));
+    return;
+  }
+  document.getElementById('quizBuildingsLive').textContent='';
+  var optionPairs=shuffle(item.opts.map(function(o,i){return {o:o,i:i};}));
+  var correctButton=null;
+  renderOptionButtons('quizOpts', optionPairs.map(function(p){
+    return { html:p.o.label, onClick:function(b){ qAnswer(b, p.i===item.a, item, correctButton); } };
   }));
+  var correctPosition=optionPairs.findIndex(function(p){return p.i===item.a;});
+  correctButton=document.getElementById('quizOpts').children[correctPosition] || null;
 }
-function qAnswer(btn, ok, item){
-  handleOptionAnswer({
-    isLocked:function(){ return qState.locked; },
-    setLocked:function(){ qState.locked=true; },
+function qAnswer(btn, ok, item, correctButton){
+  if(!qState || qState.cat!=='buildings'){
+    handleOptionAnswer({
+      isLocked:function(){ return qState.locked; },
+      setLocked:function(){ qState.locked=true; },
+      btn:btn, ok:ok,
+      recordWord: item.w || null,
+      xp: 10,
+      learnWord: item.w || null,
+      onResult:function(ok){
+        qState.results[qState.i]=ok; qState.answered++;
+        if(ok){ qState.correct++; if(qState.timed) document.getElementById('quizScore').textContent='✅ '+qState.correct; }
+      },
+      delay: 700,
+      after:function(){
+        qState.i++;
+        if(qState.i>=qState.list.length) finishQuiz();
+        else renderQ();
+      }
+    });
+    return;
+  }
+  var answeredState=qState;
+  var answeredSession=window._activeSession;
+  if(answeredState.locked) return;
+  clearQuizAdvanceTimeout();
+  var pendingTimeout=handleOptionAnswer({
+    isLocked:function(){ return answeredState.locked; },
+    setLocked:function(){ answeredState.locked=true; },
     btn:btn, ok:ok,
     recordWord: item.w || null,
     xp: 10,
     learnWord: item.w || null,
     onResult:function(ok){
-      qState.results[qState.i]=ok; qState.answered++;
-      if(ok){ qState.correct++; if(qState.timed) document.getElementById('quizScore').textContent='✅ '+qState.correct; }
+      answeredState.results[answeredState.i]=ok; answeredState.answered++;
+      if(ok){ answeredState.correct++; if(answeredState.timed) document.getElementById('quizScore').textContent='✅ '+answeredState.correct; }
+      else {
+        if(correctButton) correctButton.classList.add('correct');
+        document.getElementById('quizBuildingsLive').textContent='Yanlış. Doğru cevap gösteriliyor.';
+      }
     },
     delay: 700,
     after:function(){
-      qState.i++;
-      if(qState.i>=qState.list.length) finishQuiz();
+      quizAdvanceTimeout=null;
+      if(qState!==answeredState || window._activeSession!==answeredSession ||
+         !answeredSession || answeredSession.mode!=='quiz' || answeredSession.done ||
+         answeredState.cat!=='buildings') return;
+      answeredState.i++;
+      if(answeredState.i>=answeredState.list.length) finishQuiz(answeredState, answeredSession);
       else renderQ();
     }
   });
+  quizAdvanceTimeout=pendingTimeout || null;
 }
-function finishQuiz(){
-  stopAllTimers();
+function finishQuiz(expectedState, expectedSession){
   var s=qState;
+  if(!s) return;
+  if(s.cat==='buildings'){
+    var session=window._activeSession;
+    if((expectedState && s!==expectedState) ||
+       (expectedSession && session!==expectedSession) ||
+       !session || session.mode!=='quiz' || session.done) return;
+  }
+  stopAllTimers();
   var total = s.timed ? s.answered : s.list.length;
   var good = s.correct >= total*0.7 && s.correct>0;
   if(good) sfx('win');
