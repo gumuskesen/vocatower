@@ -949,7 +949,7 @@
     <div class="game-head">
       <button class="back" onclick="goHome()" aria-label="Ana menüye dön">←</button>
       <div class="game-head-text">
-        <div class="game-title">🏗️ Sentence Builder</div>
+        <div class="game-title">🏗️ Cümle Mimarı</div>
         <div class="game-subtitle">Kelimelere dokunarak cümleyi sırayla kur</div>
       </div>
       <div class="score-pill" id="sbRound">1/3</div>
@@ -1359,17 +1359,33 @@ function beep(freq,start,dur,type,vol){
     o.start(t); o.stop(t+dur);
   }catch(e){}
 }
+var SFX_FILES={
+  correct:{src:'../assets/audio/correct.mp3',volume:.22},
+  wrong:{src:'../assets/audio/wrong.mp3',volume:.18},
+  'gentle-wrong':{src:'../assets/audio/wrong.mp3',volume:.14},
+  win:{src:'../assets/audio/win.mp3',volume:.2}
+};
+var sfxPlayers={};
+function playFileSfx(kind){
+  var cfg=SFX_FILES[kind];
+  if(!cfg) return;
+  try{
+    var player=sfxPlayers[kind];
+    if(!player){
+      player=new Audio(cfg.src);
+      player.preload='auto';
+      player.volume=cfg.volume;
+      sfxPlayers[kind]=player;
+    }
+    player.pause();
+    player.currentTime=0;
+    var playback=player.play();
+    if(playback && playback.catch) playback.catch(function(){});
+  }catch(e){}
+}
 function sfx(kind){
-  if(kind==='correct'){ beep(659,0,.15,'sine',.22); beep(880,.12,.25,'sine',.22); }
-  else if(kind==='wrong'){ beep(196,0,.28,'triangle',.18); }
-  else if(kind==='win'){ [523,659,784,1047].forEach(function(f,i){beep(f,i*.16,.3,'sine',.2);}); }
-  else if(kind==='tick'){ beep(1200,0,.05,'sine',.08); }
-  /* Sentence Builder Third Safe Increment: yumuşak, çocuk-dostu iki
-     parçalı "dı-dıııt" ipucu — mevcut 'wrong' (üçgen dalga, sert)
-     sesinden bilinçli olarak farklı: sine dalga, düşük ses seviyesi
-     (.14), kısa toplam süre (~0.25s), düşen perde. Yalnızca Sentence
-     Builder çağırır; diğer modların 'wrong' sesini DEĞİŞTİRMEZ. */
-  else if(kind==='gentle-wrong'){ beep(330,0,.09,'sine',.14); beep(260,.1,.16,'sine',.14); }
+  if(SFX_FILES[kind]){ playFileSfx(kind); return; }
+  if(kind==='tick'){ beep(1200,0,.05,'sine',.08); }
 }
 function speak(text){
   try{
@@ -1540,7 +1556,7 @@ var MODES = [
  {key:'scramble', cls:'p', e:'🪐', tag:'BULMACA', n:'Kelime Bulmacası', d:'Karışık harflerden kelime kur', fn:startScramble},
  {key:'piano', cls:'a', e:'🎹', tag:'NOTA OYUNU', n:'Nota Kelimeleri', d:'Piyanoyla kelime çal!', fn:startPiano},
  {key:'review', cls:'b', e:'🧠', tag:'TEKRAR', n:'Kelime Tekrarı', d:'Zorlandığın kelimeleri tekrar et', fn:startReview},
- {key:'sentence_builder', cls:'g', e:'🏗️', tag:'CÜMLE KURMA', n:'Sentence Builder', d:'Kelimeleri sırayla dizerek cümle kur', fn:startSentenceBuilder},
+ {key:'sentence_builder', cls:'g', e:'🏗️', tag:'CÜMLE KURMA', n:'Cümle Mimarı', d:'Kelimeleri sırayla dizerek cümle kur', fn:startSentenceBuilder},
 ];
 /* Mod anahtarı -> üretim ikon dosyası eşlemesi. Dosya adları anahtarlarla
    birebir örtüşmediği için (ör. 'fillgap' -> mode_fill_blank.png,
@@ -3460,6 +3476,7 @@ function sbCompleteSession(s){
   var correct = total;
   var earnedXp = total * 10;
   sbClearTimers();
+  sfx('win');
   var reward = completeGameSession('sentence_builder', {
     correct: correct,
     total: total,
@@ -3467,7 +3484,7 @@ function sbCompleteSession(s){
   });
   renderResultScreen({
     emoji:'🏗️',
-    title:'Cümle Kurma Tamamlandı!',
+    title:'Cümle Mimarı Tamamlandı!',
     detail:correct+' / '+total+' doğru cümle',
     correct:correct,
     total:total,
