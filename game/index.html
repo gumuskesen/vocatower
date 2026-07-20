@@ -249,16 +249,20 @@
   .cat .progress-track{height:9px;border-radius:999px;background:var(--fg-bg-surface-sunken,#E6D5B8);overflow:hidden;}
   .cat .progress-fill{height:100%;border-radius:999px;background:var(--fg-accent-tertiary,var(--green));transition:width .5s ease;}
 
-  /* ---------- SEVİYE HARİTASI (painted checkpoint architecture) ----------
-     The 1536x1024 background is the only visible road. The stage preserves
-     that exact intrinsic ratio, and nodes share its normalized coordinates. */
-  .lm-summary{text-align:center;margin-bottom:18px;}
+  /* ---------- SEVİYE HARİTASI (full-bleed shared scene) ---------- */
+  #levelMap:not(.hidden){position:fixed;inset:0;width:100vw;height:100dvh;overflow:hidden;background:var(--bg);z-index:40;}
+  #levelMap > .game-head{position:absolute;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));z-index:5;margin:0;pointer-events:none;}
+  #levelMap > .game-head > *{pointer-events:auto;}
+  #levelMap .game-title{width:max-content;max-width:calc(100% - 58px);background:var(--card);border-radius:14px;padding:10px 14px;box-shadow:var(--shadow);}
+  #levelMap .gb-single{position:absolute;inset:0;width:100%;height:100%;max-width:none;margin:0;}
+  .lm-summary{position:absolute;top:max(64px,calc(env(safe-area-inset-top) + 58px));left:50%;transform:translateX(-50%);z-index:5;margin:0;padding:8px 14px;background:var(--card);border-radius:14px;box-shadow:var(--shadow);text-align:center;white-space:nowrap;}
   .lm-summary .lm-pct{font-size:30px;font-weight:800;color:var(--fg-accent-secondary,var(--blue));}
   .lm-summary .lm-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
-  .lm-stage{position:relative;width:100%;max-width:1180px;margin:0 auto;overflow:visible;aspect-ratio:3/2;--lm-node:28px;}
-  @media (min-width:700px){.lm-stage{--lm-node:42px;}}
-  @media (min-width:1024px){.lm-stage{--lm-node:54px;}}
-  .lm-world-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;user-select:none;z-index:0;}
+  .lm-path{position:absolute;inset:0;overflow:hidden;}
+  .lm-stage{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;}
+  .lm-scene{position:absolute;left:50%;top:50%;width:max(100%,calc(100dvh * 16 / 9));aspect-ratio:16/9;transform:translate(-50%,-50%);overflow:hidden;}
+  .lm-art{position:absolute;left:50%;top:50%;width:100%;aspect-ratio:3/2;transform:translate(-50%,-50%);container-type:size;--lm-node:clamp(28px,3cqw,54px);}
+  .lm-world-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;pointer-events:none;user-select:none;z-index:0;}
   .lm-node-wrap{position:absolute;width:var(--lm-node);height:var(--lm-node);transform:translate(-50%,-50%);z-index:1;}
   /* background-size:135% tek bir paylaşılan yakınlaştırma: üretim rozet
      PNG'lerinin (tamamlandı/mevcut/kilitli/normal) tuval içinde gereksiz
@@ -286,22 +290,23 @@
      binmez. */
   .lm-character-shadow{position:absolute;top:calc(var(--lm-node)*0.86);right:calc(var(--lm-node)*-0.08);width:calc(var(--lm-node)*0.3);height:calc(var(--lm-node)*0.1);background:rgba(35,25,15,.24);border-radius:50%;filter:blur(1px);z-index:1;}
   .lm-character{position:absolute;top:calc(var(--lm-node)*0.5);right:calc(var(--lm-node)*-0.32);width:calc(var(--lm-node)*0.46);height:calc(var(--lm-node)*0.46);border-radius:50%;overflow:hidden;background:var(--fg-bg-surface-sunken,#E6D5B8);border:2px solid var(--fg-bg-surface,#fff);box-shadow:var(--fg-shadow-sm,0 2px 5px rgba(0,0,0,.3));z-index:1;}
-  /* Efsane (legend) bilinçli olarak küçük/ortalanmış tutulur, sahnenin
-     ALTINDA (normal akışta) kalır — güzergahla asla çakışmaz. */
-  .lm-legend{display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin:20px auto 0;max-width:280px;background:var(--fg-bg-surface,var(--card));border-radius:14px;padding:10px 14px;box-shadow:var(--fg-shadow-sm,var(--shadow));}
+  .lm-legend{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:5;display:flex;flex-direction:column;gap:6px;align-items:flex-start;width:max-content;max-width:calc(100% - 24px);margin:0;background:var(--fg-bg-surface,var(--card));border-radius:14px;padding:10px 14px;box-shadow:var(--fg-shadow-sm,var(--shadow));}
   .lm-legend div{font-size:11.5px;font-weight:700;color:var(--ink-soft);display:flex;align-items:center;gap:8px;}
   .lm-legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
   .lm-legend-dot.done{background:var(--fg-accent-tertiary,var(--green));}
   .lm-legend-dot.current{background:var(--fg-accent-quaternary,var(--purple));}
   .lm-legend-dot.locked{background:var(--fg-bg-surface-sunken,#E6D5B8);}
-  /* Harita, .game-head ile aynı geniş #app içeriğine hizalanabilsin diye
-     paylaşılan 660px .gb-single tavanının üzerine çıkar (yalnızca
-     #levelMap kapsamında — diğer 14 mod .gb-single'ı etkilenmez).
-     Gerçek genişlik zaten üst #app kapsayıcısı tarafından sınırlanır. */
-  @media (min-width:700px){
-    #levelMap .gb-single{max-width:1180px;}
+  /* Mobil: 3:2 sahne, ekran yüksekliğinden gerçek genişliğe göre boyutlanır
+     (transform-scale değil), .lm-stage yatayda gerçekten kaydırılabilir olur.
+     Masaüstü kuralları (üstteki .lm-scene/.lm-art) bu breakpoint'in dışında
+     dokunulmadan kalır. */
+  @media (max-width:699px){
+    .lm-stage{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior:contain;cursor:grab;scrollbar-width:none;}
+    .lm-stage::-webkit-scrollbar{display:none;}
+    .lm-stage.lm-dragging{cursor:grabbing;}
+    .lm-scene{position:static;left:auto;top:auto;transform:none;width:calc(100dvh * 3 / 2);height:100%;max-width:none;}
+    .lm-art{position:relative;left:auto;top:auto;transform:none;width:100%;height:100%;aspect-ratio:auto;}
   }
-
   .game-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;}
   .back{border:none;background:var(--card);box-shadow:var(--shadow);width:42px;height:42px;border-radius:14px;font-size:18px;cursor:pointer;color:var(--ink);flex-shrink:0;}
   .game-head-text{flex:1;min-width:0;padding-top:2px;}
@@ -1995,15 +2000,15 @@ function openLevelMap(modeEntry){
   renderLevelMap();
 }
 
-/* Painted checkpoint centers from levelmap_world_v3_checkpoints.png.
+/* Painted platform centers from levelmap_city_01_background.png.
    Coordinates are normalized against the source image's 1536x1024 pixels
    and shared unchanged by every viewport and game mode. */
 var LM_CHECKPOINTS = [
-  {x:0.311198,y:0.702148}, {x:0.225911,y:0.711914},
-  {x:0.178385,y:0.650391}, {x:0.134115,y:0.591797},
-  {x:0.203776,y:0.526367}, {x:0.162760,y:0.447266},
-  {x:0.108073,y:0.373047}, {x:0.187500,y:0.291992},
-  {x:0.254557,y:0.138672}, {x:0.315755,y:0.149414},
+  {x:0.123698,y:0.570313}, {x:0.197917,y:0.629883},
+  {x:0.298177,y:0.668945}, {x:0.397135,y:0.639648},
+  {x:0.473958,y:0.576172}, {x:0.529297,y:0.493164},
+  {x:0.598958,y:0.404297}, {x:0.667318,y:0.330078},
+  {x:0.698568,y:0.626953}, {x:0.753906,y:0.537109},
   {x:0.345052,y:0.211914}, {x:0.410156,y:0.308594},
   {x:0.477865,y:0.316406}, {x:0.518229,y:0.264648},
   {x:0.600260,y:0.233398}, {x:0.675130,y:0.243164},
@@ -2015,30 +2020,62 @@ var LM_CHECKPOINTS = [
   {x:0.594401,y:0.682617}, {x:0.574870,y:0.759766},
   {x:0.582682,y:0.831055}, {x:0.561849,y:0.923828}
 ];
+/* Mobil harita: dokunmatik kaydırma tarayıcı tarafından doğal olarak
+   sağlanır (overflow-x:auto + touch-action:pan-x); bu yardımcı sadece
+   fare ile sürükle-kaydırmayı ekler (pointerType 'touch' hariç tutulur,
+   çünkü o zaten native scroll ile çalışıyor). Sürükleme sırasında
+   düğüme yanlışlıkla tıklanmasını da engeller. */
+function attachLmDragPan(stage){
+  var dragging=false, moved=false, startX=0, startScroll=0;
+  stage.addEventListener('pointerdown', function(e){
+    if(e.pointerType==='touch') return;
+    dragging=true; moved=false; startX=e.clientX; startScroll=stage.scrollLeft;
+    stage.classList.add('lm-dragging');
+    try{ stage.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  stage.addEventListener('pointermove', function(e){
+    if(!dragging) return;
+    var dx = e.clientX - startX;
+    if(Math.abs(dx) > 3) moved = true;
+    stage.scrollLeft = startScroll - dx;
+  });
+  function endDrag(){ dragging=false; stage.classList.remove('lm-dragging'); }
+  stage.addEventListener('pointerup', endDrag);
+  stage.addEventListener('pointercancel', endDrag);
+  stage.addEventListener('pointerleave', endDrag);
+  stage.addEventListener('click', function(e){
+    if(moved){ e.preventDefault(); e.stopPropagation(); moved=false; }
+  }, true);
+}
 function renderLevelMap(){
   var m = lmCurrentMode;
   document.getElementById('lmTitle').textContent = m.e+' '+m.n;
   var mm = window.getModeMap(m.key);
   var lmProfile = window.getProfile ? window.getProfile() : null;
   var lmAvatarId = lmProfile ? lmProfile.avatarId : 'avatar-01';
-  var cap = window.LEVEL_CAP;
+  var cityLevelCap = 10;
+  var visibleLevel = Math.min(mm.level, cityLevelCap);
   var pct = window.getModePercent(m.key);
   document.getElementById('lmPct').textContent = '%'+pct;
-  document.getElementById('lmSub').textContent = 'Seviye '+mm.level+' / '+cap;
+  document.getElementById('lmSub').textContent = 'Seviye '+visibleLevel+' / '+cityLevelCap;
   var path = document.getElementById('lmPath'); path.innerHTML='';
 
   var stage = document.createElement('div'); stage.className='lm-stage';
+  var scene = document.createElement('div'); scene.className='lm-scene';
+  var art = document.createElement('div'); art.className='lm-art';
   var worldBg = document.createElement('img');
   worldBg.className = 'lm-world-bg';
-  worldBg.src = '../assets/images/ui/levelmap/levelmap_world_v3_checkpoints.png';
+  worldBg.src = '../assets/images/ui/levelmap/levelmap_city_01_background.png';
   worldBg.alt = '';
   worldBg.setAttribute('aria-hidden', 'true');
-  stage.appendChild(worldBg);
+  art.appendChild(worldBg);
+  scene.appendChild(art);
+  stage.appendChild(scene);
   path.appendChild(stage);
 
   var positions = LM_CHECKPOINTS;
 
-  for(var L=1; L<=cap; L++){
+  for(var L=1; L<=cityLevelCap; L++){
     var pos = positions[L-1];
     var wrap = document.createElement('div'); wrap.className='lm-node-wrap';
     wrap.style.left = (pos.x*100)+'%';
@@ -2070,7 +2107,16 @@ function renderLevelMap(){
       chara.innerHTML = window.renderAvatarImage(lmAvatarId, 32);
       wrap.appendChild(chara);
     }
-    stage.appendChild(wrap);
+    art.appendChild(wrap);
+  }
+
+  if(window.matchMedia && window.matchMedia('(max-width:699px)').matches){
+    var lmTargetPos = positions[visibleLevel-1] || positions[0];
+    var lmArtWidth = art.offsetWidth;
+    var lmDesiredScroll = (lmTargetPos.x*lmArtWidth) - stage.clientWidth/2;
+    var lmMaxScroll = stage.scrollWidth - stage.clientWidth;
+    stage.scrollLeft = Math.max(0, Math.min(lmDesiredScroll, lmMaxScroll));
+    attachLmDragPan(stage);
   }
 
   var legend = document.createElement('div');
