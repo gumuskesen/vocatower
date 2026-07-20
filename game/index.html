@@ -288,6 +288,10 @@
   .lm-node-state-badge.locked{background-image:url('../assets/images/ui/levelmap/level_node_locked.png');}
   .lm-node-state-badge.done{background-image:url('../assets/images/ui/levelmap/level_node_completed.png');}
   .lm-node-state-badge.current{background-image:url('../assets/images/ui/levelmap/level_node_current.png');}
+  /* Boss (Seviye 10): Mini Boss ile aynı desen, daha büyük wrap (1.8x) —
+     hem normal düğümden hem Mini Boss'tan görünür şekilde daha büyük. */
+  .lm-node-wrap--boss{width:calc(var(--lm-node)*1.8);height:calc(var(--lm-node)*1.8);}
+  .lm-node.lm-node--boss{background-color:transparent;background-image:url('../assets/images/ui/levelmap/level_node_boss.png');box-shadow:none;border:none;}
   @keyframes lmPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(179,161,199,.4);}50%{transform:scale(1.1);box-shadow:0 0 0 12px rgba(179,161,199,0);}}
   .lm-node-tooltip{position:absolute;left:50%;bottom:calc(100% + 5px);transform:translateX(-50%) translateY(2px);z-index:3;pointer-events:none;visibility:hidden;opacity:0;white-space:nowrap;background:rgba(51,65,92,.94);color:#fff;border-radius:6px;padding:3px 6px;font-size:10px;line-height:1.2;font-weight:700;text-align:center;box-shadow:var(--fg-shadow-sm,0 2px 6px rgba(0,0,0,.08));transition:opacity .12s ease,transform .12s ease;}
   @media (hover:hover){.lm-node-wrap:hover .lm-node-tooltip{visibility:visible;opacity:1;transform:translateX(-50%) translateY(0);}}
@@ -2093,12 +2097,14 @@ function renderLevelMap(){
   for(var L=1; L<=cityLevelCap; L++){
     var pos = positions[L-1];
     var isMiniBoss = (L === 5);
-    var wrap = document.createElement('div'); wrap.className='lm-node-wrap'+(isMiniBoss?' lm-node-wrap--miniboss':'');
+    var isBoss = (L === 10);
+    var specialClass = isBoss ? 'boss' : (isMiniBoss ? 'miniboss' : null);
+    var wrap = document.createElement('div'); wrap.className='lm-node-wrap'+(specialClass?' lm-node-wrap--'+specialClass:'');
     wrap.style.left = (pos.x*100)+'%';
     wrap.style.top = (pos.y*100)+'%';
     var node = document.createElement('button'); node.type='button';
     var state = mm.completed.indexOf(L)>=0 ? 'done' : (L===mm.level ? 'current' : (L<mm.level ? 'done' : 'locked'));
-    node.className = 'lm-node '+state+(isMiniBoss?' lm-node--miniboss':'');
+    node.className = 'lm-node '+state+(specialClass?' lm-node--'+specialClass:'');
     /* Görünür glif overlay'i yok — üretim PNG'leri (kilit/onay/rozet)
        kendi durum sembolünü zaten içeriyor. Erişilebilir ad aria-label
        üzerinden korunuyor. */
@@ -2108,7 +2114,7 @@ function renderLevelMap(){
     node.setAttribute('aria-label', 'Seviye '+L+', '+lmStateLabel+(lmStarCount>0?', '+lmStarCount+' yıldız':''));
     if(state==='current') node.setAttribute('aria-current', 'step');
     node.onclick = (function(entry, level){ return function(){ if(window.setLevelMapPlayedLevel) window.setLevelMapPlayedLevel(entry.key, level); entry.fn(); }; })(m, L);
-    if(isMiniBoss){
+    if(specialClass){
       var stateBadge = document.createElement('span');
       stateBadge.className = 'lm-node-state-badge '+state;
       stateBadge.setAttribute('aria-hidden', 'true');
