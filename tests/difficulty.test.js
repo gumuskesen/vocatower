@@ -34,6 +34,34 @@ assert.strictEqual(engine.getQuestionDifficulty({baseDifficulty:2,modeModifier:.
 assert.strictEqual(engine.getQuestionDifficulty({baseDifficulty:'x'}), null);
 
 fresh();
+assert.strictEqual(engine.getManualLevel(), 'normal', 'default manual level');
+['easy','normal','hard'].forEach(function(level){
+  assert.strictEqual(engine.setManualLevel(level), true, level+' persists');
+  engine.load();
+  assert.strictEqual(engine.getManualLevel(), level, level+' loads');
+});
+assert.strictEqual(engine.setManualLevel('broken'), true, 'invalid setter safely persists fallback');
+assert.strictEqual(engine.getManualLevel(), 'normal', 'invalid manual level falls back to normal');
+seed({version:1,manualLevel:'broken'});
+assert.strictEqual(engine.getManualLevel(), 'normal', 'malformed stored level repaired');
+
+var manualPool=[{id:'one',difficulty:1},{id:'two',difficulty:2},{id:'three',difficulty:3},{id:'missing'}];
+var manualSnapshot=JSON.stringify(manualPool);
+var difficultyOf=function(item){return item.difficulty;};
+assert.deepStrictEqual(engine.filterVocabularyByManualLevel(manualPool,difficultyOf,'easy').map(function(x){return x.id;}),['one','two'], 'small easy pool widens with difficulty 2');
+assert.deepStrictEqual(engine.filterVocabularyByManualLevel(manualPool,difficultyOf,'normal').map(function(x){return x.id;}),['one','two','missing'], 'normal includes 1, 2 and missing');
+assert.deepStrictEqual(engine.filterVocabularyByManualLevel(manualPool,difficultyOf,'hard').map(function(x){return x.id;}),['two','three','one'], 'small hard pool widens with difficulty 1');
+assert.strictEqual(JSON.stringify(manualPool),manualSnapshot,'manual filter does not mutate input');
+var fullPool=[];
+for(var manualDifficulty=1;manualDifficulty<=3;manualDifficulty++){
+  for(var manualIndex=0;manualIndex<10;manualIndex++) fullPool.push({difficulty:manualDifficulty,id:manualDifficulty+'-'+manualIndex});
+}
+assert.ok(engine.filterVocabularyByManualLevel(fullPool,difficultyOf,'easy').every(function(x){return x.difficulty===1;}),'easy uses difficulty 1 when pool is sufficient');
+assert.ok(engine.filterVocabularyByManualLevel(fullPool,difficultyOf,'normal').every(function(x){return x.difficulty===1||x.difficulty===2;}),'normal uses difficulty 1-2');
+assert.ok(engine.filterVocabularyByManualLevel(fullPool,difficultyOf,'hard').every(function(x){return x.difficulty===2||x.difficulty===3;}),'hard uses difficulty 2-3');
+assert.deepStrictEqual(engine.filterVocabularyByManualLevel(fullPool,difficultyOf,'invalid'),engine.filterVocabularyByManualLevel(fullPool,difficultyOf,'normal'),'invalid filter level falls back to normal');
+
+fresh();
 assert.strictEqual(engine.recordAnswer({family:'recognition',correct:'yes'}), false, 'malformed rejected');
 assert.strictEqual(engine.recordAnswer({family:'recognition',correct:true,difficulty:9,responseMs:-1,hintsUsed:-2,attempts:0,questionId:'q1'}), true);
 var sanitized = engine.getRecentAnswers('recognition')[0];

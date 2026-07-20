@@ -49,6 +49,13 @@
   .onb-input{width:100%;border:2.5px solid #E6D5B8;border-radius:14px;padding:14px;font-size:16px;font-family:inherit;text-align:center;color:var(--ink);}
   .onb-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(74,110,155,.3);}
   .onb-error{min-height:20px;color:var(--red-soft);font-weight:700;font-size:13px;margin-top:8px;}
+  .difficulty-setting{margin:18px 0 4px;padding:14px;border:1px solid var(--fg-border-soft,#E2D3BC);border-radius:18px;background:var(--fg-bg-surface-sunken,#F4EADB);text-align:left;}
+  .difficulty-setting legend{padding:0 6px;font-size:14px;font-weight:800;color:var(--ink);}
+  .difficulty-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .difficulty-option{display:flex;align-items:flex-start;gap:7px;min-height:52px;padding:9px 8px;border-radius:13px;background:var(--fg-bg-surface,#FFF9EF);cursor:pointer;}
+  .difficulty-option input{margin:3px 0 0;accent-color:var(--blue);}
+  .difficulty-option span{display:flex;flex-direction:column;font-size:12px;font-weight:800;line-height:1.25;}
+  .difficulty-option small{margin-top:2px;color:var(--ink-soft);font-size:10px;font-weight:600;}
   .onb-preview{display:flex;flex-direction:column;align-items:center;gap:8px;margin:6px 0 18px;}
   .onb-preview .avatar{width:88px;height:88px;border-width:3px;}
   .avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
@@ -626,6 +633,14 @@
         <p class="onb-sub" id="onbNameSub">VocaTower'a başlamadan önce sana nasıl seslenelim?</p>
         <input class="onb-input" id="onbUsername" type="text" maxlength="16" placeholder="Adını yaz..." autocomplete="off">
         <div class="onb-error" id="onbNameError"></div>
+        <fieldset class="difficulty-setting hidden" id="difficultySetting">
+          <legend>Zorluk Seviyesi</legend>
+          <div class="difficulty-options">
+            <label class="difficulty-option"><input type="radio" name="manualDifficulty" value="easy" onchange="setManualDifficulty(this.value)"><span>Kolay<small>Temel kelimeler</small></span></label>
+            <label class="difficulty-option"><input type="radio" name="manualDifficulty" value="normal" onchange="setManualDifficulty(this.value)"><span>Normal<small>Temel ve orta kelimeler</small></span></label>
+            <label class="difficulty-option"><input type="radio" name="manualDifficulty" value="hard" onchange="setManualDifficulty(this.value)"><span>Zor<small>Orta ve ileri kelimeler</small></span></label>
+          </div>
+        </fieldset>
         <button class="btn" onclick="onbGoToAvatar()">Devam Et →</button>
       </div>
 
@@ -1422,6 +1437,20 @@ function setOnboardingCopy(editing){
   document.getElementById('onbNameHeading').textContent = editing ? 'Profilini Düzenle ⚙️' : 'Hoş geldin! 👋';
   document.getElementById('onbNameSub').textContent = editing ? 'İstersen kullanıcı adını değiştirebilirsin.' : 'VocaTower\'a başlamadan önce sana nasıl seslenelim?';
   document.getElementById('onbAvatarHeading').textContent = editing ? 'Avatarını Değiştir 🎨' : 'Avatarını seç 🎨';
+  document.getElementById('difficultySetting').classList.toggle('hidden', !editing);
+  if(editing) renderManualDifficultySetting();
+}
+function renderManualDifficultySetting(){
+  var level = window.DifficultyEngine && window.DifficultyEngine.getManualLevel
+    ? window.DifficultyEngine.getManualLevel() : 'normal';
+  var input = document.querySelector('input[name="manualDifficulty"][value="'+level+'"]');
+  if(input) input.checked=true;
+}
+function setManualDifficulty(level){
+  if(window.DifficultyEngine && window.DifficultyEngine.setManualLevel){
+    window.DifficultyEngine.setManualLevel(level);
+    renderManualDifficultySetting();
+  }
 }
 function openProfileSettings(){
   onbEditingExisting = true;
@@ -1452,6 +1481,16 @@ function bootApp(){
 }
 function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;} return a; }
 function pick(arr,n){ return shuffle(arr).slice(0,n); }
+function vocabDifficulty(item){
+  var english = Array.isArray(item) ? item[0] : item && item.en;
+  var entry = english && window.VOCAB_BY_EN ? window.VOCAB_BY_EN[String(english).toLowerCase()] : null;
+  return entry ? entry.difficulty : null;
+}
+function manualVocabularyPool(pool){
+  var engine=window.DifficultyEngine;
+  if(!engine || !engine.filterVocabularyByManualLevel) return Array.isArray(pool) ? pool.slice() : [];
+  return engine.filterVocabularyByManualLevel(pool, vocabDifficulty, engine.getManualLevel());
+}
 /* Shared option-button renderer (Question Panel audit, refactor #1).
    Every gameplay mode independently repeated: clear container, create
    button, assign class, assign content, attach click handler, append.
@@ -1939,8 +1978,9 @@ countries: [
 ]};
 
 function makeVocabQ(){
-  var primary = window.pickUnseen ? window.pickUnseen('vocabq', WORDS, 1, function(w){return w[0];})[0] : rand(WORDS);
-  var distractors = pick(WORDS.filter(function(w){return w[0]!==primary[0];}), 3);
+  var eligibleWords = manualVocabularyPool(WORDS);
+  var primary = window.pickUnseen ? window.pickUnseen('vocabq', eligibleWords, 1, function(w){return w[0];})[0] : rand(eligibleWords);
+  var distractors = pick(eligibleWords.filter(function(w){return w[0]!==primary[0];}), 3);
   var four = [primary].concat(distractors);
   var en=four[0][0], tr=four[0][1];
   if(Math.random()<0.5){
@@ -2312,9 +2352,9 @@ var lsState=null;
 function startListen(){
   window._activeSession = {mode:'listen', done:false};
   var listenSession=window._activeSession;
-  var pool = WORDS.filter(function(w){return w[0].length>=3&&w[0].length<=8&&/^[a-z]+$/.test(w[0]);});
+  var pool = manualVocabularyPool(WORDS.filter(function(w){return w[0].length>=3&&w[0].length<=8&&/^[a-z]+$/.test(w[0]);}));
   var rounds = window.pickUnseen ? window.pickUnseen('listen', pool, 8, function(w){return w[0];}) : pick(pool,8);
-  lsState={rounds:rounds, i:0, correct:0, locked:false, introOpen:false, speechEnabled:false, mascotEncouragementShown:false};
+  lsState={rounds:rounds, wordPool:pool, i:0, correct:0, locked:false, introOpen:false, speechEnabled:false, mascotEncouragementShown:false};
   var listenState=lsState;
   show('listen'); renderLs(false);
   showBlockingMascotIntro(listenState,listenSession,{
@@ -2327,7 +2367,7 @@ function renderLs(scheduleSpeech){
   var s=lsState, item=s.rounds[s.i];
   document.getElementById('lsRound').textContent=(s.i+1)+'/8';
   document.getElementById('lsHintText').textContent='';
-  var sameLen=WORDS.filter(function(w){return w[0]!==item[0] && Math.abs(w[0].length-item[0].length)<=1;});
+  var sameLen=s.wordPool.filter(function(w){return w[0]!==item[0] && Math.abs(w[0].length-item[0].length)<=1;});
   var others=pick(sameLen,3);
   var opts=shuffle([item].concat(others));
   s.locked=false;
@@ -2468,7 +2508,7 @@ var spState=null;
 function startSpelling(){
   window._activeSession = {mode:'spelling', done:false};
   var spellingSession=window._activeSession;
-  var cand=WORDS.filter(function(w){return w[0].length>=3&&w[0].length<=7&&/^[a-z]+$/.test(w[0]);});
+  var cand=manualVocabularyPool(WORDS.filter(function(w){return w[0].length>=3&&w[0].length<=7&&/^[a-z]+$/.test(w[0]);}));
   var rounds = window.pickUnseen ? window.pickUnseen('spelling', cand, 5, function(w){return w[0];}) : pick(cand,5);
   spState={rounds:rounds, i:0, correct:0, typed:[], introOpen:false, speechEnabled:false, mascotEncouragementShown:false};
   var spellingState=spState;
@@ -2826,16 +2866,18 @@ WORDS.forEach(function(w){
   var f=w[0][0];
   (byFirst[f]=byFirst[f]||[]).push(w);
 });
-function snakeCandidates(letter, used){
-  return (byFirst[letter]||[]).filter(function(w){return used.indexOf(w[0])<0 && /^[a-z]+$/.test(w[0]);});
+function snakeCandidates(letter, used, wordPool){
+  var source = wordPool || byFirst[letter] || [];
+  return source.filter(function(w){return w[0][0]===letter && used.indexOf(w[0])<0 && /^[a-z]+$/.test(w[0]);});
 }
 var snState=null;
 function startSnake(){
   window._activeSession = {mode:'snake', done:false};
   var snakeSession=window._activeSession;
-  var start;
-  do{ start=rand(WORDS); } while(!/^[a-z]+$/.test(start[0]) || snakeCandidates(start[0].slice(-1),[start[0]]).length<1);
-  snState={cur:start, used:[start[0]], i:0, correct:0, typed:[], locked:false, checking:false, introOpen:false, mascotEncouragementShown:false};
+  var wordPool=manualVocabularyPool(WORDS.filter(function(w){return /^[a-z]+$/.test(w[0]);}));
+  var starts=wordPool.filter(function(w){return snakeCandidates(w[0].slice(-1),[w[0]],wordPool).length>0;});
+  var start=rand(starts.length ? starts : wordPool);
+  snState={cur:start, wordPool:wordPool, used:[start[0]], i:0, correct:0, typed:[], locked:false, checking:false, introOpen:false, mascotEncouragementShown:false};
   var snakeState=snState;
   show('snake'); snPickTarget(); renderSn(true);
   showBlockingMascotIntro(snakeState,snakeSession,{
@@ -2846,7 +2888,7 @@ function startSnake(){
 function snPickTarget(){
   var s=snState;
   var last=s.cur[0].slice(-1);
-  var pool=snakeCandidates(last, s.used);
+  var pool=snakeCandidates(last, s.used, s.wordPool);
   /* Kademeli zorluk: ilk turlarda kısa kelimeler, sonraki turlarda daha uzun kelimeler tercih edilir */
   var minLen = 3, maxLen = Math.min(9, 4 + s.i);
   var byLen=pool.filter(function(w){return w[0].length>=minLen && w[0].length<=maxLen;});
@@ -3500,11 +3542,12 @@ var SCRAMBLE_EXTRA = [
 ];
 var scState=null;
 function pickScrambleWord(){
-  if(Math.random()<0.3){
-    var extra = window.pickUnseen ? window.pickUnseen('scramble_extra', SCRAMBLE_EXTRA, 1, function(p){return p[0];})[0] : rand(SCRAMBLE_EXTRA);
+  var eligibleExtra=manualVocabularyPool(SCRAMBLE_EXTRA);
+  if(eligibleExtra.length && Math.random()<0.3){
+    var extra = window.pickUnseen ? window.pickUnseen('scramble_extra', eligibleExtra, 1, function(p){return p[0];})[0] : rand(eligibleExtra);
     return {w:extra[0], hint:extra[1], en:extra[0].toLowerCase()};
   }
-  var cand=WORDS.filter(function(w){return w[0].length>=4&&w[0].length<=7&&/^[a-z]+$/.test(w[0]);});
+  var cand=manualVocabularyPool(WORDS.filter(function(w){return w[0].length>=4&&w[0].length<=7&&/^[a-z]+$/.test(w[0]);}));
   var c = window.pickUnseen ? window.pickUnseen('scramble', cand, 1, function(w){return w[0];})[0] : rand(cand);
   return {w:c[0].toUpperCase(), hint:'Türkçesi: '+c[1], en:c[0]};
 }

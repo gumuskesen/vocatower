@@ -5,6 +5,7 @@
   var STORAGE_KEY = 'vocatower_difficulty';
   var STARTING_LEVELS = ['beginner', 'basic', 'intermediate', 'advanced', 'not_sure'];
   var PREFERENCES = ['automatic', 'relaxed', 'balanced', 'challenge'];
+  var MANUAL_LEVELS = ['easy', 'normal', 'hard'];
   var PREFERENCE_OFFSETS = {automatic:0, relaxed:-0.25, balanced:0, challenge:0.25};
   var FAMILIES = ['recognition', 'listening', 'spelling', 'context', 'construction', 'knowledge', 'visualMemory'];
   var MAX_RECENT_ANSWERS = 20;
@@ -37,6 +38,7 @@
       version: 1,
       onboarding: {startingLevel:'not_sure', selectedAt:null},
       preference: 'automatic',
+      manualLevel: 'normal',
       ratings: {global:defaultRating(), families:families},
       recentAnswers: {}
     };
@@ -96,6 +98,7 @@
       result.onboarding.selectedAt = base.onboarding.selectedAt;
     }
     if(PREFERENCES.indexOf(result.preference) < 0) result.preference = base.preference;
+    if(MANUAL_LEVELS.indexOf(result.manualLevel) < 0) result.manualLevel = base.manualLevel;
 
     if(!isObject(result.ratings)) result.ratings = {};
     result.ratings.global = validateRating(result.ratings.global, base.ratings.global);
@@ -166,6 +169,46 @@
   function getPreference(){
     if(!profile) load();
     return profile.preference;
+  }
+
+  function setManualLevel(level){
+    if(!profile) load();
+    profile.manualLevel = MANUAL_LEVELS.indexOf(level) >= 0 ? level : 'normal';
+    return save();
+  }
+
+  function getManualLevel(){
+    if(!profile) load();
+    return MANUAL_LEVELS.indexOf(profile.manualLevel) >= 0 ? profile.manualLevel : 'normal';
+  }
+
+  function filterVocabularyByManualLevel(pool, difficultyFn, level){
+    var source = Array.isArray(pool) ? pool.slice() : [];
+    var selectedLevel = MANUAL_LEVELS.indexOf(level) >= 0 ? level : 'normal';
+    var readDifficulty = typeof difficultyFn === 'function' ? difficultyFn : function(item){
+      return item && item.difficulty;
+    };
+    var candidates = source.map(function(item){
+      var difficulty = null;
+      try{ difficulty = readDifficulty(item); }catch(e){}
+      return {item:item, difficulty:difficulty};
+    });
+    var filtered = candidates.filter(function(candidate){
+      if(selectedLevel === 'easy') return candidate.difficulty === 1;
+      if(selectedLevel === 'hard') return candidate.difficulty === 2 || candidate.difficulty === 3;
+      return candidate.difficulty === 1 || candidate.difficulty === 2 ||
+        candidate.difficulty === null || candidate.difficulty === undefined || !isFiniteNumber(candidate.difficulty);
+    });
+    var minimumUseful = Math.min(8, source.length);
+    if(filtered.length < minimumUseful && selectedLevel !== 'normal'){
+      var fallbackDifficulty = selectedLevel === 'easy' ? 2 : 1;
+      candidates.forEach(function(candidate){
+        if(filtered.length < minimumUseful && candidate.difficulty === fallbackDifficulty &&
+           filtered.indexOf(candidate) < 0) filtered.push(candidate);
+      });
+    }
+    if(filtered.length === 0 && source.length) return source;
+    return filtered.map(function(candidate){ return candidate.item; });
   }
 
   function getTargetDifficulty(options){
@@ -387,6 +430,8 @@
     load:load, save:save, getProfile:getProfile, reset:reset,
     setStartingLevel:setStartingLevel, getStartingLevel:getStartingLevel,
     setPreference:setPreference, getPreference:getPreference, validate:validate,
+    setManualLevel:setManualLevel, getManualLevel:getManualLevel,
+    filterVocabularyByManualLevel:filterVocabularyByManualLevel,
     getTargetDifficulty:getTargetDifficulty,
     getQuestionDifficulty:getQuestionDifficulty,
     recordAnswer:recordAnswer,
