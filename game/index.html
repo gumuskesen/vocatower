@@ -274,10 +274,20 @@
      boş halka bıraktığı ölçüldü; 135% zoom bunu ~%90-100'e çıkarıp ince
      bir çerçeve payı bırakır — PNG'ler değişmedi, tüm durumlar için tek
      paylaşılan kural, tüm kırılım noktalarında geçerli. */
-  .lm-node{width:var(--lm-node);height:var(--lm-node);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;background:var(--fg-bg-surface-sunken,#E6D5B8) center/135% no-repeat;box-shadow:var(--fg-shadow-sm,0 2px 6px rgba(0,0,0,.08));border:none;cursor:pointer;font-family:inherit;position:relative;z-index:1;flex-shrink:0;text-shadow:0 1px 3px rgba(0,0,0,.45);}
+  .lm-node{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;background:var(--fg-bg-surface-sunken,#E6D5B8) center/135% no-repeat;box-shadow:var(--fg-shadow-sm,0 2px 6px rgba(0,0,0,.08));border:none;cursor:pointer;font-family:inherit;position:relative;z-index:1;flex-shrink:0;text-shadow:0 1px 3px rgba(0,0,0,.45);}
   .lm-node.locked{background-image:url('../assets/images/ui/levelmap/level_node_locked.png');color:var(--fg-text-faint,#A08966);cursor:not-allowed;box-shadow:none;}
   .lm-node.done{background-image:url('../assets/images/ui/levelmap/level_node_completed.png');}
   .lm-node.current{background-image:url('../assets/images/ui/levelmap/level_node_current.png');animation:lmPulse 1.6s ease-in-out infinite;}
+  /* Mini Boss (Seviye 5): görsel-only büyük rozet, wrap 1.5x büyür (merkez
+     koordinatı translate(-50%,-50%) sayesinde değişmez), durum PNG'si ana
+     görselin üstünde küçük bir rozet olarak kalır ki kilitli/mevcut/tamam
+     belirsiz olmasın. Tıklama hâlâ tüm .lm-node düğmesine ait. */
+  .lm-node-wrap--miniboss{width:calc(var(--lm-node)*1.5);height:calc(var(--lm-node)*1.5);}
+  .lm-node.lm-node--miniboss{background-color:transparent;background-image:url('../assets/images/ui/levelmap/level_node_miniboss.png');box-shadow:none;border:none;}
+  .lm-node-state-badge{position:absolute;right:-4%;bottom:-4%;width:calc(var(--lm-node)*0.44);height:calc(var(--lm-node)*0.44);border-radius:50%;background-position:center;background-size:135%;background-repeat:no-repeat;pointer-events:none;z-index:2;}
+  .lm-node-state-badge.locked{background-image:url('../assets/images/ui/levelmap/level_node_locked.png');}
+  .lm-node-state-badge.done{background-image:url('../assets/images/ui/levelmap/level_node_completed.png');}
+  .lm-node-state-badge.current{background-image:url('../assets/images/ui/levelmap/level_node_current.png');}
   @keyframes lmPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(179,161,199,.4);}50%{transform:scale(1.1);box-shadow:0 0 0 12px rgba(179,161,199,0);}}
   .lm-node-tooltip{position:absolute;left:50%;bottom:calc(100% + 5px);transform:translateX(-50%) translateY(2px);z-index:3;pointer-events:none;visibility:hidden;opacity:0;white-space:nowrap;background:rgba(51,65,92,.94);color:#fff;border-radius:6px;padding:3px 6px;font-size:10px;line-height:1.2;font-weight:700;text-align:center;box-shadow:var(--fg-shadow-sm,0 2px 6px rgba(0,0,0,.08));transition:opacity .12s ease,transform .12s ease;}
   @media (hover:hover){.lm-node-wrap:hover .lm-node-tooltip{visibility:visible;opacity:1;transform:translateX(-50%) translateY(0);}}
@@ -2082,12 +2092,13 @@ function renderLevelMap(){
 
   for(var L=1; L<=cityLevelCap; L++){
     var pos = positions[L-1];
-    var wrap = document.createElement('div'); wrap.className='lm-node-wrap';
+    var isMiniBoss = (L === 5);
+    var wrap = document.createElement('div'); wrap.className='lm-node-wrap'+(isMiniBoss?' lm-node-wrap--miniboss':'');
     wrap.style.left = (pos.x*100)+'%';
     wrap.style.top = (pos.y*100)+'%';
     var node = document.createElement('button'); node.type='button';
     var state = mm.completed.indexOf(L)>=0 ? 'done' : (L===mm.level ? 'current' : (L<mm.level ? 'done' : 'locked'));
-    node.className = 'lm-node '+state;
+    node.className = 'lm-node '+state+(isMiniBoss?' lm-node--miniboss':'');
     /* Görünür glif overlay'i yok — üretim PNG'leri (kilit/onay/rozet)
        kendi durum sembolünü zaten içeriyor. Erişilebilir ad aria-label
        üzerinden korunuyor. */
@@ -2097,6 +2108,12 @@ function renderLevelMap(){
     node.setAttribute('aria-label', 'Seviye '+L+', '+lmStateLabel+(lmStarCount>0?', '+lmStarCount+' yıldız':''));
     if(state==='current') node.setAttribute('aria-current', 'step');
     node.onclick = (function(entry, level){ return function(){ if(window.setLevelMapPlayedLevel) window.setLevelMapPlayedLevel(entry.key, level); entry.fn(); }; })(m, L);
+    if(isMiniBoss){
+      var stateBadge = document.createElement('span');
+      stateBadge.className = 'lm-node-state-badge '+state;
+      stateBadge.setAttribute('aria-hidden', 'true');
+      node.appendChild(stateBadge);
+    }
     wrap.appendChild(node);
     var tooltip = document.createElement('div');
     tooltip.className = 'lm-node-tooltip';
