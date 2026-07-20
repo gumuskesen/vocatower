@@ -64,6 +64,17 @@
   .avatar-opt:hover{transform:scale(1.04);}
   .avatar-opt[aria-checked="true"]{border-color:var(--blue);background:#F3E4C8;box-shadow:0 0 0 3px rgba(74,110,155,.3);}
   .avatar-opt:focus-visible{outline:2.5px solid var(--blue);outline-offset:2px;}
+  .mascot-select-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0 18px;}
+  .mascot-select-card{min-width:0;min-height:44px;border:2.5px solid #E6D5B8;background:#F1E6D2;border-radius:18px;padding:8px 6px 10px;cursor:pointer;color:var(--ink);font-family:inherit;font-weight:800;transition:border-color .15s,transform .1s,box-shadow .15s;}
+  .mascot-select-card img{display:block;width:100%;height:112px;object-fit:contain;background:transparent;border:0;margin:0 auto 4px;pointer-events:none;}
+  .mascot-select-card:hover{transform:translateY(-2px);}
+  .mascot-select-card[aria-checked="true"]{border-color:var(--blue);background:#F3E4C8;box-shadow:0 0 0 3px rgba(74,110,155,.3);}
+  .mascot-select-card:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+  .mascot-settings-action{margin-top:10px;min-height:44px;}
+  @media (max-width:699px){
+    .mascot-select-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+    .mascot-select-card img{height:96px;}
+  }
   .onb-steps-dots{display:flex;justify-content:center;gap:6px;margin-bottom:16px;}
   .onb-steps-dots span{width:8px;height:8px;border-radius:50%;background:#D9C4A0;}
   .onb-steps-dots span.on{background:var(--blue);}
@@ -504,8 +515,15 @@
     .mascot-host.mascot-modal .mascot-image{height:250px;max-width:min(92vw,320px);}
     .mascot-host.mascot-modal .mascot-bubble{width:min(100%,300px);max-width:300px;}
   }
+  @media (min-width:1024px){
+    .mascot-host:not(.mascot-modal),.mascot-host.mascot-left:not(.mascot-modal){display:inline-flex;width:min(calc(100% - 40px),760px);max-width:760px;margin:20px 0 0;left:50%;transform:translateX(-50%);align-items:center;justify-content:center;gap:22px;}
+    .mascot-host:not(.mascot-modal) .mascot-image{width:auto;height:230px;}
+    .mascot-host:not(.mascot-modal) .mascot-bubble{flex:1 1 280px;width:auto;min-width:280px;max-width:420px;}
+  }
   @media (prefers-reduced-motion:reduce){
     .mascot-image,.mascot-bubble{animation:none;}
+    .mascot-select-card{transition:none;}
+    .mascot-select-card:hover{transform:none;}
   }
 
   /* ---------- YATAY (LANDSCAPE) DÜZEN ---------- */
@@ -626,7 +644,7 @@
   <!-- ============ İLK KURULUM (ONBOARDING / PROFİL AYARLARI) ============ -->
   <div id="onboarding" class="hidden">
     <div class="onb-wrap">
-      <div class="onb-steps-dots"><span id="onbDot1" class="on"></span><span id="onbDot2"></span></div>
+      <div class="onb-steps-dots" id="onbStepDots"><span id="onbDot1" class="on"></span><span id="onbDot2"></span><span id="onbDot3"></span><span id="onbDot4"></span></div>
 
       <div class="onb-step on" id="onbStepName">
         <h1 id="onbNameHeading">Hoş geldin! 👋</h1>
@@ -641,6 +659,7 @@
             <label class="difficulty-option"><input type="radio" name="manualDifficulty" value="hard" onchange="setManualDifficulty(this.value)"><span>Zor<small>Orta ve ileri kelimeler</small></span></label>
           </div>
         </fieldset>
+        <button class="btn ghost mascot-settings-action hidden" id="mascotSettingsAction" type="button" onclick="openMascotSelector('settings')">Maskotu Değiştir</button>
         <button class="btn" onclick="onbGoToAvatar()">Devam Et →</button>
       </div>
 
@@ -649,8 +668,32 @@
         <p class="onb-sub">Sana en çok benzeyeni seç!</p>
         <div class="avatar-grid" id="onbAvatarGrid" role="radiogroup" aria-label="Avatar seçimi"></div>
         <div class="onb-error" id="onbAvatarError"></div>
-        <button class="btn" onclick="onbConfirm()" id="onbConfirmBtn">Kuleme Başla 🏗️</button>
+        <button class="btn" onclick="onbGoToDifficulty()" id="onbConfirmBtn">Devam Et →</button>
         <button class="btn ghost" onclick="onbBackToName()">← Geri</button>
+      </div>
+
+      <div class="onb-step" id="onbStepDifficulty">
+        <h1>Zorluk Seviyeni Seç</h1>
+        <p class="onb-sub">Sana uygun başlangıç seviyesini seç.</p>
+        <fieldset class="difficulty-setting">
+          <legend>Zorluk Seviyesi</legend>
+          <div class="difficulty-options">
+            <label class="difficulty-option"><input type="radio" name="onboardingDifficulty" value="easy"><span>Kolay<small>Temel kelimeler</small></span></label>
+            <label class="difficulty-option"><input type="radio" name="onboardingDifficulty" value="normal"><span>Normal<small>Temel ve orta kelimeler</small></span></label>
+            <label class="difficulty-option"><input type="radio" name="onboardingDifficulty" value="hard"><span>Zor<small>Orta ve ileri kelimeler</small></span></label>
+          </div>
+        </fieldset>
+        <button class="btn" type="button" onclick="onbGoToMascot()">Devam Et →</button>
+        <button class="btn ghost" type="button" onclick="onbBackToAvatar()">← Geri</button>
+      </div>
+
+      <div class="onb-step" id="onbStepMascot">
+        <h1>Yol Arkadaşını Seç</h1>
+        <p class="onb-sub">Oyun boyunca sana eşlik edecek maskotu seç.</p>
+        <div class="mascot-select-grid" id="mascotSelectGrid" role="radiogroup" aria-label="Maskot seçimi"></div>
+        <div class="onb-error" id="mascotSelectError"></div>
+        <button class="btn" id="mascotSelectConfirm" type="button" onclick="confirmMascotSelection()" disabled>Devam Et</button>
+        <button class="btn ghost" id="mascotSelectBack" type="button" onclick="closeMascotSelector()">← Geri</button>
       </div>
     </div>
   </div>
@@ -1259,6 +1302,30 @@ function renderAchievementsScreen(){
 }
 
 /* ================= ORTAK MASKOT SİSTEMİ ================= */
+var MASCOT_CONFIG = Object.freeze({
+  buddy:Object.freeze({name:'Buddy',idle:'../assets/images/ui/mascots/buddy/buddy_idle.webp',encourage:'../assets/images/ui/mascots/buddy/buddy_encourage.webp',celebrate:'../assets/images/ui/mascots/buddy/buddy_celebrate.webp'}),
+  luna:Object.freeze({name:'Luna',idle:'../assets/images/ui/mascots/luna/luna_idle.webp',encourage:'../assets/images/ui/mascots/luna/luna_encourage.webp',celebrate:'../assets/images/ui/mascots/luna/luna_celebrate.webp'}),
+  pip:Object.freeze({name:'Pip',idle:'../assets/images/ui/mascots/pip/pip_idle.webp',encourage:'../assets/images/ui/mascots/pip/pip_encourage.webp',celebrate:'../assets/images/ui/mascots/pip/pip_celebrate.webp'}),
+  milo:Object.freeze({name:'Milo',idle:'../assets/images/ui/mascots/milo/milo_idle.webp',encourage:'../assets/images/ui/mascots/milo/milo_encourage.webp',celebrate:'../assets/images/ui/mascots/milo/milo_celebrate.webp'}),
+  nova:Object.freeze({name:'Nova',idle:'../assets/images/ui/mascots/nova/nova_idle.webp',encourage:'../assets/images/ui/mascots/nova/nova_encourage.webp',celebrate:'../assets/images/ui/mascots/nova/nova_celebrate.webp'}),
+  peru:Object.freeze({name:'Peru',idle:'../assets/images/ui/mascots/peru/peru_idle.webp',encourage:'../assets/images/ui/mascots/peru/peru_encourage.webp',celebrate:'../assets/images/ui/mascots/peru/peru_celebrate.webp'})
+});
+function getSelectedMascotId(){
+  var profile=window.getProfile ? window.getProfile() : null;
+  return profile && Object.prototype.hasOwnProperty.call(MASCOT_CONFIG,profile.mascotId) ? profile.mascotId : 'pip';
+}
+function getSelectedMascot(){ return MASCOT_CONFIG[getSelectedMascotId()]; }
+function getMascotAsset(pose){
+  var mascot=getSelectedMascot();
+  return mascot[pose] || mascot.idle;
+}
+function setSelectedMascot(id){
+  if(!Object.prototype.hasOwnProperty.call(MASCOT_CONFIG,id)) return false;
+  var profile=window.getProfile ? window.getProfile() : null;
+  if(!profile || typeof profile!=='object') return false;
+  var updated=Object.assign({},profile,{mascotId:id});
+  return window.safeSet(window.STORAGE_KEYS.profile,updated);
+}
 var mascotState = {
   visible:false,
   image:'',
@@ -1290,6 +1357,7 @@ function renderMascot(){
   host.classList.toggle('mascot-modal',mascotState.modal);
   host.classList.toggle('hidden',!mascotState.visible);
   host.setAttribute('role',mascotState.modal?'dialog':'region');
+  host.setAttribute('aria-label',getSelectedMascot().name+' oyun yardımcısı');
   if(mascotState.modal) host.setAttribute('aria-modal','true');
   else host.removeAttribute('aria-modal');
   text.textContent=mascotState.text;
@@ -1301,6 +1369,11 @@ function renderMascot(){
 }
 function updateMascot(options){
   options=options || {};
+  if(options.pose){
+    var selectedMascot=getSelectedMascot();
+    mascotState.image=getMascotAsset(options.pose);
+    mascotState.imageAlt=selectedMascot.name;
+  }
   if(Object.prototype.hasOwnProperty.call(options,'image')) mascotState.image=String(options.image || '');
   if(Object.prototype.hasOwnProperty.call(options,'imageAlt')) mascotState.imageAlt=String(options.imageAlt || '');
   if(Object.prototype.hasOwnProperty.call(options,'text')) mascotState.text=String(options.text || '');
@@ -1369,6 +1442,14 @@ function goHome(){ stopAllTimers(); renderTower(); show('home'); }
 
 /* ================= PROFİL: İLK KURULUM & AYARLAR ================= */
 var onbEditingExisting = false;
+var onbDraft = {username:'',avatarId:''};
+var mascotSelectorContext = 'onboarding';
+function setOnboardingStep(stepNumber){
+  ['Name','Avatar','Difficulty','Mascot'].forEach(function(name,index){
+    document.getElementById('onbStep'+name).classList.toggle('on',index===stepNumber-1);
+    document.getElementById('onbDot'+(index+1)).classList.toggle('on',index===stepNumber-1);
+  });
+}
 function buildAvatarGrid(containerId, selectedId, onSelect){
   var grid = document.getElementById(containerId);
   grid.innerHTML = '';
@@ -1406,28 +1487,115 @@ function onbGoToAvatar(){
   var err = document.getElementById('onbNameError');
   if(!v.ok){ err.textContent = v.message; return; }
   err.textContent = '';
-  document.getElementById('onbStepName').classList.remove('on');
-  document.getElementById('onbStepAvatar').classList.add('on');
-  document.getElementById('onbDot1').classList.remove('on');
-  document.getElementById('onbDot2').classList.add('on');
+  onbDraft.username=v.value;
+  setOnboardingStep(2);
   var current = window.getProfile();
   buildAvatarGrid('onbAvatarGrid', (current && current.avatarId) || window.getAvatarList()[0].id, null);
-  document.getElementById('onbConfirmBtn').textContent = onbEditingExisting ? 'Kaydet ✅' : 'Kuleme Başla 🏗️';
+  document.getElementById('onbConfirmBtn').textContent = onbEditingExisting ? 'Kaydet ✅' : 'Devam Et →';
 }
 function onbBackToName(){
-  document.getElementById('onbStepAvatar').classList.remove('on');
-  document.getElementById('onbStepName').classList.add('on');
-  document.getElementById('onbDot2').classList.remove('on');
-  document.getElementById('onbDot1').classList.add('on');
+  setOnboardingStep(1);
 }
-function onbConfirm(){
-  var username = document.getElementById('onbUsername').value;
+function onbGoToDifficulty(){
   var avatarId = document.getElementById('onbAvatarGrid').dataset.selected;
-  var res = window.saveProfile({username:username, avatarId:avatarId});
-  if(!res.ok){
-    document.getElementById('onbAvatarError').textContent = res.message;
+  if(!avatarId){ document.getElementById('onbAvatarError').textContent='Lütfen bir avatar seç.'; return; }
+  onbDraft.avatarId=avatarId;
+  if(onbEditingExisting){
+    var existing=window.getProfile();
+    var existingMascot=existing && Object.prototype.hasOwnProperty.call(MASCOT_CONFIG,existing.mascotId) ? existing.mascotId : null;
+    var settingsResult=window.saveProfile({username:onbDraft.username,avatarId:onbDraft.avatarId});
+    if(!settingsResult.ok){ document.getElementById('onbAvatarError').textContent=settingsResult.message; return; }
+    if(existingMascot) setSelectedMascot(existingMascot);
+    onbEditingExisting=false;
+    renderTower();
+    renderModes();
+    show('home');
     return;
   }
+  var currentLevel=window.DifficultyEngine && window.DifficultyEngine.getManualLevel ? window.DifficultyEngine.getManualLevel() : 'normal';
+  var difficultyInput=document.querySelector('input[name="onboardingDifficulty"][value="'+currentLevel+'"]');
+  if(difficultyInput) difficultyInput.checked=true;
+  setOnboardingStep(3);
+}
+function onbBackToAvatar(){ setOnboardingStep(2); }
+function onbGoToMascot(){
+  var difficultyInput=document.querySelector('input[name="onboardingDifficulty"]:checked');
+  if(!difficultyInput) return;
+  setManualDifficulty(difficultyInput.value);
+  openMascotSelector('onboarding');
+}
+function buildMascotSelector(selectedId){
+  var grid=document.getElementById('mascotSelectGrid');
+  var confirm=document.getElementById('mascotSelectConfirm');
+  grid.innerHTML='';
+  grid.dataset.selected=Object.prototype.hasOwnProperty.call(MASCOT_CONFIG,selectedId) ? selectedId : '';
+  Object.keys(MASCOT_CONFIG).forEach(function(id){
+    var cfg=MASCOT_CONFIG[id];
+    var card=document.createElement('button');
+    var image=document.createElement('img');
+    var label=document.createElement('span');
+    card.type='button';
+    card.className='mascot-select-card';
+    card.setAttribute('role','radio');
+    card.setAttribute('aria-checked',id===grid.dataset.selected?'true':'false');
+    card.setAttribute('aria-label',cfg.name);
+    image.src=cfg.idle;
+    image.alt=cfg.name;
+    label.textContent=cfg.name;
+    card.appendChild(image);
+    card.appendChild(label);
+    card.onclick=function(){
+      Array.prototype.forEach.call(grid.querySelectorAll('.mascot-select-card'),function(item){item.setAttribute('aria-checked','false');});
+      card.setAttribute('aria-checked','true');
+      grid.dataset.selected=id;
+      confirm.disabled=false;
+      document.getElementById('mascotSelectError').textContent='';
+    };
+    card.addEventListener('keydown',function(e){
+      var cards=Array.prototype.slice.call(grid.querySelectorAll('.mascot-select-card'));
+      var index=cards.indexOf(card);
+      var columns=window.innerWidth>=700?3:2;
+      var next=-1;
+      if(e.key==='ArrowRight') next=index+1;
+      else if(e.key==='ArrowLeft') next=index-1;
+      else if(e.key==='ArrowDown') next=index+columns;
+      else if(e.key==='ArrowUp') next=index-columns;
+      if(next>=0 && next<cards.length){e.preventDefault();cards[next].focus();}
+    });
+    grid.appendChild(card);
+  });
+  confirm.disabled=!grid.dataset.selected;
+  setTimeout(function(){
+    var target=grid.querySelector('[aria-checked="true"]') || grid.querySelector('.mascot-select-card');
+    if(target) target.focus();
+  },0);
+}
+function openMascotSelector(context){
+  mascotSelectorContext=context==='settings'?'settings':'onboarding';
+  setOnboardingStep(4);
+  buildMascotSelector(mascotSelectorContext==='settings'?getSelectedMascotId():'');
+}
+function closeMascotSelector(){
+  if(mascotSelectorContext==='settings') openProfileSettings();
+  else setOnboardingStep(3);
+}
+function confirmMascotSelection(){
+  var selectedId=document.getElementById('mascotSelectGrid').dataset.selected;
+  if(!Object.prototype.hasOwnProperty.call(MASCOT_CONFIG,selectedId)){
+    document.getElementById('mascotSelectError').textContent='Lütfen bir maskot seç.';
+    return;
+  }
+  if(mascotSelectorContext==='settings'){
+    if(!setSelectedMascot(selectedId)){ document.getElementById('mascotSelectError').textContent='Maskot kaydedilemedi.'; return; }
+    openProfileSettings();
+    return;
+  }
+  var res=window.saveProfile({username:onbDraft.username,avatarId:onbDraft.avatarId});
+  if(!res.ok){
+    document.getElementById('mascotSelectError').textContent=res.message;
+    return;
+  }
+  if(!setSelectedMascot(selectedId)){ document.getElementById('mascotSelectError').textContent='Maskot kaydedilemedi.'; return; }
   onbEditingExisting = false;
   renderTower();
   show('home');
@@ -1438,6 +1606,8 @@ function setOnboardingCopy(editing){
   document.getElementById('onbNameSub').textContent = editing ? 'İstersen kullanıcı adını değiştirebilirsin.' : 'VocaTower\'a başlamadan önce sana nasıl seslenelim?';
   document.getElementById('onbAvatarHeading').textContent = editing ? 'Avatarını Değiştir 🎨' : 'Avatarını seç 🎨';
   document.getElementById('difficultySetting').classList.toggle('hidden', !editing);
+  document.getElementById('mascotSettingsAction').classList.toggle('hidden',!editing);
+  document.getElementById('onbStepDots').classList.toggle('hidden',editing);
   if(editing) renderManualDifficultySetting();
 }
 function renderManualDifficultySetting(){
@@ -1459,10 +1629,7 @@ function openProfileSettings(){
   document.getElementById('onbUsername').value = profile ? profile.username : '';
   document.getElementById('onbNameError').textContent = '';
   document.getElementById('onbAvatarError').textContent = '';
-  document.getElementById('onbStepAvatar').classList.remove('on');
-  document.getElementById('onbStepName').classList.add('on');
-  document.getElementById('onbDot2').classList.remove('on');
-  document.getElementById('onbDot1').classList.add('on');
+  setOnboardingStep(1);
   show('onboarding');
 }
 function bootApp(){
@@ -1471,7 +1638,9 @@ function bootApp(){
   loadProgress();
   if(!window.isOnboarded()){
     onbEditingExisting = false;
+    onbDraft={username:'',avatarId:''};
     setOnboardingCopy(false);
+    setOnboardingStep(1);
     show('onboarding');
   } else {
     renderModes();
@@ -2075,8 +2244,7 @@ function startCountryQuizTimer(expectedState,expectedSession){
       expectedState.mascotHalfwayShown=true;
       showMascot({
         sessionRef:expectedSession,
-        image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
-        imageAlt:'Pip',
+        pose:'encourage',
         text:'Harika gidiyorsun! Devam et!',
         position:'right',
         autoHideMs:4000
@@ -2097,8 +2265,7 @@ function showBlockingMascotIntro(expectedState,expectedSession,config){
   mascotState.inertElement=container;
   showMascot({
     sessionRef:expectedSession,
-    image:'../assets/images/ui/mascots/pip/pip_idle.webp',
-    imageAlt:'Pip',
+    pose:'idle',
     text:config.text,
     position:'right',
     modal:true,
@@ -2260,8 +2427,7 @@ function qAnswer(btn, ok, item, correctButton){
           answeredState.mascotBuildingEncouragementShown=true;
           showMascot({
             sessionRef:answeredSession,
-            image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
-            imageAlt:'Pip',
+            pose:'encourage',
             text:'Harika gidiyorsun! Zirveye az kaldı!',
             position:'right',
             autoHideMs:4000
@@ -2304,8 +2470,7 @@ function finishQuiz(expectedState, expectedSession){
        session && session.mode==='quiz' && session.done){
       showMascot({
         sessionRef:session,
-        image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
-        imageAlt:'Pip',
+        pose:'celebrate',
         text:'Muhteşem! Gökdelenleri başarıyla tamamladın!',
         position:'right',
         autoHideMs:5000
@@ -2322,8 +2487,7 @@ function finishQuiz(expectedState, expectedSession){
        session && session.mode==='quiz' && session.done){
       showMascot({
         sessionRef:session,
-        image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
-        imageAlt:'Pip',
+        pose:'celebrate',
         text:'Başardın! Harika bir yarıştı!',
         position:'right',
         autoHideMs:5000
@@ -2393,13 +2557,13 @@ function renderLs(scheduleSpeech){
             var reward = completeGameSession('listen', {correct:s.correct, total:8, perfect:s.correct===8});
             renderResultScreen({emoji: s.correct>=6?'🎧':'💪', title:'Dinleme Bitti!', detail: s.correct+' / 8 doğru', correct:s.correct, total:8, xpText:'+'+(s.correct*10)+' XP', reward:reward});
             if(lsState===s && window._activeSession===listenSession && listenSession.done){
-              showMascot({sessionRef:listenSession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Mükemmel! Dinleme görevini tamamladın!',position:'right',autoHideMs:5000});
+              showMascot({sessionRef:listenSession,pose:'celebrate',text:'Mükemmel! Dinleme görevini tamamladın!',position:'right',autoHideMs:5000});
             }
           } else {
             renderLs(true);
             if(s.i===4 && !s.mascotEncouragementShown){
               s.mascotEncouragementShown=true;
-              showMascot({sessionRef:listenSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Harika dinliyorsun! Devam et!',position:'right',autoHideMs:4000});
+              showMascot({sessionRef:listenSession,pose:'encourage',text:'Harika dinliyorsun! Devam et!',position:'right',autoHideMs:4000});
             }
           }
         }
@@ -2478,7 +2642,7 @@ function memFlip(idx){
       if(s.done.size===6 && !s.mascotEncouragementShown && memState===s &&
          window._activeSession===memorySession && !memorySession.done){
         s.mascotEncouragementShown=true;
-        showMascot({sessionRef:memorySession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Harika hatırlıyorsun! Üç çift daha!',position:'right',autoHideMs:4000});
+        showMascot({sessionRef:memorySession,pose:'encourage',text:'Harika hatırlıyorsun! Üç çift daha!',position:'right',autoHideMs:4000});
       }
       if(s.done.size===s.cards.length){
         sfx('win');
@@ -2487,7 +2651,7 @@ function memFlip(idx){
           var reward = completeGameSession('memory', {correct:6, total:6, perfect:s.moves===6});
           renderResultScreen({emoji:'🃏', title:'Tüm Çiftleri Buldun!', detail:'6 çift · '+s.moves+' hamlede', correct:6, total:6, xpText:'+60 XP', reward:reward});
           if(memState===s && window._activeSession===memorySession && memorySession.done){
-            showMascot({sessionRef:memorySession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Mükemmel! Tüm kartları eşleştirdin!',position:'right',autoHideMs:5000});
+            showMascot({sessionRef:memorySession,pose:'celebrate',text:'Mükemmel! Tüm kartları eşleştirdin!',position:'right',autoHideMs:5000});
           }
         },500);
       }
@@ -2578,13 +2742,13 @@ function spType(L,bi){
           var reward = completeGameSession('spelling', {correct:s.correct, total:5, perfect:s.correct===5});
           renderResultScreen({emoji: s.correct>=4?'✍️':'💪', title:'Yazım Arısı Bitti!', detail: s.correct+' / 5 doğru yazım', correct:s.correct, total:5, xpText:'+'+(s.correct*15)+' XP', reward:reward});
           if(spState===s && window._activeSession===spellingSession && spellingSession.done){
-            showMascot({sessionRef:spellingSession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Harika! Yazım görevini tamamladın!',position:'right',autoHideMs:5000});
+            showMascot({sessionRef:spellingSession,pose:'celebrate',text:'Harika! Yazım görevini tamamladın!',position:'right',autoHideMs:5000});
           }
         } else {
           renderSp(true);
           if(s.i===3 && !s.mascotEncouragementShown){
             s.mascotEncouragementShown=true;
-            showMascot({sessionRef:spellingSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Çok iyi yazıyorsun! Devam et!',position:'right',autoHideMs:4000});
+            showMascot({sessionRef:spellingSession,pose:'encourage',text:'Çok iyi yazıyorsun! Devam et!',position:'right',autoHideMs:4000});
           }
         }
       },1200);
@@ -2698,8 +2862,7 @@ function renderFg(){
             if(fgState===s && window._activeSession===fillgapSession && fillgapSession.done){
               showMascot({
                 sessionRef:fillgapSession,
-                image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
-                imageAlt:'Pip',
+                pose:'celebrate',
                 text:'Harika! Tüm boşlukları tamamladın!',
                 position:'right',
                 autoHideMs:5000
@@ -2712,8 +2875,7 @@ function renderFg(){
               s.mascotEncouragementShown=true;
               showMascot({
                 sessionRef:fillgapSession,
-                image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
-                imageAlt:'Pip',
+                pose:'encourage',
                 text:'Çok iyi gidiyorsun! Devam et!',
                 position:'right',
                 autoHideMs:4000
@@ -2828,8 +2990,7 @@ function renderMd(newRound){
             if(mdState===s && window._activeSession===mapdetSession && mapdetSession.done){
               showMascot({
                 sessionRef:mapdetSession,
-                image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
-                imageAlt:'Pip',
+                pose:'celebrate',
                 text:'Muhteşem! Harita görevini tamamladın!',
                 position:'right',
                 autoHideMs:5000
@@ -2842,8 +3003,7 @@ function renderMd(newRound){
               s.mascotEncouragementShown=true;
               showMascot({
                 sessionRef:mapdetSession,
-                image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
-                imageAlt:'Pip',
+                pose:'encourage',
                 text:'Süpersin! Harita seni bekliyor!',
                 position:'right',
                 autoHideMs:4000
@@ -2993,7 +3153,7 @@ function snSubmit(){
       renderSn(true);
       if(s.i===4 && !s.mascotEncouragementShown){
         s.mascotEncouragementShown=true;
-        showMascot({sessionRef:snakeSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Süpersin! Yılanı büyütmeye devam!',position:'right',autoHideMs:4000});
+        showMascot({sessionRef:snakeSession,pose:'encourage',text:'Süpersin! Yılanı büyütmeye devam!',position:'right',autoHideMs:4000});
       }
     },1000);
   } else {
@@ -3009,7 +3169,7 @@ function snSubmit(){
       renderSn(true);
       if(s.i===4 && !s.mascotEncouragementShown){
         s.mascotEncouragementShown=true;
-        showMascot({sessionRef:snakeSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Süpersin! Yılanı büyütmeye devam!',position:'right',autoHideMs:4000});
+        showMascot({sessionRef:snakeSession,pose:'encourage',text:'Süpersin! Yılanı büyütmeye devam!',position:'right',autoHideMs:4000});
       }
     },1400);
   }
@@ -3022,7 +3182,7 @@ function finishSnake(expectedState,expectedSession){
   var reward = completeGameSession('snake', {correct:s.correct, total:8, perfect:s.correct===8});
   renderResultScreen({emoji: s.correct>=6?'🐍':'💪', title:'Yılan Tamamlandı!', detail: s.correct+' / 8 doğru · Zincir: '+s.used.join(' → '), correct:s.correct, total:8, xpText:'+'+(s.correct*10)+' XP', reward:reward});
   if(snState===s && window._activeSession===session && session.done){
-    showMascot({sessionRef:session,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Muhteşem! Kelime Yılanı tamamlandı!',position:'right',autoHideMs:5000});
+    showMascot({sessionRef:session,pose:'celebrate',text:'Muhteşem! Kelime Yılanı tamamlandı!',position:'right',autoHideMs:5000});
   }
 }
 
@@ -3068,7 +3228,7 @@ function showRocketEncouragement(expectedState,expectedSession){
      expectedSession.done || expectedState.over || expectedState.mascotEncouragementShown ||
      (expectedState.me<50 && expectedState.foe<50)) return;
   expectedState.mascotEncouragementShown=true;
-  showMascot({sessionRef:expectedSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Yarış çok yakın! Hızını koru!',position:'right',autoHideMs:4000});
+  showMascot({sessionRef:expectedSession,pose:'encourage',text:'Yarış çok yakın! Hızını koru!',position:'right',autoHideMs:4000});
 }
 function updateRockets(){
   var lane=document.querySelector('.lane');
@@ -3129,7 +3289,7 @@ function endRocket(won,expectedState,expectedSession){
     xpText:'+'+(s.correct*10)+' XP', reward:reward
   });
   if(rkState===s && window._activeSession===session && session.done){
-    showMascot({sessionRef:session,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:won?'Muhteşem! Roket yarışını kazandın!':'Harika mücadele! Bir sonraki yarış senin!',position:'right',autoHideMs:5000});
+    showMascot({sessionRef:session,pose:'celebrate',text:won?'Muhteşem! Roket yarışını kazandın!':'Harika mücadele! Bir sonraki yarış senin!',position:'right',autoHideMs:5000});
   }
 }
 
@@ -3337,7 +3497,7 @@ function cwType(L){
       if(s.correctWords>=Math.ceil(s.totalSlots/2) && !s.mascotEncouragementShown &&
          cwState===s && window._activeSession===crosswordSession && !crosswordSession.done){
         s.mascotEncouragementShown=true;
-        showMascot({sessionRef:crosswordSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Süpersin! Bulmacanın yarısını çözdün!',position:'right',autoHideMs:4000});
+        showMascot({sessionRef:crosswordSession,pose:'encourage',text:'Süpersin! Bulmacanın yarısını çözdün!',position:'right',autoHideMs:4000});
       }
       if(s.done.length===puz.slots.length){
         sfx('win');
@@ -3348,7 +3508,7 @@ function cwType(L){
             var reward = completeGameSession('crossword', {correct:s.correctWords, total:s.totalSlots, perfect:s.correctWords===s.totalSlots});
             renderResultScreen({emoji:'🧩', title:'Tüm Bulmacalar Çözüldü!', detail: s.correctWords+' kelime yerleştirdin', correct:s.correctWords, total:s.totalSlots, xpText:'+'+(s.correctWords*15)+' XP', reward:reward});
             if(cwState===s && window._activeSession===crosswordSession && crosswordSession.done){
-              showMascot({sessionRef:crosswordSession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Harika! Çapraz bulmacayı tamamladın!',position:'right',autoHideMs:5000});
+              showMascot({sessionRef:crosswordSession,pose:'celebrate',text:'Harika! Çapraz bulmacayı tamamladın!',position:'right',autoHideMs:5000});
             }
           } else { s.bankCache={}; cwLoad(); }
         },1000);
@@ -3476,8 +3636,7 @@ function stStartQuestions(){
     s.mascotEncouragementShown=true;
     showMascot({
       sessionRef:storySession,
-      image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
-      imageAlt:'Pip',
+      pose:'encourage',
       text:'Hikâyeyi çok iyi takip ettin! Şimdi sorular zamanı!',
       position:'right',
       autoHideMs:4000
@@ -3520,8 +3679,7 @@ function renderStQ(){
             if(stState===s && window._activeSession===storySession && storySession.done){
               showMascot({
                 sessionRef:storySession,
-                image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
-                imageAlt:'Pip',
+                pose:'celebrate',
                 text:'Harika! Hikâyeyi başarıyla tamamladın!',
                 position:'right',
                 autoHideMs:5000
@@ -3613,13 +3771,13 @@ function checkScramble(){
           var reward = completeGameSession('scramble', {correct:s.correct, total:5, perfect:s.correct===5});
           renderResultScreen({emoji:'🪐', title:'Bulmacalar Bitti!', detail: s.correct+' / 5 kelime çözdün', correct:s.correct, total:5, xpText:'+'+(s.correct*15)+' XP', reward:reward});
           if(scState===s && window._activeSession===scrambleSession && scrambleSession.done){
-            showMascot({sessionRef:scrambleSession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Mükemmel! Tüm kelimeleri çözdün!',position:'right',autoHideMs:5000});
+            showMascot({sessionRef:scrambleSession,pose:'celebrate',text:'Mükemmel! Tüm kelimeleri çözdün!',position:'right',autoHideMs:5000});
           }
         } else {
           scNext();
           if(s.round===4 && !s.mascotEncouragementShown){
             s.mascotEncouragementShown=true;
-            showMascot({sessionRef:scrambleSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Harika gidiyorsun! Kelimeyi bulmaya devam!',position:'right',autoHideMs:4000});
+            showMascot({sessionRef:scrambleSession,pose:'encourage',text:'Harika gidiyorsun! Kelimeyi bulmaya devam!',position:'right',autoHideMs:4000});
           }
         }
       },1300);
@@ -3706,13 +3864,13 @@ function playKey(note){
           var reward = completeGameSession('piano', {correct:s.correct, total:3, perfect:s.correct===3});
           renderResultScreen({emoji:'🎹', title:'Konser Bitti!', detail: s.correct+' kelimeyi notalarla çaldın', correct:s.correct, total:3, xpText:'+'+(s.correct*20)+' XP', reward:reward});
           if(pnState===s && window._activeSession===pianoSession && pianoSession.done){
-            showMascot({sessionRef:pianoSession,image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',imageAlt:'Pip',text:'Muhteşem! Tüm nota kelimelerini tamamladın!',position:'right',autoHideMs:5000});
+            showMascot({sessionRef:pianoSession,pose:'celebrate',text:'Muhteşem! Tüm nota kelimelerini tamamladın!',position:'right',autoHideMs:5000});
           }
         } else {
           pnNext();
           if(s.round===3 && !s.mascotEncouragementShown){
             s.mascotEncouragementShown=true;
-            showMascot({sessionRef:pianoSession,image:'../assets/images/ui/mascots/pip/pip_encourage.webp',imageAlt:'Pip',text:'Harika çalıyorsun! Son kelimeye geçelim!',position:'right',autoHideMs:4000});
+            showMascot({sessionRef:pianoSession,pose:'encourage',text:'Harika çalıyorsun! Son kelimeye geçelim!',position:'right',autoHideMs:4000});
           }
         }
       },delay);
@@ -3814,8 +3972,7 @@ function rvAnswer(btn, ok, item){
         if(rvState===s && window._activeSession===reviewSession && reviewSession.done){
           showMascot({
             sessionRef:reviewSession,
-            image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
-            imageAlt:'Pip',
+            pose:'celebrate',
             text:'Muhteşem! Kelimelerini güçlendirdin!',
             position:'right',
             autoHideMs:5000
@@ -3828,8 +3985,7 @@ function rvAnswer(btn, ok, item){
           s.mascotEncouragementShown=true;
           showMascot({
             sessionRef:reviewSession,
-            image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
-            imageAlt:'Pip',
+            pose:'encourage',
             text:'Harika hatırlıyorsun! Devam et!',
             position:'right',
             autoHideMs:4000
@@ -4188,8 +4344,7 @@ function sbAdvanceQuestion(){
     s.mascotEncouragementShown=true;
     showMascot({
       sessionRef:session,
-      image:'../assets/images/ui/mascots/pip/pip_encourage.webp',
-      imageAlt:'Pip',
+      pose:'encourage',
       text:'Süpersin! Cümlelerin giderek güçleniyor!',
       position:'right',
       autoHideMs:4000
@@ -4222,8 +4377,7 @@ function sbCompleteSession(s){
   if(sbState===s && window._activeSession===session && session.done){
     showMascot({
       sessionRef:session,
-      image:'../assets/images/ui/mascots/pip/pip_celebrate.webp',
-      imageAlt:'Pip',
+      pose:'celebrate',
       text:'Mükemmel! Cümleleri başarıyla tamamladın!',
       position:'right',
       autoHideMs:5000
