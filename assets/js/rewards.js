@@ -103,10 +103,13 @@
     var newBadges = window.checkAchievements ? window.checkAchievements(stats) : [];
 
     var levelKey = data.levelKey || mode;
+    var playedLevel = typeof data.playedLevel === 'number'
+      ? data.playedLevel
+      : (window.takeLevelMapPlayedLevel ? window.takeLevelMapPlayedLevel(levelKey) : null);
     var levelResult = data.levelPassEligible === false
       ? {passed:false, leveledUp:false, level:window.getModeLevel?window.getModeLevel(levelKey):1}
       : window.completeLevelIfPassed
-        ? window.completeLevelIfPassed(levelKey, data.correct||0, data.total||0)
+        ? window.completeLevelIfPassed(levelKey, data.correct||0, data.total||0, playedLevel)
         : {passed:false, leveledUp:false, level:1};
 
     return {goldEarned:goldEarned, breakdown:breakdown, newBadges:newBadges, stats:stats, levelResult:levelResult};
