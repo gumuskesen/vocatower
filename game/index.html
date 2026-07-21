@@ -309,12 +309,12 @@
      altına, düğümün üst kenarına yakın küçük bir gölge ekler. */
   .lm-character-shadow{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);margin-bottom:calc(var(--lm-node)*0.02);width:calc(var(--lm-node)*0.435);height:calc(var(--lm-node)*0.145);background:rgba(35,25,15,.24);border-radius:50%;filter:blur(1px);z-index:1;}
   .lm-character{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);margin-bottom:calc(var(--lm-node)*0.16);width:calc(var(--lm-node)*0.67);height:calc(var(--lm-node)*0.67);border-radius:50%;overflow:hidden;background:var(--fg-bg-surface-sunken,#E6D5B8);border:2px solid var(--fg-bg-surface,#fff);box-shadow:var(--fg-shadow-sm,0 2px 5px rgba(0,0,0,.3));z-index:1;}
-  .lm-legend{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:5;display:flex;flex-direction:column;gap:6px;align-items:flex-start;width:max-content;max-width:calc(100% - 24px);margin:0;background:var(--fg-bg-surface,var(--card));border-radius:14px;padding:10px 14px;box-shadow:var(--fg-shadow-sm,var(--shadow));}
-  .lm-legend div{font-size:11.5px;font-weight:700;color:var(--ink-soft);display:flex;align-items:center;gap:8px;}
-  .lm-legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
-  .lm-legend-dot.done{background:var(--fg-accent-tertiary,var(--green));}
-  .lm-legend-dot.current{background:var(--fg-accent-quaternary,var(--purple));}
-  .lm-legend-dot.locked{background:var(--fg-bg-surface-sunken,#E6D5B8);}
+  /* Şehir gezinme kontrolleri: harita sahnesi gibi kaymaz, sabit overlay
+     olarak kalır (legend/summary ile aynı desen). */
+  .lm-city-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:5;border:none;background:var(--fg-bg-surface,var(--card));box-shadow:var(--fg-shadow-sm,var(--shadow));border-radius:14px;padding:10px 12px;font-size:12px;font-weight:800;color:var(--ink);cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .lm-city-btn.prev{left:max(10px,env(safe-area-inset-left));}
+  .lm-city-btn.next{right:max(10px,env(safe-area-inset-right));}
+  .lm-city-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;}
   /* Mobil: 3:2 sahne, ekran yüksekliğinden gerçek genişliğe göre boyutlanır
      (transform-scale değil), .lm-stage yatayda gerçekten kaydırılabilir olur.
      Masaüstü kuralları (üstteki .lm-scene/.lm-art) bu breakpoint'in dışında
@@ -2011,34 +2011,47 @@ function renderModes(){
 
 /* ================= SEVİYE HARİTASI — eğrisel SVG güzergah ================= */
 var lmCurrentMode=null;
+var lmViewedCityIndex=null; /* ekran içi görünüm durumu — kayıt verisine yazılmaz */
 function openLevelMap(modeEntry){
   var registeredMode = modeEntry && MODES.find(function(mode){ return mode.key===modeEntry.key; });
   if(!registeredMode){ goHome(); return; }
   lmCurrentMode = registeredMode;
+  lmViewedCityIndex = null; /* her taze açılışta mevcut kilidi açık seviyenin şehrine dön */
   show('levelMap');
   renderLevelMap();
 }
 
-/* Painted platform centers from levelmap_city_01_background.png.
-   Coordinates are normalized against the source image's 1536x1024 pixels
-   and shared unchanged by every viewport and game mode. */
-var LM_CHECKPOINTS = [
+/* Painted platform centers, normalized against each city background's own
+   pixel size and shared unchanged by every viewport and game mode. Each
+   city covers 10 global levels (city index * 10 + local position 1-10). */
+var LM_CHECKPOINTS_CITY1 = [
   {x:0.123698,y:0.570313}, {x:0.197917,y:0.629883},
   {x:0.298177,y:0.668945}, {x:0.397135,y:0.639648},
   {x:0.473958,y:0.576172}, {x:0.529297,y:0.493164},
   {x:0.598958,y:0.404297}, {x:0.667318,y:0.330078},
-  {x:0.698568,y:0.626953}, {x:0.753906,y:0.537109},
-  {x:0.345052,y:0.211914}, {x:0.410156,y:0.308594},
-  {x:0.477865,y:0.316406}, {x:0.518229,y:0.264648},
-  {x:0.600260,y:0.233398}, {x:0.675130,y:0.243164},
-  {x:0.739583,y:0.259766}, {x:0.797526,y:0.297852},
-  {x:0.844401,y:0.352539}, {x:0.884115,y:0.412109},
-  {x:0.853516,y:0.464844}, {x:0.858724,y:0.552734},
-  {x:0.826823,y:0.606445}, {x:0.759115,y:0.588867},
-  {x:0.703776,y:0.608398}, {x:0.638021,y:0.637695},
-  {x:0.594401,y:0.682617}, {x:0.574870,y:0.759766},
-  {x:0.582682,y:0.831055}, {x:0.561849,y:0.923828}
+  {x:0.698568,y:0.626953}, {x:0.753906,y:0.537109}
 ];
+/* Measured directly from the winter levelmap_city_02_background.png (1536x1024,
+   3:2) via blob-centroid detection on the 10 empty stone platforms. */
+var LM_CHECKPOINTS_CITY2 = [
+  {x:0.071094,y:0.350488}, {x:0.151237,y:0.439063},
+  {x:0.226497,y:0.545996}, {x:0.363086,y:0.438770},
+  {x:0.506836,y:0.502344}, {x:0.562695,y:0.380273},
+  {x:0.633073,y:0.499609}, {x:0.721224,y:0.593457},
+  {x:0.815104,y:0.477344}, {x:0.879427,y:0.383594}
+];
+var LM_LEVELS_PER_CITY = 10;
+var LM_CITIES = [
+  {bg:'levelmap_city_01_background.png', checkpoints:LM_CHECKPOINTS_CITY1},
+  {bg:'levelmap_city_02_background.png', checkpoints:LM_CHECKPOINTS_CITY2}
+];
+var LM_TOTAL_LEVELS = LM_CITIES.length * LM_LEVELS_PER_CITY;
+/* Oyuncunun mevcut kilidi açık seviyesinin bulunduğu şehir — haritayı her
+   taze açtığımızda varsayılan görünüm budur (bkz. openLevelMap). */
+function lmHomeCityIndex(mm){
+  var idx = Math.floor((mm.level-1)/LM_LEVELS_PER_CITY);
+  return Math.max(0, Math.min(LM_CITIES.length-1, idx));
+}
 /* Mobil harita: dokunmatik kaydırma tarayıcı tarafından doğal olarak
    sağlanır (overflow-x:auto + touch-action:pan-x); bu yardımcı sadece
    fare ile sürükle-kaydırmayı ekler (pointerType 'touch' hariç tutulur,
@@ -2072,11 +2085,16 @@ function renderLevelMap(){
   var mm = window.getModeMap(m.key);
   var lmProfile = window.getProfile ? window.getProfile() : null;
   var lmAvatarId = lmProfile ? lmProfile.avatarId : 'avatar-01';
-  var cityLevelCap = 10;
-  var visibleLevel = Math.min(mm.level, cityLevelCap);
-  var pct = window.getModePercent(m.key);
+  var cityIndex = (lmViewedCityIndex===null) ? lmHomeCityIndex(mm) : lmViewedCityIndex;
+  cityIndex = Math.max(0, Math.min(LM_CITIES.length-1, cityIndex));
+  lmViewedCityIndex = cityIndex;
+  var city = LM_CITIES[cityIndex];
+  var cityStart = cityIndex*LM_LEVELS_PER_CITY + 1;
+  var visibleLevel = Math.min(mm.level, LM_TOTAL_LEVELS);
+  var doneInRange = mm.completed.filter(function(l){ return l<=LM_TOTAL_LEVELS; }).length;
+  var pct = Math.round(doneInRange/LM_TOTAL_LEVELS*100);
   document.getElementById('lmPct').textContent = '%'+pct;
-  document.getElementById('lmSub').textContent = 'Seviye '+visibleLevel+' / '+cityLevelCap;
+  document.getElementById('lmSub').textContent = 'Seviye '+visibleLevel+' / '+LM_TOTAL_LEVELS;
   var path = document.getElementById('lmPath'); path.innerHTML='';
 
   var stage = document.createElement('div'); stage.className='lm-stage';
@@ -2084,7 +2102,7 @@ function renderLevelMap(){
   var art = document.createElement('div'); art.className='lm-art';
   var worldBg = document.createElement('img');
   worldBg.className = 'lm-world-bg';
-  worldBg.src = '../assets/images/ui/levelmap/levelmap_city_01_background.png';
+  worldBg.src = '../assets/images/ui/levelmap/'+city.bg;
   worldBg.alt = '';
   worldBg.setAttribute('aria-hidden', 'true');
   art.appendChild(worldBg);
@@ -2092,12 +2110,13 @@ function renderLevelMap(){
   stage.appendChild(scene);
   path.appendChild(stage);
 
-  var positions = LM_CHECKPOINTS;
+  var positions = city.checkpoints;
 
-  for(var L=1; L<=cityLevelCap; L++){
-    var pos = positions[L-1];
-    var isMiniBoss = (L === 5);
-    var isBoss = (L === 10);
+  for(var localPos=1; localPos<=LM_LEVELS_PER_CITY; localPos++){
+    var L = cityStart + localPos - 1;
+    var pos = positions[localPos-1];
+    var isMiniBoss = (localPos === 5);
+    var isBoss = (localPos === 10);
     var specialClass = isBoss ? 'boss' : (isMiniBoss ? 'miniboss' : null);
     var wrap = document.createElement('div'); wrap.className='lm-node-wrap'+(specialClass?' lm-node-wrap--'+specialClass:'');
     wrap.style.left = (pos.x*100)+'%';
@@ -2153,7 +2172,8 @@ function renderLevelMap(){
   }
 
   if(window.matchMedia && window.matchMedia('(max-width:699px)').matches){
-    var lmTargetPos = positions[visibleLevel-1] || positions[0];
+    var lmTargetLocal = Math.max(1, Math.min(LM_LEVELS_PER_CITY, mm.level - cityStart + 1));
+    var lmTargetPos = positions[lmTargetLocal-1] || positions[0];
     var lmArtWidth = art.offsetWidth;
     var lmDesiredScroll = (lmTargetPos.x*lmArtWidth) - stage.clientWidth/2;
     var lmMaxScroll = stage.scrollWidth - stage.clientWidth;
@@ -2161,13 +2181,25 @@ function renderLevelMap(){
     attachLmDragPan(stage);
   }
 
-  var legend = document.createElement('div');
-  legend.className = 'lm-legend';
-  legend.innerHTML =
-    '<div><span class="lm-legend-dot done"></span>Tamamlanan = renkli</div>' +
-    '<div><span class="lm-legend-dot current"></span>Mevcut = parlayan</div>' +
-    '<div><span class="lm-legend-dot locked"></span>Kilitli = gri</div>';
-  path.appendChild(legend);
+  var prevBtn = document.createElement('button'); prevBtn.type='button';
+  prevBtn.className = 'lm-city-btn prev';
+  prevBtn.textContent = cityIndex>0 ? '‹ Şehir '+cityIndex : '‹ Şehir';
+  prevBtn.disabled = cityIndex<=0;
+  prevBtn.setAttribute('aria-label','Önceki şehir');
+  prevBtn.onclick = function(){ lmViewedCityIndex = cityIndex-1; renderLevelMap(); };
+  path.appendChild(prevBtn);
+
+  /* İlerleme durumuna bakılmaksızın her yapılandırılmış şehir gezilebilir
+     (önizleme); kontrol yalnızca o yönde şehir YOKSA devre dışı kalır.
+     Kilitli seviyeler zaten kendi 'locked' durumuyla tıklanamaz kalır. */
+  var hasNextCity = (cityIndex+1) < LM_CITIES.length;
+  var nextBtn = document.createElement('button'); nextBtn.type='button';
+  nextBtn.className = 'lm-city-btn next';
+  nextBtn.textContent = hasNextCity ? 'Şehir '+(cityIndex+2)+' ›' : 'Şehir ›';
+  nextBtn.disabled = !hasNextCity;
+  nextBtn.setAttribute('aria-label', hasNextCity ? 'Sonraki şehir' : 'Sonraki şehir yok');
+  nextBtn.onclick = function(){ lmViewedCityIndex = cityIndex+1; renderLevelMap(); };
+  path.appendChild(nextBtn);
 }
 function showLevelUpToast(levelResult){
   if(!levelResult || !levelResult.leveledUp) return;
