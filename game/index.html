@@ -2040,10 +2040,20 @@ var LM_CHECKPOINTS_CITY2 = [
   {x:0.633073,y:0.499609}, {x:0.721224,y:0.593457},
   {x:0.815104,y:0.477344}, {x:0.879427,y:0.383594}
 ];
+/* Measured directly from the autumn levelmap_city_03_background.png (1536x1024,
+   3:2) via blob-centroid detection on the 10 tan stone platforms. */
+var LM_CHECKPOINTS_CITY3 = [
+  {x:0.196720,y:0.432162}, {x:0.264819,y:0.498527},
+  {x:0.343343,y:0.521147}, {x:0.418626,y:0.467976},
+  {x:0.501163,y:0.415367}, {x:0.580622,y:0.490592},
+  {x:0.668949,y:0.512429}, {x:0.754035,y:0.445893},
+  {x:0.838870,y:0.495043}, {x:0.929521,y:0.472197}
+];
 var LM_LEVELS_PER_CITY = 10;
 var LM_CITIES = [
   {bg:'levelmap_city_01_background.png', checkpoints:LM_CHECKPOINTS_CITY1},
-  {bg:'levelmap_city_02_background.png', checkpoints:LM_CHECKPOINTS_CITY2}
+  {bg:'levelmap_city_02_background.png', checkpoints:LM_CHECKPOINTS_CITY2},
+  {bg:'levelmap_city_03_background.png', checkpoints:LM_CHECKPOINTS_CITY3}
 ];
 var LM_TOTAL_LEVELS = LM_CITIES.length * LM_LEVELS_PER_CITY;
 /* Oyuncunun mevcut kilidi açık seviyesinin bulunduğu şehir — haritayı her
